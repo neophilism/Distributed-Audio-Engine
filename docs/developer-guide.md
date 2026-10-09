@@ -1,6 +1,6 @@
 # Using the portable audio core
 
-The library currently builds against Node 24.19.0 using TypeScript 7.0.2. Public exports are in `src/index.ts` with declarations in `dist/src/index.d.ts`. It has no third-party runtime dependencies. Run `npm ci --ignore-scripts` and `npm run check`.
+The library builds against Node 24.19.0 using TypeScript 7.0.2. Portable exports are in `src/index.ts`, browser audio in the `/browser` subpath and SQLite adapters in `/node`, each with emitted declarations. It has no third-party runtime dependencies. Run `npm ci --ignore-scripts` and `npm run check`; this also verifies separate consumer types and a packed offline installation.
 
 ## Endpoint media flow
 
@@ -8,9 +8,11 @@ The library currently builds against Node 24.19.0 using TypeScript 7.0.2. Public
 2. Use `packageRendition` to create sample-aligned metadata and a fresh encrypted rendition. Metadata, private manifest and attachment keys stay at the endpoint.
 3. Upload only ciphertext chunks through `IngestionManager` and a storage adapter. Its public upload schema excludes private manifests; incomplete objects stay quarantined.
 4. Deliver the manifest/key through an authenticated E2EESA parent channel to explicitly authorized listening endpoints. That channel is an integration prerequisite, not a URL key or plaintext JSON fallback.
-5. At the listener endpoint, use `decryptAttachment` with the expected tenant/application/parent context, then decode/render only authenticated media.
+5. At the listener endpoint, use `decryptAttachment`, or `EndpointAttachmentReader` with `readAttachmentRange`, with the expected tenant/application/parent context. Partial ranges authenticate required chunks; complete reads also verify the file hash. Decode/render only authenticated media.
 
-The convenience attachment codec handles bounded objects (64 MiB default, explicitly configurable up to 1 GiB); long recordings should be segmented or use the later streaming/range adapter. Keys/manifests must never enter service logs or object metadata. Memory stores are reference adapters, not crash-durable deployment storage.
+The attachment codec handles bounded objects (64 MiB default, configurable up to 1 GiB). Range reads are capped to 64 MiB per call; long recordings should be separate bounded segments. Keys/manifests must never enter service logs or object metadata. Memory stores are reference adapters. Node SQLite cache/checkpoint adapters provide tested local persistence, with deployed retention/rollback/recovery qualification still pending.
+
+`EndpointProgramPlayer` follows the programmed timeline, rechecks expiring endpoint rights and resolves the current target after asynchronous delivery. It retains one bounded decoded asset locally and wipes it on replacement/interruption. It supplies PCM fragments to a sink, including `BrowserAudioSink` from the browser entry point. Review the [player](program-player.md), [browser lifecycle limits](browser-playback.md) and [delivery contract](encrypted-delivery.md) before integration.
 
 ## Timeline and spatial flow
 
@@ -22,8 +24,12 @@ The convenience attachment codec handles bounded objects (64 MiB default, explic
 
 `ControlVerifier` authenticates scoped signed controls and uses an atomic checkpoint interface. `PlaybackAuthority` consumes those controls and a separately authenticated E2EE payload decoder to enforce leases, consent ceilings, fade/stop deadlines and supersession. Persist replay checkpoints before deployment. The client must continue checking authority even if its network connection disappears.
 
+`DisciplinedClock` can supply a common time adapter from challenged authenticated reference timestamps. It rejects stale/uncertain/conflicting estimates and requires explicit stop/reset/rejoin for unsupported corrections. Network-clock estimates never qualify acoustic output.
+
+`CoordinatorMonitor` accepts primary-signed program/scoped leases, and `CoordinatorChunkTransport` uses configured local ciphertext transports with bounded fallback. `CachingChunkTransport` and `EndpointCiphertextCache` cache only opaque ciphertext. Local hosts/caches never acquire keys or playback authority; the same canonical timeline drives either transport path.
+
 ## Dependencies still requiring integration
 
-Native Android/iOS audio and measurement adapters; actual E2EESA pairwise/group key distribution; authenticated root/recovery storage; durable SQL/object-store/checkpoint adapters; compressed-media/resampling adapters; deployed retention/restore drills; local coordination/cache and commerce adapters; full acoustic evidence integration; physical-device trials; independent release review and client-update assurance.
+Native Android/iOS audio/measurement/secure-state adapters; actual E2EESA pairwise/group key distribution and control channels; authenticated root/recovery storage; durable upload state/object-store adapters; compressed-media/resampling adapters; deployed retention/restore drills and LAN provisioning; entitlement/commerce adapters; full acoustic evidence integration; physical-device trials; independent release review and client-update assurance.
 
 Keep work moving through these separately recorded packages. Nothing in a portable unit test supplies independent field evidence or an upstream certification claim.

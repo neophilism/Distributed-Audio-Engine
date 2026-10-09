@@ -1,5 +1,7 @@
 # Browser endpoint playback
 
+Import `BrowserAudioSink` from `@neophilism/distributed-audio-engine/browser`. The portable core does not require browser audio globals, and browser consumers do not require Node ambient types.
+
 `BrowserAudioSink` connects authenticated endpoint PCM to an explicitly supplied `AudioContext`. The application resumes the context through an appropriate user gesture, obtains a signed playback lease through the E2EE control decoder, and supplies the same disciplined time source used for the timeline. The sink never changes a system volume slider, selects a song or asserts that the browser's current output is an external speaker.
 
 Scheduling uses the audio context clock, validates PCM shape/rate, deinterleaves only the scheduled range and rejects overlapping output. Rates must match the context; resampling is a separate adapter. The queue has a default one-second horizon, a five-second configuration ceiling and an independent sample-memory ceiling. Returned alignment is always `timeline-only`.
