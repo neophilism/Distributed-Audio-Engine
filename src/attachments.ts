@@ -149,3 +149,53 @@ export async function decryptAttachment(
     return plaintext;
   } catch (error) { plaintext.fill(0); throw error; }
 }
+
+/** Endpoint range primitive. The manifest must arrive in an authenticated E2EE parent. */
+export class EndpointAttachmentReader {
+  private closed = false;
+  private constructor(private readonly manifest: PrivateManifest, private readonly key: CryptoKey) {}
+
+  static async open(manifest: PrivateManifest, expected: AttachmentContext, maxPlaintextBytes = DEFAULT_OBJECT_LIMIT): Promise<EndpointAttachmentReader> {
+    const local = structuredClone(manifest);
+    const context = { ...expected };
+    await validateManifest(local, context, maxPlaintextBytes);
+    const key = await crypto.subtle.importKey('raw', bytes(local.attachmentKeyHex, 32), 'AES-GCM', false, ['decrypt']);
+    // Keep the non-extractable CryptoKey; do not retain the copied raw key string.
+    local.attachmentKeyHex = '';
+    return new EndpointAttachmentReader(local, key);
+  }
+
+  get sizeBytes(): number { return this.manifest.plaintextSizeBytes; }
+  get chunkCount(): number { return this.manifest.chunkCount; }
+  get chunkSizeBytes(): number { return this.manifest.chunkSizeBytes; }
+  get storageObjectId(): string { return this.manifest.storageObjectId; }
+  get tenantId(): string { return this.manifest.tenantId; }
+  get application(): ApplicationScope { return this.manifest.application; }
+  assertOpen(): void { invariant(!this.closed, 'ATTACHMENT_READER_CLOSED'); }
+  private check(index: number): void {
+    this.assertOpen();
+    integer(index, 0, this.chunkCount - 1);
+  }
+  ciphertextLength(index: number): number { this.check(index); return plaintextLength(this.manifest, index) + 16; }
+
+  async decryptChunk(index: number, ciphertext: Uint8Array): Promise<Uint8Array> {
+    this.check(index);
+    invariant(ciphertext.length === this.ciphertextLength(index), 'CIPHERTEXT_LENGTH_MISMATCH');
+    const local = Uint8Array.from(ciphertext);
+    const plaintext = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce(this.manifest.noncePrefixHex, index), additionalData: associatedData(this.manifest, index), tagLength: 128 }, this.key, local));
+    if (this.closed) { plaintext.fill(0); invariant(false, 'ATTACHMENT_READER_CLOSED'); }
+    return plaintext;
+  }
+
+  async verifyComplete(plaintext: Uint8Array): Promise<void> {
+    invariant(!this.closed, 'ATTACHMENT_READER_CLOSED');
+    invariant(plaintext.length === this.sizeBytes, 'FILE_LENGTH_MISMATCH');
+    const local = Uint8Array.from(plaintext);
+    try {
+      const actual = await digest(local);
+      invariant(!this.closed, 'ATTACHMENT_READER_CLOSED');
+      invariant(actual === this.manifest.plaintextHashHex, 'FILE_HASH_MISMATCH');
+    } finally { local.fill(0); }
+  }
+  close(): void { this.closed = true; }
+}

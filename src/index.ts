@@ -12,3 +12,4 @@ export * from './spatial.js';
 export * from './renderer.js';
 export * from './safety.js';
 export * from './placement.js';
+export * from './delivery.js';
