@@ -123,4 +123,3 @@ export function contributionCoverage(intervals: readonly QualifyingInterval[]): 
     integer(durationMs); return { outputId, durationMs };
   }).sort((a, b) => a.outputId < b.outputId ? -1 : a.outputId > b.outputId ? 1 : 0);
 }
-

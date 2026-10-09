@@ -1,0 +1,21 @@
+{
+  "version": "2026-10-09-v1",
+  "standardBasis": { "repository": "neophilism/End-To-End-Everywhere-Security-Architecture-Standard", "commit": "dea8f54cab9130da86a71f36de553766a978daf2", "release": "0.9.0-rc.1" },
+  "scope": "Reusable audio component and explicitly separated adapter roles",
+  "productConformance": "not assessed",
+  "productionClaim": false,
+  "independentReview": "pending",
+  "deployed": false,
+  "fieldValidated": false,
+  "dataFlows": [
+    { "id": "media-and-private-manifests", "classification": "protected content", "producer": "authorized creator endpoint", "authorizedRecipients": ["explicit listening endpoints"], "relayMayDecrypt": false, "implemented": "AES-GCM chunk codec, authenticated range and bounded endpoint rendering", "pending": ["real authenticated parent manifest/key distribution", "recipient enrollment/revocation integration", "independent protocol review"] },
+    { "id": "ciphertext-delivery", "classification": "ciphertext and opaque routing/retention metadata", "producer": "authorized endpoint", "authorizedRecipients": ["ciphertext service/cache for ciphertext only"], "relayMayDecrypt": false, "implemented": "bounded transport/cache/storage interfaces and SQLite ciphertext cache", "pending": ["deployed HTTPS/object-store identity", "retention and restore qualification"] },
+    { "id": "private-controls", "classification": "protected commands", "producer": "pinned authorized control issuer", "authorizedRecipients": ["scoped listening/control endpoints"], "relayMayDecrypt": false, "implemented": "scoped signatures, atomic replay checkpoints and authority evaluator with decoder seam", "pending": ["real authenticated E2EE payload channel", "rollback-resistant native state"] },
+    { "id": "acoustic-evidence", "classification": "consented private measurement decisions", "producer": "authorized measurement endpoint", "authorizedRecipients": ["explicit evidence evaluator under consent"], "relayMayDecrypt": false, "implemented": "challenged signed-decision validation and conservative interval evaluation", "pending": ["native measurement/route adapters", "real E2EE decoder", "calibration/source/output attribution", "consent interface and hardware qualification"], "excluded": ["raw ambient audio in exported decision records", "audience/person inference"] },
+    { "id": "purchase-accounting", "classification": "intentionally authorized business processing", "producer": "authenticated buyer and provider adapters", "authorizedRecipients": ["configured merchant", "explicitly selected payment provider"], "mediaKeysDisclosed": false, "implemented": "opaque quote/payment/accounting facts, exact amounts and private POSIX SQLite files", "endpointStorage": "plaintext business facts at authorized recipient; disk/backup encryption pending", "pending": ["authenticated recipient transport", "actual raw provider signature/API adapters", "provider sandbox", "deployed retention/restore/rollback controls"] },
+    { "id": "entitlements", "classification": "intentionally authorized opaque access facts", "producer": "authorized issuer endpoint", "authorizedRecipients": ["configured issuer", "authenticated subject for scoped access decisions"], "mediaKeysDisclosed": false, "implemented": "scoped atomic grants, source deduplication, expiry/revocation and private SQLite records", "pending": ["verified purchase/contribution/refund source integration", "authenticated recipient transport", "fresh rights/device/key delivery integration", "deployed retention and encrypted backup"] }
+  ],
+  "softwareEvidence": ["tests/canonical.test.ts", "tests/evidence.test.ts", "tests/commerce.test.ts", "tests/reconciliation.test.ts", "tests/business-store.test.ts", "tests/entitlements.test.ts", "tests/engine-pipeline.test.ts", "scripts/check-package.mjs"],
+  "testAdapterLimitations": ["payment provider and raw-signature verifier are local test adapters", "measurement decisions and E2EE payload decoders are test adapters", "browser graph tests are not hardware interoperability"],
+  "dependentApplications": { "SceneSignal": "planning", "Distributed-Radio-Engine": "planning", "TrackZero": "planning" }
+}

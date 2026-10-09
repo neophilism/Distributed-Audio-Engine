@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-09-v3",
+  "version": "2026-10-09-v4",
   "original_baseline_total": 88,
   "total": 120,
   "counts": {
@@ -77,7 +77,9 @@
       "released": false,
       "github_prs": [
         5,
-        23
+        23,
+        27,
+        30
       ],
       "implementation_scope": "Scoped policy and root-authorized device references with platform Web Crypto key types; production provisioning/recovery remains pending."
     },
@@ -400,12 +402,23 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-16",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 30,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "partial": true,
+      "github_prs": [
+        30
+      ],
+      "implementation_scope": "Atomic scoped resource/use entitlement grants, one owner per source, expiry, terminal revocation and real SQLite persistence. Contribution qualification, purchase/refund source verification and authenticated recipient/key delivery integration remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/entitlements.test.ts",
+        "fieldClaim": false
+      }
     },
     {
       "id": "DAE-17",
@@ -420,12 +433,25 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-17",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 27,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "partial": true,
+      "github_prs": [
+        27,
+        29,
+        30
+      ],
+      "implementation_scope": "Immutable complete-product checkout, all-asset sale/download rights, exact money, provider idempotency and adapter-verified settlement facts with durable SQLite purchase state. Real signed provider adapter, provider sandbox and recipient/fulfillment integration remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/commerce.test.ts; tests/business-store.test.ts",
+        "fieldClaim": false
+      }
     },
     {
       "id": "DAE-18",
@@ -438,12 +464,25 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-18",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 28,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "partial": true,
+      "github_prs": [
+        28,
+        29,
+        30
+      ],
+      "implementation_scope": "Exact split allocation, cumulative refunds, visible liabilities/failures, atomic transfer reservations and durable accounting state. Actual provider signature/dispatch adapters, sandbox transactions and deployed reconciliation/recovery remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/reconciliation.test.ts; tests/business-store.test.ts",
+        "fieldClaim": false
+      }
     },
     {
       "id": "DAE-19",
@@ -804,7 +843,8 @@
       "github_prs": [
         3,
         22,
-        23
+        23,
+        25
       ],
       "implementation_scope": "Signed/replay-checked controls plus real SQLite atomic checkpoints and separate-process race/restart tests. Rollback-resistant native state and independent review remain pending.",
       "portable_integration_tested": true,
@@ -2441,14 +2481,18 @@
       "DAE-13",
       "DAE-14",
       "DAE-15",
+      "DAE-16",
+      "DAE-17",
+      "DAE-18",
       "DAE-20"
     ],
-    "audio_engine_implementation_prs": 22,
+    "audio_engine_implementation_prs": 28,
     "audio_engine_documentation_prs": [
       15,
-      24
+      24,
+      31
     ],
-    "portable_tests": 133,
+    "portable_tests": 139,
     "portable_consumer_types_checked": true,
     "packed_consumer_smoke_checked": true,
     "production_deployed": false,

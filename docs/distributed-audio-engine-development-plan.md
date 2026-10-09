@@ -1,5 +1,7 @@
 # Distributed-Audio-Engine: development plan
 
+Current implementation and evidence are recorded in [implementation status](implementation-status.md) and [roadmap.json](roadmap.json). Planning IDs below are separate from GitHub PR numbers.
+
 Requested order: Distributed-Audio-Engine → SceneSignal → Distributed-Radio-Engine → TrackZero.
 
 ## DAE-01 — Architecture, contracts, repository and CI

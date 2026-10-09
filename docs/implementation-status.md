@@ -1,38 +1,38 @@
 # Implementation and evidence status
 
-Twenty-two implementation/hardening PRs cover fifteen merged reference roadmap IDs: DAE-01 through DAE-08, DAE-24 through DAE-28, DAE-33 and DAE-34. DAE-11 additionally has a merged portable clock implementation, while its native/acoustic work remains partial. PR #15 and #24 maintain documentation/status. Roadmap IDs and GitHub PR numbers remain separate.
+The engine has 28 merged implementation/hardening PRs. Fifteen roadmap IDs retain merged reference status: DAE-01 through DAE-08, DAE-24 through DAE-28, DAE-33 and DAE-34. Nine additional IDs have partial portable implementations: DAE-11 through DAE-18 and DAE-20. Ten IDs remain planned. GitHub PR #15, #24 and #31 maintain documentation/status; roadmap IDs and GitHub PR numbers remain separate.
 
-All 105 tests pass, including actual file reopen and separate-process checkpoint races. Strict typecheck, source/boundary checks, roadmap DAG, Node consumer types without DOM, browser consumer types without Node and a real offline packed-installation smoke pass. Each implementation PR's GitHub CI was checked at its exact head before merging. These are software results with explicit test adapters, not production/native/field qualification.
+All 139 software tests pass. Strict typecheck, source/boundary checks, roadmap DAG, Node consumer types without DOM, browser consumer types without Node, real offline packed-installation smoke and dependency audit pass. Each implementation PR's hosted CI was checked at its exact head before merging. Tests include actual SQLite reopen and separate-process races; audio graphs, measurement decisions and payment signatures/providers use explicitly documented adapters.
 
-| Area | Current scope | Outstanding evidence or integration |
+| Area | Current scope | Remaining integration or qualification |
 |---|---|---|
 | Encryption/delivery | Endpoint AES-GCM chunks, private manifests, bounded authenticated ranges, complete-file hash and HTTPS response limits | Authenticated parent key channel, independent crypto/interoperability review |
-| Playback | Current-position linear player, rights/recipient expiry, bounded PCM queue, browser graph fade/stop and lifecycle resets | Actual browser/device interoperability, native enforcement and suspended-context operating qualification |
-| Controls | Scoped signatures/replay checks, leases/emergency supersession, SQLite atomic checkpoints, restart/process races | Rollback-resistant native state, E2EE payload channel and deployed recovery drills |
-| Clock | Challenged reference timestamps, conservative uncertainty/drift/freshness intervals and explicit rejoin corrections | Native clock/sink integration, route-specific delays and acoustic measurements |
-| Local coordination/cache | Program-bound primary leases, opaque registered transports, bounded failover, scoped quota/expiry cache with SQLite | LAN discovery/provisioning, platform adapters and replica/restore qualification |
-| Identity | Tenant/app policy evaluator and root-authorized device event chain | Provider provisioning, root/hardware storage, recovery and real agreement protocol |
-| Ingestion | Resumable ciphertext-only orchestrator, quota/digest/expiry checks | Durable upload state/object-store adapters and deployed cleanup/restore drills |
-| Rights | Explicit layers, uses, validity, territory and revocation | Authorized record provisioning, confidential persistence and production review |
-| Media | Bounded RIFF/WAVE PCM/float32 parser, PCM16 encoder, exact frames, digital peak/RMS, fresh-key renditions | Compressed/extended codecs, integrated loudness analysis and native sinks |
-| Spatial | Scene contracts, mono mixtures, bounded source/speaker gains, fixed/object tracking | Resampling/topology choreography, actual positioning hardware and field pilots |
-| Acoustic harness | Short-capture latency and trial report calculations | Real reference captures, source attribution, calibrated levels and independent assessment |
+| Canonical inputs | Stable v1 valid bytes, Unicode/order vectors, bounded parsing and duplicate/member rejection | Explicit versioned migration when an approved upstream contract changes |
+| Playback | Current-position linear player, rights/recipient expiry, bounded PCM queue, browser fade/stop and lifecycle resets | Real browser/device interoperability, native sinks and suspended-context qualification |
+| Controls/clock | Scoped signatures, leases/emergency supersession, SQLite replay checkpoints, challenged clock intervals | Native protected state, E2EE payload delivery, route-specific output delay and acoustic measurements |
+| Output evidence | Active-route invalidation, post-challenge measurement decisions, full-window calibration, immutable conservative intervals and physical-output coverage | Real native routes, calibration/source/output attribution and independent qualification |
+| Local coordination/cache | Primary leases, registered opaque transports, bounded failover and quota/expiry SQLite ciphertext cache | LAN discovery/provisioning and replica/restore qualification |
+| Identity/rights | Root-authorized device events, tenant/app roles and explicit layered permissions | Real identity provisioning, root/recovery storage, agreement protocol and rights persistence |
+| Ingestion/media | Resumable ciphertext ingest, bounded WAV/PCM packaging, sample alignment and digital peak/RMS | Durable upload/object-store adapters, compressed codecs, integrated loudness analysis and native sinks |
+| Spatial | Neutral scenes, bounded mono mixtures and fixed/object tracking | Resampling/topology choreography, positioning hardware and pilots |
+| Checkout | Immutable complete-product quotes, all-asset rights, exact money, provider idempotency, verified-event seam and SQLite purchase state | Real provider signature/API adapter, sandbox and complete-product fulfillment |
+| Reconciliation | Exact splits, cumulative refunds, visible liabilities/failures, atomic transfer reservations and SQLite accounting | Actual transfer/refund dispatch, provider sandbox, recovery and production operations |
+| Entitlements | Atomic scoped grants, source deduplication, expiry, terminal revocation and SQLite persistence | Source verification, purchase/refund/contribution integration and real recipient/key delivery |
 
-## Latest merged implementation chain
+## This merged round
 
 | PR | Result |
 |---|---|
-| [#16](https://github.com/neophilism/Distributed-Audio-Engine/pull/16) | Bounded authenticated encrypted range delivery |
-| [#17](https://github.com/neophilism/Distributed-Audio-Engine/pull/17) | Browser PCM queue, fade/stop and authority envelopes |
-| [#18](https://github.com/neophilism/Distributed-Audio-Engine/pull/18) | Encrypted current-position program player and exact fragment cursor |
-| [#19](https://github.com/neophilism/Distributed-Audio-Engine/pull/19) | Bounded ciphertext cache and real SQLite adapter |
-| [#20](https://github.com/neophilism/Distributed-Audio-Engine/pull/20) | Signed coordinator routing leases and bounded failover |
-| [#21](https://github.com/neophilism/Distributed-Audio-Engine/pull/21) | Portable shared-clock uncertainty/freshness reference |
-| [#22](https://github.com/neophilism/Distributed-Audio-Engine/pull/22) | Durable atomic replay checkpoints and process concurrency |
-| [#23](https://github.com/neophilism/Distributed-Audio-Engine/pull/23) | Portable pipeline, consumer packages and cancellation hardening |
+| [#25](https://github.com/neophilism/Distributed-Audio-Engine/pull/25) | Canonical v1 input hardening and duplicate-key parsing |
+| [#26](https://github.com/neophilism/Distributed-Audio-Engine/pull/26) | Challenged output evidence, whole-window calibration and immutable coverage receipts |
+| [#27](https://github.com/neophilism/Distributed-Audio-Engine/pull/27) | Complete-product checkout and bound settlement events |
+| [#28](https://github.com/neophilism/Distributed-Audio-Engine/pull/28) | Exact splits, cumulative refunds and transfer reconciliation |
+| [#29](https://github.com/neophilism/Distributed-Audio-Engine/pull/29) | Durable purchase/accounting state, private files and process races |
+| [#30](https://github.com/neophilism/Distributed-Audio-Engine/pull/30) | Atomic entitlement grants and durable source deduplication |
+| [#31](https://github.com/neophilism/Distributed-Audio-Engine/pull/31) | Roadmap/evidence reconciliation and component/data-flow inventory |
 
-No service is deployed, no registry package is published, and no physical speaker trial or independent release certification has been performed. SceneSignal, Distributed Radio Engine and TrackZero remain in planning as requested. Android/iOS SDK work and the remaining evidence/entitlement/commerce/operations modules continue within the audio engine before dependent application implementation.
+## Work remaining
 
-## Output-evidence integration candidate
+The next major packages are Android/iOS SDKs, native clock/route/acoustic qualification, authenticated E2EE parent/key delivery, complete-product/refund fulfillment, actual payment-provider sandbox/dispatch, sponsor delivery accounting, observability and operations. Optional live-input/advanced-hardware adapters and integrated scale/release qualification follow their recorded dependencies. The [roadmap](roadmap.json) preserves original versus added scope and separate implementation/deployment/integration/field/release states.
 
-PR #26 adds partial portable foundations for DAE-12 through DAE-15 and DAE-20: active-route invalidation, challenged authenticated measurements, complete-window calibration coverage, conservative intervals and immutable scoped coverage receipts. Native Android/iOS routes, measurement hardware and independent qualification remain pending. The combined candidate includes the separately merged canonical/commerce work. See [output evidence](output-evidence.md).
+No service has been deployed, no registry package has been published, and physical speaker trials and independent release certification remain pending. SceneSignal, Distributed Radio Engine and TrackZero remain planning repositories in the requested build order. Development stops after this checked and merged round at the owner's request.

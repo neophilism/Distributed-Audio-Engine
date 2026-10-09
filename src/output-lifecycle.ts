@@ -18,4 +18,3 @@ export class OutputLifecycle {
   disconnect(): void { const generation = this.value.generation + 1; integer(generation, 1); this.value = { state: 'unavailable', generation }; this.invalidatePlaybackAndEvidence(); }
   requireCurrent(route: OutputRoute): void { invariant(this.value.state === 'active' && this.value.playbackSupported && canonicalJson(this.value.route) === canonicalJson(route), 'OUTPUT_ROUTE_CHANGED'); }
 }
-
