@@ -64,7 +64,7 @@ export class MemoryCommerceStore implements CommerceStore {
       const draft = structuredClone(current), result = operation(draft);
       invariant(!(result && typeof result === 'object' && 'then' in result), 'ASYNC_COMMERCE_TRANSACTION');
       invariant(draft.orders.size <= 4096 && draft.events.size <= 16384 && draft.payments.size <= 4096, 'COMMERCE_STORE_LIMIT');
-      this.states.set(key, structuredClone(draft)); return structuredClone(result);
+      const snapshotResult = structuredClone(result); this.states.set(key, structuredClone(draft)); return snapshotResult;
     } finally { this.busy = false; }
   }
 }

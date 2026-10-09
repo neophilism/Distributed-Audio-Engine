@@ -47,7 +47,7 @@ export class MemoryAccountingStore implements AccountingStore {
       const key = canonicalJson(scope), draft = structuredClone(this.values.get(key) ?? { agreements: new Map(), accounts: new Map(), transfers: new Map(), events: new Map() });
       const result = operation(draft); invariant(!(result && typeof result === 'object' && 'then' in result), 'ASYNC_ACCOUNTING_TRANSACTION');
       invariant(draft.agreements.size <= 1024 && draft.accounts.size <= 4096 && draft.transfers.size <= 16384 && draft.events.size <= 32768, 'ACCOUNTING_STORE_LIMIT');
-      this.values.set(key, structuredClone(draft)); return structuredClone(result);
+      const snapshotResult = structuredClone(result); this.values.set(key, structuredClone(draft)); return snapshotResult;
     } finally { this.busy = false; }
   }
 }
