@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-09-v2",
+  "version": "2026-10-09-v3",
   "original_baseline_total": 88,
   "total": 120,
   "counts": {
@@ -31,8 +31,10 @@
       "field_validated": false,
       "released": false,
       "github_prs": [
-        1
-      ]
+        1,
+        23
+      ],
+      "implementation_scope": "Portable package contracts, strict CI, separate core/browser/Node exports and packed consumer verification."
     },
     {
       "id": "DAE-02",
@@ -74,8 +76,10 @@
       "field_validated": false,
       "released": false,
       "github_prs": [
-        5
-      ]
+        5,
+        23
+      ],
+      "implementation_scope": "Scoped policy and root-authorized device references with platform Web Crypto key types; production provisioning/recovery remains pending."
     },
     {
       "id": "DAE-04",
@@ -161,8 +165,10 @@
       "field_validated": false,
       "released": false,
       "github_prs": [
-        9
-      ]
+        9,
+        18
+      ],
+      "implementation_scope": "Canonical timeline, revisions/markers and exact sample-frame cursor for fragment scheduling."
     },
     {
       "id": "DAE-08",
@@ -176,12 +182,30 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-08",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "merged",
+      "github_pr": 16,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        16,
+        17,
+        18,
+        23
+      ],
+      "implementation_scope": "Bounded authenticated range/HTTPS delivery, Web Audio sink, current-position endpoint player and portable pipeline tests. Browser/native field qualification and parent key channel remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": [
+          "tests/engine-pipeline.test.ts",
+          "tests/integration-hardening.test.ts"
+        ],
+        "parent_channel": "test-double",
+        "physical_output": "test-double",
+        "field_evidence": false
+      }
     },
     {
       "id": "DAE-09",
@@ -232,12 +256,18 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-11",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 21,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        21,
+        23
+      ],
+      "implementation_scope": "Portable challenged shared-clock reference with uncertainty/freshness/conflict gates only. Native SDK, route delay and acoustic measurement prerequisites remain pending.",
+      "partial": true
     },
     {
       "id": "DAE-12",
@@ -530,12 +560,29 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-26",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "merged",
+      "github_pr": 19,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        19,
+        20,
+        23
+      ],
+      "implementation_scope": "Scoped ciphertext cache with real SQLite adapter, signed coordinator routing leases and bounded local/fallback transport. LAN discovery/platform field integration remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": [
+          "tests/engine-pipeline.test.ts",
+          "tests/integration-hardening.test.ts"
+        ],
+        "parent_channel": "test-double",
+        "physical_output": "test-double",
+        "field_evidence": false
+      }
     },
     {
       "id": "DAE-27",
@@ -676,8 +723,11 @@
       "released": false,
       "github_prs": [
         2,
-        14
-      ]
+        14,
+        16,
+        23
+      ],
+      "implementation_scope": "Endpoint encrypted objects and authenticated range readers; private manifests require the separately authenticated E2EE parent channel."
     },
     {
       "id": "DAE-34",
@@ -697,8 +747,22 @@
       "field_validated": false,
       "released": false,
       "github_prs": [
-        3
-      ]
+        3,
+        22,
+        23
+      ],
+      "implementation_scope": "Signed/replay-checked controls plus real SQLite atomic checkpoints and separate-process race/restart tests. Rollback-resistant native state and independent review remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": [
+          "tests/engine-pipeline.test.ts",
+          "tests/integration-hardening.test.ts"
+        ],
+        "parent_channel": "test-double",
+        "physical_output": "test-double",
+        "field_evidence": false
+      }
     },
     {
       "id": "SS-01",
@@ -2315,9 +2379,18 @@
     }
   ],
   "progress": {
-    "audio_engine_merged_roadmap_ids": 13,
-    "audio_engine_implementation_prs": 14,
-    "portable_tests": 57,
+    "audio_engine_merged_roadmap_ids": 15,
+    "audio_engine_partial_roadmap_ids": [
+      "DAE-11"
+    ],
+    "audio_engine_implementation_prs": 22,
+    "audio_engine_documentation_prs": [
+      15,
+      24
+    ],
+    "portable_tests": 105,
+    "portable_consumer_types_checked": true,
+    "packed_consumer_smoke_checked": true,
     "production_deployed": false,
     "field_validated": false,
     "independent_review": "pending"
