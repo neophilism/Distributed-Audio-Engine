@@ -8,12 +8,40 @@
     "node": ">=24.19.0 <25"
   },
   "exports": {
-    ".": { "types": "./dist/src/index.d.ts", "import": "./dist/src/index.js", "default": "./dist/src/index.js" },
-    "./browser": { "types": "./dist/src/browser/index.d.ts", "import": "./dist/src/browser/index.js", "default": "./dist/src/browser/index.js" },
-    "./node": { "types": "./dist/src/node/index.d.ts", "import": "./dist/src/node/index.js", "default": "./dist/src/node/index.js" }
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    },
+    "./browser": {
+      "types": "./dist/src/browser/index.d.ts",
+      "import": "./dist/src/browser/index.js",
+      "default": "./dist/src/browser/index.js"
+    },
+    "./node": {
+      "types": "./dist/src/node/index.d.ts",
+      "import": "./dist/src/node/index.js",
+      "default": "./dist/src/node/index.js"
+    },
+    "./evidence": {
+      "types": "./dist/src/evidence.d.ts",
+      "import": "./dist/src/evidence.js",
+      "default": "./dist/src/evidence.js"
+    },
+    "./output-lifecycle": {
+      "types": "./dist/src/output-lifecycle.d.ts",
+      "import": "./dist/src/output-lifecycle.js",
+      "default": "./dist/src/output-lifecycle.js"
+    }
   },
   "types": "./dist/src/index.d.ts",
-  "files": ["dist/src", "src", "docs", "README.md", "AGENTS.md"],
+  "files": [
+    "dist/src",
+    "src",
+    "docs",
+    "README.md",
+    "AGENTS.md"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc",

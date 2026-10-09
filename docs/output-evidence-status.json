@@ -1,0 +1,27 @@
+{
+  "roadmapIds": [
+    "DAE-12",
+    "DAE-13",
+    "DAE-14",
+    "DAE-15",
+    "DAE-20"
+  ],
+  "githubPR": 26,
+  "implementation": "partial",
+  "source": [
+    "src/evidence.ts",
+    "src/output-lifecycle.ts"
+  ],
+  "softwareTests": "tests/evidence.test.ts (8 tests)",
+  "testAdapters": "explicit E2EE payload decoder and verifier measurement decisions",
+  "deployed": false,
+  "fieldValidated": false,
+  "released": false,
+  "openGates": [
+    "native active-route integrations",
+    "authenticated parent key channel",
+    "calibrated hardware/source attribution",
+    "independent release review",
+    "rollback-resistant native state"
+  ]
+}
