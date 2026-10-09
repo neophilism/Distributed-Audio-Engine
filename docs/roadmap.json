@@ -1,0 +1,2277 @@
+{
+  "version": "2026-10-09-v2",
+  "original_baseline_total": 88,
+  "total": 120,
+  "counts": {
+    "Distributed-Audio-Engine": 34,
+    "SceneSignal": 32,
+    "Distributed-Radio-Engine": 28,
+    "TrackZero": 26
+  },
+  "build_order": [
+    "Distributed-Audio-Engine",
+    "SceneSignal",
+    "Distributed-Radio-Engine",
+    "TrackZero"
+  ],
+  "items": [
+    {
+      "id": "DAE-01",
+      "title": "Architecture, contracts, repository and CI",
+      "depends_on": [],
+      "scope": "Neutral TypeScript contracts, CI, four-repository plans, E2EESA pinned baseline and documented trust boundaries. No consumer branding or reward economics in core.",
+      "acceptance": "Typecheck, core boundary/static checks, roadmap dependency validation, build and contract tests pass. Every release and field state remains separately reported.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-01",
+      "origin": "original",
+      "status": "implemented",
+      "github_pr": 1,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-02",
+      "title": "Device and acoustics feasibility harness",
+      "depends_on": [
+        "DAE-01"
+      ],
+      "scope": "Record reference captures, device routes, timing, calibration uncertainty and failures without treating test data as field evidence.",
+      "acceptance": "Simulations never enable a hardware compatibility or verified-volume claim.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-02",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-03",
+      "title": "Identity, tenants and scoped roles",
+      "depends_on": [
+        "DAE-01",
+        "DAE-34"
+      ],
+      "scope": "Scoped capabilities and endpoint-controlled enrollment/revocation. Tenant, application, device and operation isolation; separate service login from E2EE recipient authority. Authentication and durable persistence are adapters.",
+      "acceptance": "Cross-tenant/application, expired capabilities, forged enrollment, rollback, reused devices and revoked authorizers are rejected. External identity provisioning is explicitly separate.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-03",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-04",
+      "title": "Secure asset ingestion",
+      "depends_on": [
+        "DAE-03",
+        "DAE-33"
+      ],
+      "scope": "Resumable ciphertext-only ingestion, quotas, checksums, idempotency, expiry and quarantine. Probe/transcode at authorized endpoints; storage never receives a private manifest or key.",
+      "acceptance": "Interrupted ciphertext transfers resume; digest mismatch, oversized upload, mixed tenant/application and mutated duplicate chunks fail closed. No server plaintext processing.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-04",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-05",
+      "title": "Rights and permitted-use records",
+      "depends_on": [
+        "DAE-04"
+      ],
+      "scope": "Evaluate explicit permissions for playback, distribution, caching, rewards and spatial use.",
+      "acceptance": "Absent, revoked, expired or geographically incompatible permissions deny new delivery.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-05",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-06",
+      "title": "Media packaging and loudness metadata",
+      "depends_on": [
+        "DAE-04",
+        "DAE-05",
+        "DAE-33"
+      ],
+      "scope": "Authorized-endpoint media packaging, sample counts/alignment, waveform and peak/loudness metadata, bounded gain and independent encryption of renditions. Codec/transcoder plugins never run inside ciphertext-only relays.",
+      "acceptance": "Known PCM fixtures validate duration, peaks, alignment, clipping and encrypted package integrity. Unsupported codecs or measurement configurations fail closed; no LUFS claim from peak measurements.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-06",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-07",
+      "title": "Canonical generic audio timeline",
+      "depends_on": [
+        "DAE-06"
+      ],
+      "scope": "Deterministic neutral asset timeline, epochs, revisions, loops, fallback clips and future-effective publication. Generic transition markers; radio show/song/outro and reward semantics belong to Distributed Radio Engine.",
+      "acceptance": "Join times resolve identical clip/sample targets. Revisions switch atomically at agreed boundaries without duplicate/omitted content; no consumer dependency.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-07",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-08",
+      "title": "Encrypted delivery and broad-compatibility adapter",
+      "depends_on": [
+        "DAE-07",
+        "DAE-33"
+      ],
+      "scope": "Ciphertext segment transport, cache adapters, endpoint decryption and playback clock integration. Browser interoperability is a playback claim; tighter acoustic synchronization needs separate qualification.",
+      "acceptance": "Route and transport errors do not imply acoustic calibration.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-08",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-09",
+      "title": "Android audio SDK",
+      "depends_on": [
+        "DAE-08"
+      ],
+      "scope": "Build native Android endpoint playback and output lifecycle integration.",
+      "acceptance": "Actual Android devices cover interruptions, lock screen, output changes and reconnects.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-09",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-10",
+      "title": "iOS audio SDK",
+      "depends_on": [
+        "DAE-08"
+      ],
+      "scope": "Build native iOS endpoint playback and output lifecycle integration.",
+      "acceptance": "Actual iOS devices cover interruptions, lock screen, permissions and reconnects.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-10",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-11",
+      "title": "Clock discipline and acoustic timing",
+      "depends_on": [
+        "DAE-02",
+        "DAE-09",
+        "DAE-10"
+      ],
+      "scope": "Estimate clock offset/drift and compensate only for supported measured output delays.",
+      "acceptance": "Qualifying acoustic claims reference real skew measurements and route-specific evidence.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-11",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-12",
+      "title": "Device profiles and route evidence",
+      "depends_on": [
+        "DAE-09",
+        "DAE-10"
+      ],
+      "scope": "Distinguish active output, supported capabilities and route revision changes.",
+      "acceptance": "A paired device or renamed headphone is insufficient speaker proof.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-12",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-13",
+      "title": "Opt-in acoustic evidence adapters",
+      "depends_on": [
+        "DAE-02",
+        "DAE-12"
+      ],
+      "scope": "Process consented calibration and attribution evidence at an authorized endpoint.",
+      "acceptance": "Stale, ambiguous or replayed observations cannot be labeled verified output.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-13",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-14",
+      "title": "Qualifying-window and level evaluator",
+      "depends_on": [
+        "DAE-11",
+        "DAE-13"
+      ],
+      "scope": "Intersect valid output, calibrated measurement and interval bounds conservatively.",
+      "acceptance": "Uncertain boundaries, expired evidence and interruptions never generate verified intervals.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-14",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-15",
+      "title": "Neutral contribution-policy primitives",
+      "depends_on": [
+        "DAE-05",
+        "DAE-14"
+      ],
+      "scope": "Reusable bounded measurement-band and interval rules. No artist points, song vesting, exponential reward pricing, radio cadence or Groove economics in the core.",
+      "acceptance": "Invalid bounds, stale calibration, insufficient assurance and out-of-limit intervals cannot qualify. Policies cannot raise a user volume.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-15",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-16",
+      "title": "Generic entitlement ledger primitives",
+      "depends_on": [
+        "DAE-15"
+      ],
+      "scope": "Atomic, idempotent non-product-specific entitlement grants and access records with persistence adapter. Radio points wallets and reward redemptions live in Distributed Radio Engine.",
+      "acceptance": "Replay and concurrent grant requests never create duplicate rights.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-16",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-17",
+      "title": "Album checkout and payment adapter",
+      "depends_on": [
+        "DAE-03",
+        "DAE-05",
+        "DAE-06"
+      ],
+      "scope": "Abstract complete-product purchases and payment-provider events.",
+      "acceptance": "Signed idempotent settlement events bind the correct product and buyer.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-17",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-18",
+      "title": "Splits, refunds and reconciliation",
+      "depends_on": [
+        "DAE-17"
+      ],
+      "scope": "Reconcile fees, agreed shares, refunds and transfer failures.",
+      "acceptance": "Sandbox transactions balance and rejected transfers stay visible.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-18",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-19",
+      "title": "Sponsor campaigns and delivery accounting",
+      "depends_on": [
+        "DAE-07",
+        "DAE-18"
+      ],
+      "scope": "Track approved campaign records and generic media deliveries.",
+      "acceptance": "Reports distinguish delivery, output verification and people.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-19",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-20",
+      "title": "Anti-abuse and signed evidence",
+      "depends_on": [
+        "DAE-03",
+        "DAE-14",
+        "DAE-16"
+      ],
+      "scope": "Bind challenges, evidence scope, validity and replay keys.",
+      "acceptance": "Forged and duplicated evidence cannot affect grants.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-20",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-21",
+      "title": "Observability, cost and roadmap exports",
+      "depends_on": [
+        "DAE-08",
+        "DAE-16",
+        "DAE-18",
+        "DAE-19"
+      ],
+      "scope": "Expose health and roadmap status with explicit unknown values and cost controls.",
+      "acceptance": "Missing data is not a zero or a passing validation.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-21",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-22",
+      "title": "Security, privacy and operations baseline",
+      "depends_on": [
+        "DAE-05",
+        "DAE-20",
+        "DAE-21"
+      ],
+      "scope": "Integrate E2EESA requirements, retention, recovery and maintainable operations.",
+      "acceptance": "Deployed restore, deletion and independent security evidence is required before release.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-22",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-23",
+      "title": "Core audio integration candidate",
+      "depends_on": [
+        "DAE-11",
+        "DAE-12",
+        "DAE-14",
+        "DAE-16",
+        "DAE-18",
+        "DAE-19",
+        "DAE-22"
+      ],
+      "scope": "Encrypted asset, native playback, clock, evidence, commerce and shared entitlement integration; portable release candidate independently consumable by SceneSignal or radio engine. Hardware-dependent claims require actual evidence.",
+      "acceptance": "Software integration evidence, six-hour supported-device soaks, supported-device matrix and unresolved gates published. No dependent app is required to build core.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-23",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-24",
+      "title": "Spatial asset and scene contracts",
+      "depends_on": [
+        "DAE-01",
+        "DAE-06"
+      ],
+      "scope": "Aligned stem/object scene contracts, positions, revisions, capability weights, source spread, fixed positions and neutral physical anchor records. SceneSignal calls a physical instrument anchor a Spime; the core remains neutral.",
+      "acceptance": "Invalid positions or incompatible stem lengths cannot produce a scene.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-24",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-25",
+      "title": "Portable spatial DSP renderer",
+      "depends_on": [
+        "DAE-24"
+      ],
+      "scope": "Compute bounded, capability-aware source weights and render per-output samples.",
+      "acceptance": "Known sample fixtures, speaker changes and gain constraints remain musically stable.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-25",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-26",
+      "title": "Local coordinator and edge caching",
+      "depends_on": [
+        "DAE-08",
+        "DAE-24"
+      ],
+      "scope": "Coordinate authorized playback and opaque cache state on a local network.",
+      "acceptance": "Host loss, missing segments and interrupted joins produce a bounded fallback.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-26",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-27",
+      "title": "Safety controls and bounded authority",
+      "depends_on": [
+        "DAE-24",
+        "DAE-34"
+      ],
+      "scope": "Implement expiring operating limits and authenticated emergency controls.",
+      "acceptance": "Expired authority cannot sustain unattended output indefinitely.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-27",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-28",
+      "title": "Placement and tracking adapters",
+      "depends_on": [
+        "DAE-24"
+      ],
+      "scope": "Fixed/moving placement and neutral physical-anchor adapters. Track the speaker/object rather than its owner; distinguish BLE presence/range from validated coordinates; confidence and stale data gates.",
+      "acceptance": "Owner-phone movement never silently moves a fixed speaker.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-28",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-29",
+      "title": "Optional live-input transport",
+      "depends_on": [
+        "DAE-11",
+        "DAE-27"
+      ],
+      "scope": "Add authenticated encrypted live frames behind a separately qualified latency path.",
+      "acceptance": "Real-device measurements justify each live/monitoring compatibility claim.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-29",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-30",
+      "title": "Optional advanced hardware adapters",
+      "depends_on": [
+        "DAE-28"
+      ],
+      "scope": "Integrate hardware-specific transport and precision position capabilities.",
+      "acceptance": "Unsupported hardware reports unsupported capability instead of fabricated precision.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-30",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-31",
+      "title": "Scale, resilience and contract qualification",
+      "depends_on": [
+        "DAE-23",
+        "DAE-25",
+        "DAE-26",
+        "DAE-27",
+        "DAE-28"
+      ],
+      "scope": "Exercise core boundaries, load, interoperability and failure recovery.",
+      "acceptance": "Actual test limits, failures and applicable compatibility evidence are recorded.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-31",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-32",
+      "title": "Engine stable release and maintainer kit",
+      "depends_on": [
+        "DAE-31"
+      ],
+      "scope": "Package stable contracts, reproducible artifacts and maintenance documentation.",
+      "acceptance": "Release source, independent approvals and conformance evidence match the delivered version.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "DAE-32",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-33",
+      "title": "Endpoint-encrypted chunked media and private manifests",
+      "depends_on": [
+        "DAE-01"
+      ],
+      "scope": "Implement attachment-chunked-aead@0.1.0 with fresh per-object keys, exact nonce/AAD binding and authenticated private manifests passed only through an authorized E2EE channel. Endpoint-only plaintext derivatives.",
+      "acceptance": "Tamper, reorder, truncate, cross-object substitution, wrong key and malformed manifest tests reject before plaintext release. Known AES-GCM vectors plus portable endpoint round trips.",
+      "gate": "Independent crypto/interoperability review before production",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DAE-34",
+      "title": "Authenticated controls and replay-safe authority",
+      "depends_on": [
+        "DAE-01"
+      ],
+      "scope": "Ed25519 signed scoped controls, pinned endpoint authorizers, monotonic sequence/epoch, expiry and cancellation. No unsigned fallback; key distribution remains separate from signatures.",
+      "acceptance": "Reject forged, stale, expired, cross-app and cross-tenant commands; mutation does not advance checkpoint. Authentication precedes control execution.",
+      "gate": "Independent security review before production",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-01",
+      "title": "Repository and application shell",
+      "depends_on": [
+        "DAE-01"
+      ],
+      "scope": "Separate SceneSignal product shell and E2EE client; consumes the core without radio-engine or TrackZero imports. Use user-centered community and spatial music language.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-01",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-02",
+      "title": "Organizer and collaborator roles",
+      "depends_on": [
+        "SS-01"
+      ],
+      "scope": "Enforce organizer, performer, operator and steward permissions.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-02",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-03",
+      "title": "Site and session planning",
+      "depends_on": [
+        "SS-02"
+      ],
+      "scope": "Record operating site, time, boundaries and session conditions.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-03",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-04",
+      "title": "Permit evidence upload",
+      "depends_on": [
+        "SS-03"
+      ],
+      "scope": "Endpoint-encrypt permits and private organizer data. Retain conditions and explicit authorizer decisions without exposing full documents to storage/admins; redacted public summaries are intentional disclosures.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-04",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-05",
+      "title": "No-permit-required attestation",
+      "depends_on": [
+        "SS-04"
+      ],
+      "scope": "Capture the location-specific basis and conditions of the organizer assertion.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-05",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-06",
+      "title": "Authorization lifecycle and enforcement",
+      "depends_on": [
+        "SS-05"
+      ],
+      "scope": "Prevent activation without current permitted authority and invalidate changed site conditions.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-06",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-07",
+      "title": "Artist calls and lineup agreements",
+      "depends_on": [
+        "SS-06"
+      ],
+      "scope": "Recruit performers and record lineup, duration, rights and financial terms.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-07",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-08",
+      "title": "Free event discovery and visitor pages",
+      "depends_on": [
+        "SS-07"
+      ],
+      "scope": "Offer accessible public event information without a ticket or audience account.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-08",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-09",
+      "title": "Session sponsorship",
+      "depends_on": [
+        "SS-08"
+      ],
+      "scope": "Manage transparent sponsor commitments, placements and costs.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-09",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-10",
+      "title": "Artist album sales and optional support",
+      "depends_on": [
+        "SS-09"
+      ],
+      "scope": "Offer complete albums, voluntary support and agreed artist shares.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-10",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-11",
+      "title": "Speaker-contributor onboarding",
+      "depends_on": [
+        "SS-06",
+        "DAE-12"
+      ],
+      "scope": "Join speakers voluntarily with explicit permissions and supported-device status.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-11",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-12",
+      "title": "Local coordinator and site setup",
+      "depends_on": [
+        "SS-11"
+      ],
+      "scope": "Prepare local playback, caches and operator diagnostics.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-12",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-13",
+      "title": "Fixed-speaker placement map",
+      "depends_on": [
+        "SS-12"
+      ],
+      "scope": "Place speakers independently of the owner phone, including fixed-on-blanket mode.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-13",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-14",
+      "title": "Speaker roles and calibration",
+      "depends_on": [
+        "SS-13"
+      ],
+      "scope": "Assign useful coverage and frequency roles using measured capabilities.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-14",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-15",
+      "title": "Stem and composition ingestion",
+      "depends_on": [
+        "SS-07",
+        "DAE-06",
+        "DAE-24"
+      ],
+      "scope": "Import authorized aligned stems and complete fallback mixes.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-15",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-16",
+      "title": "Spatial scene composer",
+      "depends_on": [
+        "SS-15"
+      ],
+      "scope": "Place instruments and define spread with a visual scene interface.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-16",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-17",
+      "title": "Scene audition and simulation",
+      "depends_on": [
+        "SS-16"
+      ],
+      "scope": "Preview mixes and missing-contributor situations using labeled simulations.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-17",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-18",
+      "title": "Static spatial field playback",
+      "depends_on": [
+        "SS-14",
+        "SS-16",
+        "SS-17",
+        "DAE-25"
+      ],
+      "scope": "Drive calibrated fixed speakers with position-dependent instrument mixtures.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-18",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-19",
+      "title": "Dynamic density and contributor changes",
+      "depends_on": [
+        "SS-18"
+      ],
+      "scope": "Smoothly adapt musical weights when contributors arrive or leave.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-19",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-20",
+      "title": "Moving-speaker position tracking",
+      "depends_on": [
+        "SS-19"
+      ],
+      "scope": "Update only actual speaker positions using confidence-bounded tracking.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-20",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-21",
+      "title": "Spimes: movable physical instrument anchors",
+      "depends_on": [
+        "SS-16",
+        "SS-20",
+        "DAE-28"
+      ],
+      "scope": "A Spime is a Bluetooth-enabled statue, giant chess piece, violin or other physical object whose validated location controls a virtual instrument/stem position. Bind object ID, tracking method, calibration, confidence, owner and scene; consented encrypted telemetry. Presence or RSSI alone is not precise location.",
+      "acceptance": "Moving a validated Spime moves its assigned virtual source; stale, low-confidence and disconnected tracking freezes/fades safely. The speaker/phone/object locations remain separate; manually placed fallback works.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-21",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-22",
+      "title": "Preprogrammed spatial automation",
+      "depends_on": [
+        "SS-21"
+      ],
+      "scope": "Schedule instrument movement and scene transitions on the common clock.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-22",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-23",
+      "title": "Live scene control and operator handoff",
+      "depends_on": [
+        "SS-22"
+      ],
+      "scope": "Apply authorized edits with undo and safe operator transfer.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-23",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-24",
+      "title": "Session contribution rewards",
+      "depends_on": [
+        "SS-14",
+        "DAE-14",
+        "DAE-16"
+      ],
+      "scope": "Session-specific validated contribution rewards and useful-role credits using neutral core primitives. Does not import TrackZero point vesting or Unlocked Groove rules; authorizer and safe limits bound contribution.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-24",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-25",
+      "title": "Accessibility and equitable participation",
+      "depends_on": [
+        "SS-24"
+      ],
+      "scope": "Support non-device visitors, quiet routes, readable controls and alternate formats.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-25",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-26",
+      "title": "Acoustic monitoring and emergency controls",
+      "depends_on": [
+        "SS-25"
+      ],
+      "scope": "Monitor permitted output and execute authenticated fade/stop controls.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-26",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-27",
+      "title": "Weather, access and site operations",
+      "depends_on": [
+        "SS-26"
+      ],
+      "scope": "Coordinate cancellation, access, contacts and incident response.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-27",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-28",
+      "title": "Optional live-performance audio",
+      "depends_on": [
+        "SS-27"
+      ],
+      "scope": "Integrate live input only after measured latency and performer-monitor qualification.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-28",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-29",
+      "title": "Session settlement and impact reporting",
+      "depends_on": [
+        "SS-28"
+      ],
+      "scope": "Reconcile artist revenue, costs and independently described participation facts.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-29",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-30",
+      "title": "Controlled 10\u201320-speaker pilot",
+      "depends_on": [
+        "SS-29"
+      ],
+      "scope": "Run a real authorized mixed-device spatial trial with recorded outcomes.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-30",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-31",
+      "title": "Larger deployment qualification",
+      "depends_on": [
+        "SS-30"
+      ],
+      "scope": "Increase tested scale in stages and publish limits.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-31",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "SS-32",
+      "title": "Public release and producer runbooks",
+      "depends_on": [
+        "SS-31"
+      ],
+      "scope": "Deliver organizer, performer, operator and contributor guidance with release evidence.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "EP-32",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-01",
+      "title": "Repository and reusable radio contracts",
+      "depends_on": [
+        "DAE-23"
+      ],
+      "scope": "Establish neutral radio engine, generic creators/publishers, media items and show contracts. No TrackZero branding, venue or location policy.",
+      "acceptance": "A music and a documentary consumer compile against the same public contracts.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-02",
+      "title": "Creator and publisher identity adapters",
+      "depends_on": [
+        "DRE-01"
+      ],
+      "scope": "Artist, organization, station ownership and collaborator roles with tenant/application isolation and endpoint device authority.",
+      "acceptance": "External account login alone cannot enroll a decrypting recipient.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-03",
+      "title": "Station editorial authority",
+      "depends_on": [
+        "DRE-02"
+      ],
+      "scope": "Artist/organization-controlled programming, collaborator scopes and signed revision approvals.",
+      "acceptance": "Unauthorized sequencing or sponsor insertion fails; approvals bind exact program digest.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-04",
+      "title": "General radio content catalog",
+      "depends_on": [
+        "DRE-02"
+      ],
+      "scope": "Music, news, documentaries, talk shows, episodes and creator attribution; assets consume core encrypted packaging.",
+      "acceptance": "Music and spoken-work fixtures use the same pipeline without song-specific assumptions.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-05",
+      "title": "Rights and publishing checks",
+      "depends_on": [
+        "DRE-03",
+        "DRE-04"
+      ],
+      "scope": "Required composition/recording or spoken-work permissions, territory, release window and cache/reward grants.",
+      "acceptance": "Missing uses prevent publishing; revocation does not invent recall of already delivered files.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-06",
+      "title": "Program compiler and completion boundaries",
+      "depends_on": [
+        "DRE-05"
+      ],
+      "scope": "Compile content, opening identification, closing identification and before-next-intro reward markers into the common timeline.",
+      "acceptance": "Points closure always follows the full matching outro; opportunities occur before the next intro.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-07",
+      "title": "Scheduling, loops and versioned rotations",
+      "depends_on": [
+        "DRE-06"
+      ],
+      "scope": "Scheduled shows, recurring blocks, fallback sets and future-effective revisions owned by the broadcaster.",
+      "acceptance": "Continuous station survives publisher disconnection; no user-selectable on-demand track playback.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-08",
+      "title": "Interstitial and identification adapters",
+      "depends_on": [
+        "DRE-06"
+      ],
+      "scope": "Uploaded/recorded station IDs and deterministic per-content identification metadata, including That was SONG by ARTIST on STATION radio.",
+      "acceptance": "Silent placeholders never count as completed required identification; artist controls actual audio.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-09",
+      "title": "Sponsor placement and common-program accounting",
+      "depends_on": [
+        "DRE-07",
+        "DRE-08"
+      ],
+      "scope": "Broadcaster-approved ads, campaigns and split accounting on one authoritative station sequence.",
+      "acceptance": "No individualized audio ad insertion changes playback timeline; ads do not earn song points.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-10",
+      "title": "Always-on encrypted station operations",
+      "depends_on": [
+        "DRE-07",
+        "DRE-09"
+      ],
+      "scope": "Endpoint prepublication of encrypted audio/programs, autonomous ciphertext scheduler, recovery and fixed approved versions.",
+      "acceptance": "Station keeps broadcasting without artist phone; relay/storage never receives media decryption keys.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-11",
+      "title": "Radio join and playback SDK facade",
+      "depends_on": [
+        "DRE-10"
+      ],
+      "scope": "Guest live radio, current timeline join, native/web wrappers and backpressure/recovery.",
+      "acceptance": "Tuning in joins current program; supported client types expose honest route/evidence states.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-12",
+      "title": "Contribution point policy and units",
+      "depends_on": [
+        "DRE-05",
+        "DRE-11"
+      ],
+      "scope": "One creator-specific metric: conservative measured acoustic-energy equivalents integrated over qualifying time. Threshold, reference level, safety ceiling and versioned unit fixed in policies.",
+      "acceptance": "No headphone, software-slider or subthreshold credit. Accounted quantity is points, not summed physical decibels.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-13",
+      "title": "Independent multi-speaker evidence",
+      "depends_on": [
+        "DRE-12"
+      ],
+      "scope": "Deduplicate physical output identities and calibrated source evidence; sum distinct verified output contributions, never a combined field plus its component speakers.",
+      "acceptance": "One output fanned out through multiple clients counts once; unverified 1000-speaker declarations earn nothing.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-14",
+      "title": "Realtime provisional point progress",
+      "depends_on": [
+        "DRE-12",
+        "DRE-13"
+      ],
+      "scope": "Preview per-content points while playback is active; do not create spendable balance yet.",
+      "acceptance": "Preview and settled balances remain distinct; failed evidence windows earn zero.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-15",
+      "title": "Outro-complete point vesting",
+      "depends_on": [
+        "DRE-06",
+        "DRE-08",
+        "DRE-14"
+      ],
+      "scope": "Award once per completed broadcast occurrence only after full content and its closing identification; stop, pause, seek, mute or route interruption forfeits provisional cycle. Late join starts eligibility at next full cycle.",
+      "acceptance": "Race/replay and cross-station duplicate-cycle tests vest once; stopping during outro vests zero.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-16",
+      "title": "Creator-specific transactional point wallets",
+      "depends_on": [
+        "DRE-15"
+      ],
+      "scope": "Append-only earn/spend ledger, fixed-point units, idempotency, persistence, concurrency and creator isolation.",
+      "acceptance": "No transferable universal wallet; spending one artist balance cannot consume another.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-17",
+      "title": "Default exponential reward price ladder",
+      "depends_on": [
+        "DRE-16"
+      ],
+      "scope": "Slow initial increases that transition into unbounded exponential growth with arbitrary precision, creator overrides and immutable offer-price snapshots.",
+      "acceptance": "High tiers exceed feasible 1000-speaker all-day examples; no floating-point balance overflow or retroactive repricing.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-18",
+      "title": "Points reward catalog and atomic redemption",
+      "depends_on": [
+        "DRE-05",
+        "DRE-16",
+        "DRE-17"
+      ],
+      "scope": "Creator-defined points offers, coupons, recordings and other lawful fan rewards; cost/budget/stock and atomic entitlement issuance.",
+      "acceptance": "Concurrent redemption cannot overspend; failed grant restores balance; no paid-single disguise.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-19",
+      "title": "Separate Unlocked Groove catalog",
+      "depends_on": [
+        "DRE-05"
+      ],
+      "scope": "App-exclusive bonus recordings separated from point offers and paid catalog. Distinct alternate takes have distinct recording IDs.",
+      "acceptance": "The same recording cannot be silently offered in both reward channels; prior entitlements survive edits.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-20",
+      "title": "Shared transition opportunity scheduler",
+      "depends_on": [
+        "DRE-06",
+        "DRE-19"
+      ],
+      "scope": "Broadcaster-defined every x-to-y completed content cadence, one shared timeline opportunity after outro and before next intro.",
+      "acceptance": "One opportunity ID/time reaches all connected clients; joining/reconnecting cannot reroll it.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-21",
+      "title": "Exponential rarity and fair eligibility",
+      "depends_on": [
+        "DRE-20"
+      ],
+      "scope": "Configurable exponentially decreasing rarity weights, listener lifetime completion gates and seeded auditable server/issuer draws with positive-tail probabilities.",
+      "acceptance": "Superlisteners retain access to rare tiers; rarity does not decrease to zero merely because they listen longer.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-22",
+      "title": "Listener completion progress including headphones",
+      "depends_on": [
+        "DRE-11",
+        "DRE-15",
+        "DRE-21"
+      ],
+      "scope": "Recoverable per-creator completed-listen history; headphones are eligible for Grooves and never speaker points.",
+      "acceptance": "Changing output route does not reroll opportunities; muted/background-halted playback is not completion.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-23",
+      "title": "Groove grant ledger and secure delivery",
+      "depends_on": [
+        "DRE-19",
+        "DRE-20",
+        "DRE-21",
+        "DRE-22"
+      ],
+      "scope": "Idempotent grants, bounded budgets/stock, duplicate protection and endpoint-only content access; program continues while UI reveals reward.",
+      "acceptance": "Replay/reconnect grants once; personalized reward never replaces radio audio or desynchronizes listeners.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-24",
+      "title": "Commerce and complete-work products",
+      "depends_on": [
+        "DRE-04",
+        "DRE-18",
+        "DRE-23"
+      ],
+      "scope": "Whole albums for music and complete show/documentary works for nonmusic; optional tips/gifts, splits and provider adapters.",
+      "acceptance": "Paid standalone music singles remain unsupported; purchases never require speaker participation.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-25",
+      "title": "Creator and sponsor reporting",
+      "depends_on": [
+        "DRE-09",
+        "DRE-16",
+        "DRE-23",
+        "DRE-24"
+      ],
+      "scope": "Output contribution, lifetime/balance points, grants and transactions reported independently from audience estimates.",
+      "acceptance": "Out-loud output does not assert a particular number of people heard it; no exact location requirement.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-26",
+      "title": "E2EESA security, privacy and recovery",
+      "depends_on": [
+        "DRE-10",
+        "DRE-13",
+        "DRE-16",
+        "DRE-23"
+      ],
+      "scope": "Client-origin encrypted radio/rewards, endpoint-authorized keys, metadata minimization, recovery and dependency/secret gates.",
+      "acceptance": "No private content, raw ambient audio or secret key in infrastructure/logs; declared operational metadata inventoried.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-27",
+      "title": "Mixed-content and radio integration pilot",
+      "depends_on": [
+        "DRE-18",
+        "DRE-23",
+        "DRE-24",
+        "DRE-25",
+        "DRE-26"
+      ],
+      "scope": "End-to-end music and news/documentary consumer fixtures, encrypted playback, vesting/spend and timed Grooves.",
+      "acceptance": "Actual supported-output evidence distinct from simulations; all semantic paths tested.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "DRE-28",
+      "title": "Stable reusable radio release",
+      "depends_on": [
+        "DRE-27"
+      ],
+      "scope": "Native consumer contracts, developer kit, support matrix, independent security review and release evidence.",
+      "acceptance": "No TrackZero dependency or branding in engine; unresolved assurance gates block production claim.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-01",
+      "title": "TrackZero repository, UX and radio-only boundary",
+      "depends_on": [
+        "DRE-01"
+      ],
+      "scope": "Consumer radio app using Distributed Radio Engine. TrackZero references the hidden bonus track before track one; no on-demand song selector or venue coordination.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-01",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-02",
+      "title": "Accounts and artist/label onboarding",
+      "depends_on": [
+        "TZ-01",
+        "DRE-02"
+      ],
+      "scope": "Give artists, labels and listeners scoped recoverable identities.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-02",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-03",
+      "title": "Station identity and storefront shell",
+      "depends_on": [
+        "TZ-02"
+      ],
+      "scope": "Present broadcaster branding, station information and complete-product offers.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-03",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-04",
+      "title": "Catalog and complete-album management",
+      "depends_on": [
+        "TZ-03",
+        "DRE-04"
+      ],
+      "scope": "Manage full albums and artwork through radio-engine catalog adapters.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-04",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-05",
+      "title": "Rights review and publishing checks",
+      "depends_on": [
+        "TZ-04",
+        "DRE-05"
+      ],
+      "scope": "Explain and enforce required publishing permissions.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-05",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-06",
+      "title": "Drag-and-drop program sequencing",
+      "depends_on": [
+        "TZ-05",
+        "DRE-07"
+      ],
+      "scope": "Let the broadcaster arrange content, ads, introductions and recurring blocks.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-06",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-07",
+      "title": "Artist interstitial studio",
+      "depends_on": [
+        "TZ-06",
+        "DRE-08"
+      ],
+      "scope": "Record or upload broadcaster-controlled station and content identifications.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-07",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-08",
+      "title": "Sponsor uploads and placements",
+      "depends_on": [
+        "TZ-07",
+        "DRE-09"
+      ],
+      "scope": "Place approved sponsor audio in the common station sequence.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-08",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-09",
+      "title": "Always-on station operations",
+      "depends_on": [
+        "TZ-08",
+        "DRE-10"
+      ],
+      "scope": "Show station scheduling, fallback and recovery independently of the creator phone.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-09",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-10",
+      "title": "Guest web player and album pages",
+      "depends_on": [
+        "TZ-09",
+        "DRE-11"
+      ],
+      "scope": "Allow free guest live playback and complete-album browsing.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-10",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-11",
+      "title": "Android listening application",
+      "depends_on": [
+        "TZ-10",
+        "DAE-09"
+      ],
+      "scope": "Integrate the native Android listening and active-output SDK.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-11",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-12",
+      "title": "iOS listening application",
+      "depends_on": [
+        "TZ-10",
+        "DAE-10"
+      ],
+      "scope": "Integrate the native iOS listening and active-output SDK.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-12",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-13",
+      "title": "Contribute Sound setup and evidence UI",
+      "depends_on": [
+        "TZ-12",
+        "DRE-13"
+      ],
+      "scope": "Explain consent, output qualification and unsupported measurement modes.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-13",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-14",
+      "title": "Artist reward prices and exponential ladder UX",
+      "depends_on": [
+        "TZ-05",
+        "TZ-13",
+        "DRE-17"
+      ],
+      "scope": "Artist-selected point prices and configurable slow-then-exponential defaults. Show exact costs, available balance and preview; high rewards remain difficult even for sustained large-speaker networks.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-14",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-15",
+      "title": "Live points, outro vesting and reward spending",
+      "depends_on": [
+        "TZ-14",
+        "DRE-18"
+      ],
+      "scope": "Single artist-specific metric UI, provisional song meter, post-outro spendable grant and atomic unlock. Cross-artist stations show the appropriate balance for each content creator; headphone listening earns no speaker points.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-15",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-16",
+      "title": "Album checkout and payout experience",
+      "depends_on": [
+        "TZ-15",
+        "DRE-24"
+      ],
+      "scope": "Support receipts, purchase access and artist settlement.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-16",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-17",
+      "title": "Fan library and reward downloads",
+      "depends_on": [
+        "TZ-15",
+        "TZ-16",
+        "DRE-23"
+      ],
+      "scope": "Fan library for purchased works, point-redemptions and separately earned Unlocked Grooves. Download only under creator-authorized rights; playback in this app remains linear station radio.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-17",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-18",
+      "title": "Artist and sponsor reporting",
+      "depends_on": [
+        "TZ-17",
+        "DRE-25"
+      ],
+      "scope": "Present actual output contributions, transactions and campaign delivery.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-18",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-19",
+      "title": "Additional voluntary revenue",
+      "depends_on": [
+        "TZ-18"
+      ],
+      "scope": "Offer voluntary tips, complete-album gifts and sponsor support.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-19",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-20",
+      "title": "Privacy, moderation and complaints",
+      "depends_on": [
+        "TZ-19",
+        "DRE-26"
+      ],
+      "scope": "Provide privacy controls, reporting and explainable account decisions.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-20",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-21",
+      "title": "Discovery and station sharing",
+      "depends_on": [
+        "TZ-20"
+      ],
+      "scope": "Share current radio stations without becoming an event coordination product.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-21",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-22",
+      "title": "Accessibility and battery/recovery qualification",
+      "depends_on": [
+        "TZ-21"
+      ],
+      "scope": "Measure accessible playback, mobile battery use and interruption recovery.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-22",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-23",
+      "title": "Integrated radio pilot",
+      "depends_on": [
+        "TZ-22",
+        "TZ-25",
+        "TZ-26",
+        "DRE-27"
+      ],
+      "scope": "Validate creator programming, listening, rewards and commerce together.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-23",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-24",
+      "title": "Production rollout and creator runbook",
+      "depends_on": [
+        "TZ-23",
+        "DRE-28"
+      ],
+      "scope": "Deliver launch evidence and clear creator/support procedures.",
+      "acceptance": "Exercise the stated workflow plus denial, interruption and cross-role cases; publish supported scope and real validation status.",
+      "gate": "Actual field evidence for hardware/production claims",
+      "baseline_id": "AR-24",
+      "origin": "original",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-25",
+      "title": "Unlocked Groove creator settings and separate bonus catalog",
+      "depends_on": [
+        "TZ-14",
+        "DRE-19",
+        "DRE-20",
+        "DRE-21"
+      ],
+      "scope": "Upload alternate takes and app-exclusive recordings; configure x-to-y-song cadence, rarity, completion gates and stock. Keep these recordings separate from paid/points catalogs.",
+      "acceptance": "Creator preview shows eligibility and disclosure; inconsistent catalog memberships/cadence cannot publish.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    },
+    {
+      "id": "TZ-26",
+      "title": "LOCKED to UNLOCKED GROOVE reveal",
+      "depends_on": [
+        "TZ-17",
+        "TZ-25",
+        "DRE-23"
+      ],
+      "scope": "At the shared outro-to-next-intro marker display LOCKED GROOVE and animate LOCKED into UNLOCKED; accessible reduced-motion equivalent. Both headphones and speakers qualify; reveal never pauses program.",
+      "acceptance": "One reveal per granted opportunity; exact transition timing tested, screen reader and reduced-motion support, no personalized radio insertion.",
+      "gate": "Software",
+      "baseline_id": null,
+      "origin": "added",
+      "status": "planned",
+      "github_pr": null,
+      "deployed": false,
+      "integration_tested": false,
+      "field_validated": false,
+      "released": false
+    }
+  ]
+}

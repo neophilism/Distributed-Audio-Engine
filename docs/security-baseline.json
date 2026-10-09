@@ -1,0 +1,29 @@
+{
+  "standard": "End To End Everywhere Security Architecture Standard",
+  "source": "https://github.com/neophilism/End-To-End-Everywhere-Security-Architecture-Standard",
+  "commit": "dea8f54cab9130da86a71f36de553766a978daf2",
+  "release": "0.9.0-rc.1",
+  "profiles": {
+    "attachments": "attachment-chunked-aead@0.1.0",
+    "server": "server-ciphertext-only@0.1.0",
+    "identity": "identity-account-root@0.1.0",
+    "realTimeMedia": [
+      "media-sframe-sender-keys@0.1.0",
+      "media-sframe-mls@0.1.0"
+    ],
+    "development": "development-ssdf-baseline@0.1.0",
+    "web": "client-web-hardened@0.1.0",
+    "native": "client-native-signed@0.1.0"
+  },
+  "algorithms": [
+    "ALG-AES-256-GCM",
+    "ALG-SHA256",
+    "ALG-ED25519"
+  ],
+  "productionClaim": false,
+  "independentReview": "pending",
+  "hardwareQualification": "pending",
+  "privateContentBoundary": "authorized endpoints only",
+  "relayKeysAllowed": false,
+  "relayPlaintextAllowed": false
+}

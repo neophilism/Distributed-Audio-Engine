@@ -1,0 +1,26 @@
+{
+  "name": "@neophilism/distributed-audio-engine",
+  "version": "0.1.0-dev",
+  "private": true,
+  "description": "Neutral endpoint-encrypted audio, synchronization and spatial primitives",
+  "type": "module",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
+  "types": "./dist/src/index.d.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "test": "npm run build && node --test dist/tests/*.test.js",
+    "lint": "node scripts/check-source.mjs",
+    "roadmap:check": "node scripts/check-roadmap.mjs",
+    "check": "npm run typecheck && npm run lint && npm run roadmap:check && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2"
+  }
+}
