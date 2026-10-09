@@ -28,3 +28,18 @@ test('authenticated emergency stop clears the current lease',async()=>{
   const f=await fixture(policy);await f.authority.renew(await signControl(f.body,f.keys.privateKey),1000);
   await f.authority.emergencyStop(await signControl({...f.body,sequence:2,action:'emergency-stop'},f.keys.privateKey),1500);assert.equal(f.authority.gainAt(1501),0);
 });
+test('slow lease decryption cannot rearm after a newer emergency stop',async()=>{
+  const f=await fixture(policy);const verifier=new ControlVerifier(scope,new Map([['key',f.keys.publicKey]]),new Set(['lease','emergency-stop']),new MemoryCheckpointStore());
+  let release!:(value:LeasePolicy)=>void;let entered!:()=>void;const started=new Promise<void>(resolve=>{entered=resolve;});
+  const authority=new PlaybackAuthority(verifier,async()=>{entered();return new Promise<LeasePolicy>(resolve=>{release=resolve;});},0.8);
+  const renewal=authority.renew(await signControl(f.body,f.keys.privateKey),1000);await started;
+  await authority.emergencyStop(await signControl({...f.body,sequence:2,action:'emergency-stop'},f.keys.privateKey),1500);
+  release(policy);await assert.rejects(renewal);assert.equal(authority.gainAt(1501),0);
+});
+test('leaving supersedes any previously accepted but still decrypting lease',async()=>{
+  const f=await fixture(policy);const verifier=new ControlVerifier(scope,new Map([['key',f.keys.publicKey]]),new Set(['lease']),new MemoryCheckpointStore());
+  let release!:(value:LeasePolicy)=>void;let entered!:()=>void;const started=new Promise<void>(resolve=>{entered=resolve;});
+  const authority=new PlaybackAuthority(verifier,async()=>{entered();return new Promise<LeasePolicy>(resolve=>{release=resolve;});},0.8);
+  const renewal=authority.renew(await signControl(f.body,f.keys.privateKey),1000);await started;authority.leave();release(policy);
+  await assert.rejects(renewal);authority.mute(false);assert.equal(authority.gainAt(1100),0);
+});
