@@ -17,3 +17,4 @@ export * from './browser-audio.js';
 export * from './player.js';
 export * from './cache.js';
 export * from './coordinator.js';
+export * from './clock.js';
