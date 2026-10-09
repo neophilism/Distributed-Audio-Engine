@@ -1,10 +1,10 @@
 import { DatabaseSync } from 'node:sqlite';
 import type { CheckpointStore, ControlCheckpoint } from '../controls.js';
-import { canonicalJson, identifier, integer, invariant } from '../validation.js';
+import { canonicalJson, parseCanonicalJson, identifier, integer, invariant } from '../validation.js';
 
 function validateScopeKey(scopeKey: string): void {
   invariant(typeof scopeKey === 'string' && scopeKey.length <= 1024, 'INVALID_CHECKPOINT_SCOPE');
-  const scope: unknown = JSON.parse(scopeKey);
+  const scope: unknown = parseCanonicalJson(scopeKey);
   invariant(scope && typeof scope === 'object' && Object.keys(scope).sort().join(',') === 'application,sessionId,tenantId', 'INVALID_CHECKPOINT_SCOPE');
   const fields = scope as Record<string, unknown>; identifier(fields.tenantId); identifier(fields.sessionId);
   invariant(fields.application === 'scenesignal' || fields.application === 'distributed-radio', 'INVALID_APPLICATION');
