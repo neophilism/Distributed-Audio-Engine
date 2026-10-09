@@ -1,0 +1,358 @@
+{
+  "source": "Current conversation: user-provided 88-PR list",
+  "total": 88,
+  "items": [
+    {
+      "id": "DAE-01",
+      "title": "Architecture, contracts, repository and CI"
+    },
+    {
+      "id": "DAE-02",
+      "title": "Device and acoustics feasibility harness"
+    },
+    {
+      "id": "DAE-03",
+      "title": "Identity, tenants and scoped roles"
+    },
+    {
+      "id": "DAE-04",
+      "title": "Secure asset ingestion"
+    },
+    {
+      "id": "DAE-05",
+      "title": "Rights and permitted-use records"
+    },
+    {
+      "id": "DAE-06",
+      "title": "Media packaging and loudness metadata"
+    },
+    {
+      "id": "DAE-07",
+      "title": "Canonical programming timeline"
+    },
+    {
+      "id": "DAE-08",
+      "title": "Radio delivery and broad-compatibility adapter"
+    },
+    {
+      "id": "DAE-09",
+      "title": "Android audio SDK"
+    },
+    {
+      "id": "DAE-10",
+      "title": "iOS audio SDK"
+    },
+    {
+      "id": "DAE-11",
+      "title": "Clock discipline and acoustic timing"
+    },
+    {
+      "id": "DAE-12",
+      "title": "Device profiles and route evidence"
+    },
+    {
+      "id": "DAE-13",
+      "title": "Opt-in acoustic evidence adapters"
+    },
+    {
+      "id": "DAE-14",
+      "title": "Qualifying-window and level evaluator"
+    },
+    {
+      "id": "DAE-15",
+      "title": "Reward policy compiler"
+    },
+    {
+      "id": "DAE-16",
+      "title": "Reward ledger and entitlements"
+    },
+    {
+      "id": "DAE-17",
+      "title": "Album checkout and payment adapter"
+    },
+    {
+      "id": "DAE-18",
+      "title": "Splits, refunds and reconciliation"
+    },
+    {
+      "id": "DAE-19",
+      "title": "Sponsor campaigns and delivery accounting"
+    },
+    {
+      "id": "DAE-20",
+      "title": "Anti-abuse and signed evidence"
+    },
+    {
+      "id": "DAE-21",
+      "title": "Observability, cost and roadmap exports"
+    },
+    {
+      "id": "DAE-22",
+      "title": "Security, privacy and operations baseline"
+    },
+    {
+      "id": "DAE-23",
+      "title": "Radio engine release candidate"
+    },
+    {
+      "id": "DAE-24",
+      "title": "Spatial asset and scene contracts"
+    },
+    {
+      "id": "DAE-25",
+      "title": "Portable spatial DSP renderer"
+    },
+    {
+      "id": "DAE-26",
+      "title": "Local coordinator and edge caching"
+    },
+    {
+      "id": "DAE-27",
+      "title": "Safety controls and bounded authority"
+    },
+    {
+      "id": "DAE-28",
+      "title": "Placement and tracking adapters"
+    },
+    {
+      "id": "DAE-29",
+      "title": "Optional live-input transport"
+    },
+    {
+      "id": "DAE-30",
+      "title": "Optional advanced hardware adapters"
+    },
+    {
+      "id": "DAE-31",
+      "title": "Scale, resilience and contract qualification"
+    },
+    {
+      "id": "DAE-32",
+      "title": "Engine stable release and maintainer kit"
+    },
+    {
+      "id": "EP-01",
+      "title": "Repository and application shell"
+    },
+    {
+      "id": "EP-02",
+      "title": "Organizer and collaborator roles"
+    },
+    {
+      "id": "EP-03",
+      "title": "Site and session planning"
+    },
+    {
+      "id": "EP-04",
+      "title": "Permit evidence upload"
+    },
+    {
+      "id": "EP-05",
+      "title": "No-permit-required attestation"
+    },
+    {
+      "id": "EP-06",
+      "title": "Authorization lifecycle and enforcement"
+    },
+    {
+      "id": "EP-07",
+      "title": "Artist calls and lineup agreements"
+    },
+    {
+      "id": "EP-08",
+      "title": "Free event discovery and visitor pages"
+    },
+    {
+      "id": "EP-09",
+      "title": "Session sponsorship"
+    },
+    {
+      "id": "EP-10",
+      "title": "Artist album sales and optional support"
+    },
+    {
+      "id": "EP-11",
+      "title": "Speaker-contributor onboarding"
+    },
+    {
+      "id": "EP-12",
+      "title": "Local coordinator and site setup"
+    },
+    {
+      "id": "EP-13",
+      "title": "Fixed-speaker placement map"
+    },
+    {
+      "id": "EP-14",
+      "title": "Speaker roles and calibration"
+    },
+    {
+      "id": "EP-15",
+      "title": "Stem and composition ingestion"
+    },
+    {
+      "id": "EP-16",
+      "title": "Spatial scene composer"
+    },
+    {
+      "id": "EP-17",
+      "title": "Scene audition and simulation"
+    },
+    {
+      "id": "EP-18",
+      "title": "Static spatial field playback"
+    },
+    {
+      "id": "EP-19",
+      "title": "Dynamic density and contributor changes"
+    },
+    {
+      "id": "EP-20",
+      "title": "Moving-speaker position tracking"
+    },
+    {
+      "id": "EP-21",
+      "title": "Movable physical instrument anchors"
+    },
+    {
+      "id": "EP-22",
+      "title": "Preprogrammed spatial automation"
+    },
+    {
+      "id": "EP-23",
+      "title": "Live scene control and operator handoff"
+    },
+    {
+      "id": "EP-24",
+      "title": "Session contribution rewards"
+    },
+    {
+      "id": "EP-25",
+      "title": "Accessibility and equitable participation"
+    },
+    {
+      "id": "EP-26",
+      "title": "Acoustic monitoring and emergency controls"
+    },
+    {
+      "id": "EP-27",
+      "title": "Weather, access and site operations"
+    },
+    {
+      "id": "EP-28",
+      "title": "Optional live-performance audio"
+    },
+    {
+      "id": "EP-29",
+      "title": "Session settlement and impact reporting"
+    },
+    {
+      "id": "EP-30",
+      "title": "Controlled 10\u201320-speaker pilot"
+    },
+    {
+      "id": "EP-31",
+      "title": "Larger deployment qualification"
+    },
+    {
+      "id": "EP-32",
+      "title": "Public release and producer runbooks"
+    },
+    {
+      "id": "AR-01",
+      "title": "Repository, UX and product boundary"
+    },
+    {
+      "id": "AR-02",
+      "title": "Accounts and artist/label onboarding"
+    },
+    {
+      "id": "AR-03",
+      "title": "Station identity and storefront shell"
+    },
+    {
+      "id": "AR-04",
+      "title": "Catalog and complete-album management"
+    },
+    {
+      "id": "AR-05",
+      "title": "Rights review and publishing checks"
+    },
+    {
+      "id": "AR-06",
+      "title": "Drag-and-drop program sequencing"
+    },
+    {
+      "id": "AR-07",
+      "title": "Artist interstitial studio"
+    },
+    {
+      "id": "AR-08",
+      "title": "Sponsor uploads and placements"
+    },
+    {
+      "id": "AR-09",
+      "title": "Always-on station operations"
+    },
+    {
+      "id": "AR-10",
+      "title": "Guest web player and album pages"
+    },
+    {
+      "id": "AR-11",
+      "title": "Android listening application"
+    },
+    {
+      "id": "AR-12",
+      "title": "iOS listening application"
+    },
+    {
+      "id": "AR-13",
+      "title": "Contribute Sound setup and evidence UI"
+    },
+    {
+      "id": "AR-14",
+      "title": "Artist reward builder"
+    },
+    {
+      "id": "AR-15",
+      "title": "Automatic contribution rewards"
+    },
+    {
+      "id": "AR-16",
+      "title": "Album checkout and payout experience"
+    },
+    {
+      "id": "AR-17",
+      "title": "Fan library and reward downloads"
+    },
+    {
+      "id": "AR-18",
+      "title": "Artist and sponsor reporting"
+    },
+    {
+      "id": "AR-19",
+      "title": "Additional voluntary revenue"
+    },
+    {
+      "id": "AR-20",
+      "title": "Privacy, moderation and complaints"
+    },
+    {
+      "id": "AR-21",
+      "title": "Discovery and station sharing"
+    },
+    {
+      "id": "AR-22",
+      "title": "Accessibility and battery/recovery qualification"
+    },
+    {
+      "id": "AR-23",
+      "title": "Integrated radio pilot"
+    },
+    {
+      "id": "AR-24",
+      "title": "Production rollout and creator runbook"
+    }
+  ]
+}
