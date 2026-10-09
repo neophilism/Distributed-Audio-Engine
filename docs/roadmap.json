@@ -668,7 +668,7 @@
       "gate": "Independent crypto/interoperability review before production",
       "baseline_id": null,
       "origin": "added",
-      "status": "implemented",
+      "status": "merged",
       "github_pr": 2,
       "deployed": false,
       "integration_tested": false,
@@ -2313,5 +2313,13 @@
       "field_validated": false,
       "released": false
     }
-  ]
+  ],
+  "progress": {
+    "audio_engine_merged_roadmap_ids": 13,
+    "audio_engine_implementation_prs": 14,
+    "portable_tests": 57,
+    "production_deployed": false,
+    "field_validated": false,
+    "independent_review": "pending"
+  }
 }
