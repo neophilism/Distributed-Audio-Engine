@@ -1,0 +1,11 @@
+# Endpoint encrypted delivery
+
+`EndpointAttachmentReader.open` accepts a private manifest only after the caller authenticates its E2EESA parent message and verifies current recipient authorization. It validates and snapshots the manifest, imports a non-extractable AES key and never exposes the key to a transport. It does not establish the parent channel or recipient identity.
+
+`readAttachmentRange` fetches only the necessary opaque ciphertext chunks. Each chunk's tag, index, size and manifest context are checked before copying plaintext into the result. It bounds returned data to 64 MiB per call, wipes temporary chunks and suppresses results after cancellation or reader closure. Closing a reader stops future use; JavaScript memory management cannot promise immediate key erasure or recall plaintext already returned to an authorized recipient.
+
+A partial range reports `chunk-authenticated`, not a verified whole-file hash. A complete read additionally verifies the private manifest's plaintext SHA-256 hash and reports `whole-file-verified`. Empty files still authenticate their tag. Long recordings should be separate bounded segments with private endpoint metadata connecting them; whole-file reads over the limit fail rather than allocate an unbounded recording.
+
+`FetchChunkTransport` uses an explicitly configured HTTPS origin and a separate scoped download-capability adapter. It never receives keys, filenames, media types or plaintext hashes. Redirects, cookies, referrers and HTTP cache storage are disabled; response streams are length bounded. The server still observes opaque object identifiers, chunk indices, ciphertext size and timing. A deployed service must implement scoped authorization, storage retention and availability; a successful fetch proves neither output route nor acoustic calibration.
+
+The format follows section 8 of the pinned [E2EESA attachment profile](https://github.com/neophilism/End-To-End-Everywhere-Security-Architecture-Standard/blob/dea8f54cab9130da86a71f36de553766a978daf2/spec/attachments-file-encryption.md). Portable tests cover range selection, malformed ranges, full and empty file verification, substitution, tampering, cancellation, immutable manifests and bounded HTTPS responses. Browser/device and independent security evidence remain pending.
