@@ -7,6 +7,8 @@ import { minorUnits, validateCommerceScope, validateCurrency } from '../commerce
 import type { AccountingStore, AccountingState, ReconciliationAccount, TransferReservation, SplitAgreement } from '../reconciliation.js';
 import { accountStatement, validateAgreement } from '../reconciliation.js';
 import { canonicalJson, identifier, integer, invariant, parseCanonicalJson } from '../validation.js';
+import type { EntitlementStore, EntitlementState, EntitlementGrant } from '../entitlements.js';
+import { validateEntitlementState } from '../entitlements.js';
 
 function exact(value: object, fields: string): void { invariant(value && typeof value === 'object' && Object.keys(value).sort().join(',') === fields.split(',').sort().join(','), 'INVALID_BUSINESS_RECORD'); }
 function digest(value: string): void { invariant(typeof value === 'string' && /^[0-9a-f]{64}$/.test(value), 'INVALID_BUSINESS_DIGEST'); }
@@ -116,6 +118,20 @@ export class SqliteAccountingStore implements AccountingStore {
   transact<T>(scope: IdentityScope, operation: (state: AccountingState) => T): T {
     scope = structuredClone(scope);
     return this.database.transact('accounting', scope, () => ({ agreements: new Map(), accounts: new Map(), transfers: new Map(), events: new Map() }), decodeAccounting, state => ({ agreements: entries(state.agreements), accounts: entries(state.accounts), transfers: entries(state.transfers), events: entries(state.events) }), operation);
+  }
+  close(): void { this.database.close(); }
+}
+export class SqliteEntitlementStore implements EntitlementStore {
+  private readonly database: BusinessDatabase;
+  constructor(path: string) { this.database = new BusinessDatabase(path); }
+  transact<T>(scope: IdentityScope, operation: (state: EntitlementState) => T): T {
+    scope = structuredClone(scope);
+    const decode = (input: unknown): EntitlementState => {
+      invariant(input && typeof input === 'object', 'INVALID_ENTITLEMENT_SNAPSHOT'); exact(input, 'grants,sources');
+      const value = input as Record<string, unknown>, state: EntitlementState = { grants: mapFrom<EntitlementGrant>(value.grants), sources: mapFrom<string>(value.sources) };
+      validateEntitlementState(state, scope); return state;
+    };
+    return this.database.transact('entitlements', scope, () => ({ grants: new Map(), sources: new Map() }), decode, state => ({ grants: entries(state.grants), sources: entries(state.sources) }), operation);
   }
   close(): void { this.database.close(); }
 }
