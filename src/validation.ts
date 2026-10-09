@@ -24,7 +24,7 @@ export function canonicalJson(value: unknown): string {
     seen.add(input);
     let result: string;
     if (Array.isArray(input)) {
-      invariant(Object.keys(input).length === input.length && input.every((_value, index) => Object.hasOwn(input, index)), 'NON_CANONICAL_ARRAY');
+      invariant(Object.keys(input).length === input.length && Object.keys(input).every((key, index) => key === String(index)), 'NON_CANONICAL_ARRAY');
       result = '[' + input.map(visit).join(',') + ']';
     }
     else {

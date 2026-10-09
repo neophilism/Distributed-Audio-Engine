@@ -74,6 +74,6 @@ export class ProgramTimeline {
         }
       }
     }
-    return result.sort((a,b)=>a.atFrame<b.atFrame?-1:a.atFrame>b.atFrame?1:canonicalJson(a.id).localeCompare(canonicalJson(b.id)));
+    return result.sort((a,b)=>a.atFrame<b.atFrame?-1:a.atFrame>b.atFrame?1:a.id<b.id?-1:a.id>b.id?1:0);
   }
 }

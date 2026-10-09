@@ -47,7 +47,7 @@ export class DeviceRegistry {
     invariant(pinnedRootPublicKey.type==='public'&&pinnedRootPublicKey.algorithm.name==='Ed25519','INVALID_ROOT_KEY');
   }
   snapshot() {
-    return {scope:structuredClone(this.scope),sequence:this.sequence,devices:[...this.devices.values()].sort((a,b)=>a.id.localeCompare(b.id)).map(x=>structuredClone(x)),retiredKeyIds:[...this.retiredKeyIds].sort()};
+    return {scope:structuredClone(this.scope),sequence:this.sequence,devices:[...this.devices.values()].sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0).map(x=>structuredClone(x)),retiredKeyIds:[...this.retiredKeyIds].sort()};
   }
   async stateHash(): Promise<string> {
     const hash=await crypto.subtle.digest('SHA-256',encoder.encode(canonicalJson(this.snapshot())));
