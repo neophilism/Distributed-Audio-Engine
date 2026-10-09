@@ -8,3 +8,4 @@ export * from './ingestion.js';
 export * from './rights.js';
 export * from './media.js';
 export * from './timeline.js';
+export * from './spatial.js';
