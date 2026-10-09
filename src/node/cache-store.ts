@@ -9,7 +9,7 @@ export class SqliteCiphertextCacheStore implements CiphertextCacheStore {
   constructor(path: string) {
     invariant(typeof path === 'string' && path.length > 0 && path.length <= 4096 && !path.includes('\0'), 'INVALID_CACHE_DATABASE_PATH');
     this.db = new DatabaseSync(path, { allowExtension: false, enableDoubleQuotedStringLiterals: false });
-    this.db.exec(`PRAGMA journal_mode = WAL; PRAGMA synchronous = FULL; PRAGMA busy_timeout = 5000;
+    this.db.exec(`PRAGMA busy_timeout = 5000; PRAGMA journal_mode = WAL; PRAGMA synchronous = FULL;
       CREATE TABLE IF NOT EXISTS dae_cache_meta (id INTEGER PRIMARY KEY CHECK (id = 1), watermark INTEGER NOT NULL);
       INSERT OR IGNORE INTO dae_cache_meta VALUES (1, 0);
       CREATE TABLE IF NOT EXISTS dae_ciphertext_cache (

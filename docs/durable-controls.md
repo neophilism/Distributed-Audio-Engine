@@ -1,0 +1,11 @@
+# Durable replay checkpoints
+
+The Node-only `SqliteCheckpointStore` implements the core `CheckpointStore` compare-and-set interface. Signed-control scope, epoch and sequence survive process exit and file reopening. Prepared statements and a full-durability immediate transaction atomically read the expected state and advance it; competing writers cannot both accept the same transition. Direct updates also reject epoch rollback, sequence gaps and invalid initial counters.
+
+Only canonical tenant/application/session routing metadata and counters are stored. The schema excludes control ciphertext, signatures, private payloads, media manifests and cryptographic keys. Private content remains within the endpoint E2EE adapters. Cache and checkpoint stores have separate tables and can use separately protected database paths. Filesystem access, reliable time, availability, maintenance/retention and secure backup policy remain deployment responsibilities.
+
+Keep a scoped control stream ordered across its authorized handlers. An accepted counter belongs to the stream, not a specific action; a central dispatcher or handlers sharing the same durable checkpoint must not independently reverify an already-consumed command. Initial clock acquisition and key/channel setup must define appropriate recipient-specific streams and replay recovery without bypassing a gap.
+
+Tests accept a real signed command, reopen the database and reject its replay before accepting the next command. Additional tests cover stale expectations, invalid transitions, scope isolation and two separate Node processes racing one counter. These exercise actual persistence and process concurrency. They do not prove survival of every hardware/filesystem power-loss mode, malicious database rollback, trusted device storage or an independently reviewed deployed recovery process.
+
+Restoring an older checkpoint snapshot can reintroduce previously accepted counters. A release must assess rollback-resistant endpoint storage and an authenticated recovery/new-epoch procedure; operators must not blindly restore an earlier counter file and claim replay safety. Independent release review and native secure-state integration remain gates.
