@@ -21,7 +21,7 @@ export function resolveFrame(program:AudioProgram,elapsedFrames:bigint){
   const loopIndex=elapsedFrames/BigInt(local.totalFrames);const inLoop=Number(elapsedFrames%BigInt(local.totalFrames));
   let start=0;
   for(const clip of local.clips){
-    if(inLoop<start+clip.frames)return{programId:local.id,clipId:clip.id,assetId:clip.assetId,offsetFrames:inLoop-start,loopIndex,sampleRate:local.sampleRate};
+    if(inLoop<start+clip.frames)return{programId:local.id,clipId:clip.id,assetId:clip.assetId,offsetFrames:inLoop-start,clipFrames:clip.frames,remainingFrames:start+clip.frames-inLoop,loopIndex,sampleRate:local.sampleRate};
     start+=clip.frames;
   }
   throw new Error('Unreachable validated timeline position');
@@ -46,7 +46,15 @@ export class ProgramTimeline {
     this.revisions.push({startFrame:effectiveFrame,program});
   }
   targetAt(unixMs:number){
-    const frame=this.frameAt(unixMs);let revision=this.revisions[0]!;
+    return this.targetAtFrame(this.frameAt(unixMs));
+  }
+  timeAtFrame(frame:bigint):number{
+    invariant(frame>=0n&&frame<=BigInt(Number.MAX_SAFE_INTEGER),'FRAME_TIME_OUT_OF_RANGE');
+    const unixMs=this.epochUnixMs+Number(frame)*1000/this.sampleRate;
+    invariant(Number.isFinite(unixMs)&&unixMs<=Number.MAX_SAFE_INTEGER,'FRAME_TIME_OUT_OF_RANGE');return unixMs;
+  }
+  targetAtFrame(frame:bigint){
+    invariant(frame>=0n,'PROGRAM_NOT_STARTED');let revision=this.revisions[0]!;
     for(const candidate of this.revisions){if(candidate.startFrame>frame)break;revision=candidate;}
     return{...resolveFrame(revision.program,frame-revision.startFrame),absoluteFrame:frame,alignment:'timeline-only' as const};
   }

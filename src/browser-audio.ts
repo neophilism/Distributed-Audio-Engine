@@ -30,6 +30,7 @@ export class BrowserAudioSink {
     context.addEventListener('statechange', this.onStateChange);
   }
   get pending(): number { return this.voices.size; }
+  get horizonMs(): number { return this.maxAheadMs; }
   private observe() {
     invariant(!this.closed, 'AUDIO_SINK_CLOSED'); const nowMs = this.nowUnixMs(); integer(nowMs);
     invariant(Number.isFinite(this.context.currentTime) && this.context.currentTime >= 0, 'INVALID_AUDIO_CLOCK');

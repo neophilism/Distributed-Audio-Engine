@@ -14,3 +14,4 @@ export * from './safety.js';
 export * from './placement.js';
 export * from './delivery.js';
 export * from './browser-audio.js';
+export * from './player.js';
