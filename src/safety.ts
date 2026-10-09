@@ -2,6 +2,7 @@ import { finite, integer, invariant } from './validation.js';
 import { ControlVerifier } from './controls.js';
 import type { ControlBody,SignedControl } from './controls.js';
 export interface LeasePolicy {expiresAtMs:number;stopAtMs:number;fadeMs:number;maxLinearGain:number}
+export interface OutputEnvelope { gainCeiling: number; fadeStartMs: number; deadlineMs: number }
 export type ControlPayloadDecoder=(authenticatedBody:ControlBody)=>Promise<unknown>;
 /** An endpoint renders only within both user consent and current signed authority. */
 export class PlaybackAuthority {
@@ -34,11 +35,17 @@ export class PlaybackAuthority {
   setUserGain(gain:number):void{finite(gain,0,this.consentedGainCeiling);this.userGain=gain;}
   mute(muted=true):void{this.muted=muted;}
   leave():void{this.operationGeneration++;this.lease=undefined;this.muted=true;}
+  /** A sink must schedule this deadline into the audio graph, including during timer suspension. */
+  envelopeAt(nowMs:number):OutputEnvelope|null{
+    this.observeTime(nowMs);if(!this.lease||this.muted)return null;
+    const deadlineMs=Math.min(this.lease.expiresAtMs,this.lease.stopAtMs);
+    if(nowMs>=deadlineMs){this.lease=undefined;return null;}
+    const gainCeiling=Math.min(this.userGain,this.lease.maxLinearGain);
+    return gainCeiling>0?{gainCeiling,fadeStartMs:deadlineMs-this.lease.fadeMs,deadlineMs}:null;
+  }
   gainAt(nowMs:number):number{
-    this.observeTime(nowMs);if(!this.lease||this.muted)return 0;
-    const deadline=Math.min(this.lease.expiresAtMs,this.lease.stopAtMs);
-    if(nowMs>=deadline){this.lease=undefined;return 0;}
-    const fade=Math.min(1,(deadline-nowMs)/this.lease.fadeMs);
-    return Math.min(this.userGain,this.lease.maxLinearGain)*fade;
+    const envelope=this.envelopeAt(nowMs);if(!envelope)return 0;
+    const fade=Math.min(1,(envelope.deadlineMs-nowMs)/(envelope.deadlineMs-envelope.fadeStartMs));
+    return envelope.gainCeiling*fade;
   }
 }
