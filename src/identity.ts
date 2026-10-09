@@ -1,7 +1,7 @@
 import { canonicalJson, identifier, integer, invariant } from './validation.js';
 import type { ApplicationScope } from './contracts.js';
 import type { EndpointCryptoKey } from './crypto-types.js';
-export type Permission = 'assets:write' | 'assets:read' | 'rights:write' | 'program:write' | 'control:send';
+export type Permission = 'assets:write' | 'assets:read' | 'rights:write' | 'program:write' | 'control:send' | 'commerce:manage' | 'commerce:buy';
 export interface IdentityScope { tenantId: string; application: ApplicationScope; identityId: string }
 /** A trusted authentication adapter supplies this actor; this is a policy evaluator. */
 export interface AuthenticatedActor extends IdentityScope { deviceId: string; expiresAtMs: number; permissions: readonly Permission[] }
