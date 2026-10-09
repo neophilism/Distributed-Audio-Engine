@@ -281,12 +281,23 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-12",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 26,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "partial": true,
+      "github_prs": [
+        26
+      ],
+      "implementation_scope": "Portable active-route invalidation, challenged authenticated measurement decisions, full-window calibration coverage, immutable conservative intervals and scoped physical-output deduplication. Native output integration, calibrated hardware attribution and independent qualification remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/evidence.test.ts",
+        "fieldClaim": false
+      }
     },
     {
       "id": "DAE-13",
@@ -300,12 +311,23 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-13",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 26,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "partial": true,
+      "github_prs": [
+        26
+      ],
+      "implementation_scope": "Portable active-route invalidation, challenged authenticated measurement decisions, full-window calibration coverage, immutable conservative intervals and scoped physical-output deduplication. Native output integration, calibrated hardware attribution and independent qualification remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/evidence.test.ts",
+        "fieldClaim": false
+      }
     },
     {
       "id": "DAE-14",
@@ -319,12 +341,23 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-14",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 26,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "partial": true,
+      "github_prs": [
+        26
+      ],
+      "implementation_scope": "Portable active-route invalidation, challenged authenticated measurement decisions, full-window calibration coverage, immutable conservative intervals and scoped physical-output deduplication. Native output integration, calibrated hardware attribution and independent qualification remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/evidence.test.ts",
+        "fieldClaim": false
+      }
     },
     {
       "id": "DAE-15",
@@ -338,12 +371,23 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-15",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 26,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "partial": true,
+      "github_prs": [
+        26
+      ],
+      "implementation_scope": "Portable active-route invalidation, challenged authenticated measurement decisions, full-window calibration coverage, immutable conservative intervals and scoped physical-output deduplication. Native output integration, calibrated hardware attribution and independent qualification remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/evidence.test.ts",
+        "fieldClaim": false
+      }
     },
     {
       "id": "DAE-16",
@@ -433,12 +477,23 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-20",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 26,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "partial": true,
+      "github_prs": [
+        26
+      ],
+      "implementation_scope": "Portable active-route invalidation, challenged authenticated measurement decisions, full-window calibration coverage, immutable conservative intervals and scoped physical-output deduplication. Native output integration, calibrated hardware attribution and independent qualification remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/evidence.test.ts",
+        "fieldClaim": false
+      }
     },
     {
       "id": "DAE-21",
@@ -1298,7 +1353,7 @@
     },
     {
       "id": "SS-30",
-      "title": "Controlled 10\u201320-speaker pilot",
+      "title": "Controlled 10–20-speaker pilot",
       "depends_on": [
         "SS-29"
       ],
@@ -2381,14 +2436,19 @@
   "progress": {
     "audio_engine_merged_roadmap_ids": 15,
     "audio_engine_partial_roadmap_ids": [
-      "DAE-11"
+      "DAE-11",
+      "DAE-12",
+      "DAE-13",
+      "DAE-14",
+      "DAE-15",
+      "DAE-20"
     ],
     "audio_engine_implementation_prs": 22,
     "audio_engine_documentation_prs": [
       15,
       24
     ],
-    "portable_tests": 105,
+    "portable_tests": 133,
     "portable_consumer_types_checked": true,
     "packed_consumer_smoke_checked": true,
     "production_deployed": false,
