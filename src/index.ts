@@ -18,3 +18,6 @@ export * from './player.js';
 export * from './cache.js';
 export * from './coordinator.js';
 export * from './clock.js';
+export * from './evidence.js';
+export * from './output-lifecycle.js';
+
