@@ -10,3 +10,4 @@ export * from './media.js';
 export * from './timeline.js';
 export * from './spatial.js';
 export * from './renderer.js';
+export * from './safety.js';
