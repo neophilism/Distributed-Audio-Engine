@@ -35,5 +35,5 @@ No service is deployed, no registry package is published, and no physical speake
 
 ## Output-evidence implementation candidate
 
-The next implementation adds portable active-route invalidation, challenged authenticated measurement decisions and conservative qualifying intervals (partial DAE-12 through DAE-15 and DAE-20). All 114 software tests pass locally after incorporating canonical-input hardening, together with strict typing, source/boundary, roadmap, portable consumer and packed-install checks. Test measurement decisions and decoders are explicit adapters. This supplies neither native route integration nor independent acoustic qualification. See [output evidence](output-evidence.md).
+The next implementation adds portable active-route invalidation, challenged authenticated measurement decisions and conservative qualifying intervals (partial DAE-12 through DAE-15 and DAE-20). All 120 software tests pass locally with merged canonical-input and checkout modules, together with strict typing, source/boundary, roadmap, portable consumer and packed-install checks. Test measurement decisions and decoders are explicit adapters. This supplies neither native route integration nor independent acoustic qualification. See [output evidence](output-evidence.md).
 

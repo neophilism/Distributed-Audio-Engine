@@ -2433,7 +2433,7 @@
       15,
       24
     ],
-    "portable_tests": 114,
+    "portable_tests": 120,
     "portable_consumer_types_checked": true,
     "packed_consumer_smoke_checked": true,
     "production_deployed": false,
