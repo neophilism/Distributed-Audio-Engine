@@ -83,9 +83,11 @@ export class FetchChunkTransport implements CiphertextChunkTransport {
     notAborted(signal);
     const path = [local.application, local.tenantId, 'objects', local.storageObjectId, 'chunks', String(local.chunkIndex)].map(encodeURIComponent).join('/');
     const response = await this.fetcher(`${this.origin}/${path}`, { method: 'GET', headers: { Authorization: `Bearer ${capability}` }, redirect: 'error', credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer', ...(signal ? { signal } : {}) });
-    invariant(response.status === 200 && response.body, 'CIPHERTEXT_FETCH_FAILED');
-    const length = response.headers.get('content-length');
-    if (length !== null) invariant(/^\d+$/.test(length) && Number(length) === local.expectedBytes, 'CIPHERTEXT_LENGTH_MISMATCH');
+    try {
+      invariant(response.status === 200 && response.body, 'CIPHERTEXT_FETCH_FAILED');
+      const length = response.headers.get('content-length');
+      if (length !== null) invariant(/^\d+$/.test(length) && Number(length) === local.expectedBytes, 'CIPHERTEXT_LENGTH_MISMATCH');
+    } catch (error) { await response.body?.cancel().catch(() => undefined); throw error; }
     const body = response.body.getReader(); const out = new Uint8Array(local.expectedBytes); let offset = 0;
     try {
       while (true) {

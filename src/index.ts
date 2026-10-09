@@ -1,4 +1,5 @@
 export * from './contracts.js';
+export type * from './crypto-types.js';
 export * from './validation.js';
 export * from './attachments.js';
 export * from './controls.js';
@@ -13,7 +14,6 @@ export * from './renderer.js';
 export * from './safety.js';
 export * from './placement.js';
 export * from './delivery.js';
-export * from './browser-audio.js';
 export * from './player.js';
 export * from './cache.js';
 export * from './coordinator.js';

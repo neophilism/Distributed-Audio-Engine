@@ -16,6 +16,7 @@ export class CoordinatorMonitor {
   constructor(scope: Scope, private readonly programId: string, private readonly verifier: ControlVerifier, private readonly decode: ControlPayloadDecoder) {
     this.scope = Object.freeze({ ...scope }); identifier(scope.tenantId); identifier(scope.sessionId); identifier(programId);
     invariant(scope.application === 'scenesignal' || scope.application === 'distributed-radio', 'INVALID_APPLICATION');
+    invariant(verifier.matchesScope(scope), 'COORDINATOR_SCOPE_MISMATCH');
   }
   private observe(nowMs: number): void { integer(nowMs, this.lastNowMs); this.lastNowMs = nowMs; }
   async accept(control: SignedControl, nowMs: number): Promise<void> {
