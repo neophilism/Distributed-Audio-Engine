@@ -23,9 +23,13 @@ export function canonicalJson(value: unknown): string {
     invariant(!seen.has(input), 'CYCLIC_VALUE');
     seen.add(input);
     let result: string;
-    if (Array.isArray(input)) result = '[' + input.map(visit).join(',') + ']';
+    if (Array.isArray(input)) {
+      invariant(Object.keys(input).length === input.length && input.every((_value, index) => Object.hasOwn(input, index)), 'NON_CANONICAL_ARRAY');
+      result = '[' + input.map(visit).join(',') + ']';
+    }
     else {
       invariant(Object.getPrototypeOf(input) === Object.prototype || Object.getPrototypeOf(input) === null, 'NON_PLAIN_OBJECT');
+      invariant(Object.values(Object.getOwnPropertyDescriptors(input)).every(d => !d.get && !d.set), 'CANONICAL_ACCESSOR');
       result = '{' + Object.keys(input).sort().map(key => JSON.stringify(key) + ':' + visit((input as Record<string, unknown>)[key])).join(',') + '}';
     }
     seen.delete(input);

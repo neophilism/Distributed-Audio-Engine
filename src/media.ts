@@ -68,5 +68,5 @@ export async function packageRendition(audio:PcmAudio,gain:number,context:Attach
   validateAudio(audio);finite(gain,0,1);
   const derived:PcmAudio={sampleRate:audio.sampleRate,channels:audio.channels,samples:Float32Array.from(audio.samples,x=>x*gain)};
   const encoded=encodePcm16(derived);const encrypted=await encryptAttachment(encoded,{...context,filename,mediaType:'audio/wav'});
-  return{privateMetadata:analyzePcm(derived),...encrypted};
+  return{privateMetadata:analyzePcm(decodeWave(encoded)),...encrypted};
 }

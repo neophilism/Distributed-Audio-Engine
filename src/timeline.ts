@@ -57,9 +57,11 @@ export class ProgramTimeline {
     for(let r=0;r<this.revisions.length;r++){
       const revision=this.revisions[r]!;const end=this.revisions[r+1]?.startFrame;
       if(revision.startFrame>throughFrame)break;
+      if(end!==undefined&&afterFrame>=end)continue;
       const loop=BigInt(revision.program.totalFrames);
       const from=afterFrame>revision.startFrame?afterFrame-revision.startFrame:0n;
-      const first=from/loop;const last=(throughFrame-revision.startFrame)/loop;
+      const limit=end!==undefined&&end<throughFrame?end:throughFrame;
+      const first=from/loop;const last=(limit-revision.startFrame)/loop;
       invariant(last-first<=BigInt(maxMarkers),'MARKER_REPLAY_RANGE_TOO_LARGE');
       for(let cycle=first;cycle<=last;cycle++){
         let position=0;
