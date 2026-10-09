@@ -1,4 +1,4 @@
-import { finite, integer, invariant } from './validation.js';
+import { finite, identifier, integer, invariant } from './validation.js';
 import { validateScene,validateSpeakers } from './spatial.js';
 import type { SpatialScene,SpatialSpeaker } from './spatial.js';
 export interface MixPlan {sceneId:string;revision:number;sourceIds:string[];speakerIds:string[];gains:Record<string,Record<string,number>>;ceilings:Record<string,number>;missingSourceIds:string[]}
@@ -28,6 +28,7 @@ export function createMixPlan(scene:SpatialScene,speakers:readonly SpatialSpeake
 function validatePlan(plan:MixPlan):void{
   invariant(plan.sourceIds.length>0&&plan.sourceIds.length<=256&&plan.speakerIds.length<=4096,'INVALID_MIX_SHAPE');
   invariant(new Set(plan.sourceIds).size===plan.sourceIds.length&&new Set(plan.speakerIds).size===plan.speakerIds.length,'DUPLICATE_MIX_ID');
+  for(const id of [...plan.sourceIds,...plan.speakerIds])identifier(id);
   for(const speaker of plan.speakerIds){
     const row=plan.gains[speaker];invariant(row&&Object.keys(row).length===plan.sourceIds.length,'INVALID_MIX_ROW');finite(plan.ceilings[speaker]!,0,1);
     for(const source of plan.sourceIds){invariant(Object.hasOwn(row,source),'MISSING_SOURCE_GAIN');finite(row[source]!,0,1);}

@@ -29,7 +29,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        1
+      ]
     },
     {
       "id": "DAE-02",
@@ -47,7 +50,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        4
+      ]
     },
     {
       "id": "DAE-03",
@@ -66,7 +72,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        5
+      ]
     },
     {
       "id": "DAE-04",
@@ -85,7 +94,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        6
+      ]
     },
     {
       "id": "DAE-05",
@@ -103,7 +115,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        7
+      ]
     },
     {
       "id": "DAE-06",
@@ -123,7 +138,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        8
+      ]
     },
     {
       "id": "DAE-07",
@@ -141,7 +159,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        9
+      ]
     },
     {
       "id": "DAE-08",
@@ -471,7 +492,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        10
+      ]
     },
     {
       "id": "DAE-25",
@@ -489,7 +513,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        11
+      ]
     },
     {
       "id": "DAE-26",
@@ -527,7 +554,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        12
+      ]
     },
     {
       "id": "DAE-28",
@@ -540,12 +570,15 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-28",
       "origin": "original",
-      "status": "implemented",
+      "status": "merged",
       "github_pr": 13,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        13
+      ]
     },
     {
       "id": "DAE-29",
@@ -635,12 +668,16 @@
       "gate": "Independent crypto/interoperability review before production",
       "baseline_id": null,
       "origin": "added",
-      "status": "merged",
+      "status": "implemented",
       "github_pr": 2,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        2,
+        14
+      ]
     },
     {
       "id": "DAE-34",
@@ -658,7 +695,10 @@
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        3
+      ]
     },
     {
       "id": "SS-01",

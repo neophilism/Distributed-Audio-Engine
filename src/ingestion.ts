@@ -51,7 +51,7 @@ export class IngestionManager {
     invariant(Object.keys(r).sort().join(',')==='chunkDigestsHex,ciphertextSizeBytes,expiresAtMs,scope,storageObjectId,uploadId','UNKNOWN_UPLOAD_FIELDS');
     identifier(r.uploadId);identifier(r.storageObjectId);identifier(r.scope.tenantId);
     integer(r.ciphertextSizeBytes,16,this.limits.maxObjectBytes);integer(r.expiresAtMs,nowMs+1,nowMs+this.limits.maxRetentionMs);
-    invariant(r.chunkDigestsHex.length>=1&&r.chunkDigestsHex.length<=Math.ceil(this.limits.maxObjectBytes/16),'INVALID_CHUNK_COUNT');
+    invariant(r.chunkDigestsHex.length>=1&&r.chunkDigestsHex.length<=4096&&r.chunkDigestsHex.length*16<=r.ciphertextSizeBytes&&r.ciphertextSizeBytes<=r.chunkDigestsHex.length*this.limits.maxChunkBytes,'INVALID_CHUNK_COUNT');
     invariant(r.chunkDigestsHex.every(x=>/^[0-9a-f]{64}$/.test(x)),'INVALID_CHUNK_DIGEST');
     const key=this.key(r.scope,r.uploadId);const existing=this.uploads.get(key);
     if(existing){invariant(canonicalJson(existing.request)===canonicalJson(r)&&existing.state!=='expired','UPLOAD_ID_CONFLICT');return this.progress(r.scope,r.uploadId);}

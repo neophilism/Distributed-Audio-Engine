@@ -43,3 +43,8 @@ test('leaving supersedes any previously accepted but still decrypting lease',asy
   const renewal=authority.renew(await signControl(f.body,f.keys.privateKey),1000);await started;authority.leave();release(policy);
   await assert.rejects(renewal);authority.mute(false);assert.equal(authority.gainAt(1100),0);
 });
+test('leaving also supersedes a lease whose signature verification is still running',async()=>{
+  const f=await fixture(policy);const verifier=new ControlVerifier(scope,new Map([['key',f.keys.publicKey]]),new Set(['lease']),new MemoryCheckpointStore());
+  const authority=new PlaybackAuthority(verifier,async()=>policy,0.8);const signed=await signControl(f.body,f.keys.privateKey);
+  const renewal=authority.renew(signed,1000);authority.leave();await assert.rejects(renewal);authority.mute(false);assert.equal(authority.gainAt(1100),0);
+});

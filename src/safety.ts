@@ -15,7 +15,10 @@ export class PlaybackAuthority {
   async renew(control:SignedControl,nowMs:number):Promise<void>{
     this.observeTime(nowMs);
     invariant(control.body.action==='lease','WRONG_CONTROL_ACTION');
-    const body=await this.controls.accept(control,nowMs);const generation=++this.operationGeneration;const payload=await this.decode(body);
+    const requestGeneration=this.operationGeneration;
+    const body=await this.controls.accept(control,nowMs);
+    invariant(requestGeneration===this.operationGeneration,'AUTHORITY_CONTROL_SUPERSEDED');
+    const generation=++this.operationGeneration;const payload=await this.decode(body);
     invariant(payload&&typeof payload==='object'&&Object.keys(payload).sort().join(',')==='expiresAtMs,fadeMs,maxLinearGain,stopAtMs','INVALID_LEASE_PAYLOAD');
     const policy=structuredClone(payload) as LeasePolicy;
     integer(policy.expiresAtMs,nowMs+1,body.expiresAtMs);integer(policy.stopAtMs,nowMs+1);integer(policy.fadeMs,1,30000);finite(policy.maxLinearGain,0,this.consentedGainCeiling);
