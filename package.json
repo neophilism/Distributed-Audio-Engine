@@ -8,17 +8,21 @@
     "node": ">=24.19.0 <25"
   },
   "exports": {
-    ".": "./dist/src/index.js",
-    "./node": "./dist/src/node/index.js"
+    ".": { "types": "./dist/src/index.d.ts", "import": "./dist/src/index.js", "default": "./dist/src/index.js" },
+    "./browser": { "types": "./dist/src/browser/index.d.ts", "import": "./dist/src/browser/index.js", "default": "./dist/src/browser/index.js" },
+    "./node": { "types": "./dist/src/node/index.d.ts", "import": "./dist/src/node/index.js", "default": "./dist/src/node/index.js" }
   },
   "types": "./dist/src/index.d.ts",
+  "files": ["dist/src", "src", "docs", "README.md", "AGENTS.md"],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc",
     "test": "npm run build && node --test dist/tests/*.test.js",
     "lint": "node scripts/check-source.mjs",
     "roadmap:check": "node scripts/check-roadmap.mjs",
-    "check": "npm run typecheck && npm run lint && npm run roadmap:check && npm test"
+    "portability:check": "tsc --project tests/types/tsconfig.core.json && tsc --project tests/types/tsconfig.browser.json",
+    "package:check": "node scripts/check-package.mjs",
+    "check": "npm run typecheck && npm run lint && npm run roadmap:check && npm test && npm run portability:check && npm run package:check"
   },
   "devDependencies": {
     "@types/node": "24.19.2",

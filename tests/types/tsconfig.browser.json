@@ -1,0 +1,4 @@
+{
+  "compilerOptions": { "noEmit": true, "strict": true, "module": "NodeNext", "target": "ES2023", "lib": ["ES2023", "DOM"], "types": [] },
+  "files": ["browser-consumer.ts"]
+}

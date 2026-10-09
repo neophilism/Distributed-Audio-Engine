@@ -1,5 +1,6 @@
 import { canonicalJson, identifier, integer, invariant } from './validation.js';
 import type { ApplicationScope } from './contracts.js';
+import type { EndpointCryptoKey } from './crypto-types.js';
 export type Permission = 'assets:write' | 'assets:read' | 'rights:write' | 'program:write' | 'control:send';
 export interface IdentityScope { tenantId: string; application: ApplicationScope; identityId: string }
 /** A trusted authentication adapter supplies this actor; this is a policy evaluator. */
@@ -29,7 +30,7 @@ function unhex(input: string): Uint8Array<ArrayBuffer> {
   invariant(typeof input === 'string' && /^[0-9a-f]{128}$/.test(input),'INVALID_IDENTITY_SIGNATURE');
   return Uint8Array.from(input.match(/.{2}/g)!.map(x=>parseInt(x,16)));
 }
-export async function signDeviceEvent(body: DeviceEventBody, rootPrivateKey: CryptoKey): Promise<SignedDeviceEvent> {
+export async function signDeviceEvent(body: DeviceEventBody, rootPrivateKey: EndpointCryptoKey): Promise<SignedDeviceEvent> {
   invariant(rootPrivateKey.type === 'private' && rootPrivateKey.algorithm.name === 'Ed25519','INVALID_ROOT_KEY');
   const snapshot=structuredClone(body);
   return {body:snapshot,rootSignatureHex:hex(new Uint8Array(await crypto.subtle.sign('Ed25519',rootPrivateKey,eventBytes(snapshot))))};
@@ -41,7 +42,7 @@ export class DeviceRegistry {
   private readonly retiredKeyIds = new Set<string>();
   private readonly usedFingerprints = new Set<string>();
   private readonly scope: IdentityScope;
-  constructor(scope: IdentityScope, private readonly pinnedRootPublicKey: CryptoKey) {
+  constructor(scope: IdentityScope, private readonly pinnedRootPublicKey: EndpointCryptoKey) {
     this.scope=structuredClone(scope); identifier(scope.tenantId);identifier(scope.identityId);
     invariant(scope.application==='scenesignal'||scope.application==='distributed-radio','INVALID_APPLICATION');
     invariant(pinnedRootPublicKey.type==='public'&&pinnedRootPublicKey.algorithm.name==='Ed25519','INVALID_ROOT_KEY');

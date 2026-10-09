@@ -1,5 +1,6 @@
 import { canonicalJson, identifier, integer, invariant } from './validation.js';
 import type { ApplicationScope } from './contracts.js';
+import type { EndpointCryptoKey } from './crypto-types.js';
 
 const encoder = new TextEncoder();
 const PROFILE = 'attachment-chunked-aead@0.1.0' as const;
@@ -153,7 +154,7 @@ export async function decryptAttachment(
 /** Endpoint range primitive. The manifest must arrive in an authenticated E2EE parent. */
 export class EndpointAttachmentReader {
   private closed = false;
-  private constructor(private readonly manifest: PrivateManifest, private readonly key: CryptoKey) {}
+  private constructor(private readonly manifest: PrivateManifest, private readonly key: EndpointCryptoKey) {}
 
   static async open(manifest: PrivateManifest, expected: AttachmentContext, maxPlaintextBytes = DEFAULT_OBJECT_LIMIT): Promise<EndpointAttachmentReader> {
     const local = structuredClone(manifest);

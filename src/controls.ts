@@ -1,5 +1,6 @@
 import { canonicalJson, identifier, integer, invariant } from './validation.js';
 import type { Scope } from './contracts.js';
+import type { EndpointCryptoKey, EndpointCryptoKeyPair } from './crypto-types.js';
 const encoder = new TextEncoder();
 export interface ControlBody {
   version: '1.0.0';
@@ -49,10 +50,11 @@ function validateBody(body: ControlBody): void {
 function controlBytes(body: ControlBody): Uint8Array<ArrayBuffer> {
   return encoder.encode(canonicalJson({ domain: 'DAE-CONTROL-v1', body }));
 }
-export async function createControlSigningKey(): Promise<CryptoKeyPair> {
-  return crypto.subtle.generateKey({ name: 'Ed25519' }, false, ['sign','verify']) as Promise<CryptoKeyPair>;
+export async function createControlSigningKey(): Promise<EndpointCryptoKeyPair> {
+  const keys = await crypto.subtle.generateKey({ name: 'Ed25519' }, false, ['sign','verify']);
+  invariant('publicKey' in keys && 'privateKey' in keys, 'INVALID_GENERATED_KEY_PAIR'); return keys;
 }
-export async function signControl(body: ControlBody, privateKey: CryptoKey): Promise<SignedControl> {
+export async function signControl(body: ControlBody, privateKey: EndpointCryptoKey): Promise<SignedControl> {
   const snapshot = structuredClone(body); validateBody(snapshot);
   invariant(privateKey.type === 'private' && privateKey.algorithm.name === 'Ed25519', 'INVALID_SIGNING_KEY');
   const signature = new Uint8Array(await crypto.subtle.sign('Ed25519', privateKey, controlBytes(snapshot)));
@@ -61,12 +63,14 @@ export async function signControl(body: ControlBody, privateKey: CryptoKey): Pro
 /** Verifies integrity/authority only. Never decrypt or execute a payload here. */
 export class ControlVerifier {
   private readonly scope: Scope;
-  private readonly signers: ReadonlyMap<string, CryptoKey>;
+  private readonly signers: ReadonlyMap<string, EndpointCryptoKey>;
   private readonly actions: ReadonlySet<string>;
-  constructor(scope: Scope, signers: ReadonlyMap<string, CryptoKey>, actions: ReadonlySet<string>, private readonly checkpoints: CheckpointStore, private readonly maxLifetimeMs = 60_000) {
+  constructor(scope: Scope, signers: ReadonlyMap<string, EndpointCryptoKey>, actions: ReadonlySet<string>, private readonly checkpoints: CheckpointStore, private readonly maxLifetimeMs = 60_000) {
     this.scope = structuredClone(scope); this.signers = new Map(signers); this.actions = new Set(actions);
     identifier(scope.tenantId); identifier(scope.sessionId); integer(maxLifetimeMs, 1, 300_000);
+    invariant(scope.application === 'scenesignal' || scope.application === 'distributed-radio', 'INVALID_APPLICATION');
   }
+  matchesScope(scope: Scope): boolean { return canonicalJson(scope) === canonicalJson(this.scope); }
   async accept(control: SignedControl, nowMs: number): Promise<ControlBody> {
     integer(nowMs);
     const envelope = structuredClone(control);

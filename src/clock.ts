@@ -29,6 +29,7 @@ export class DisciplinedClock {
   constructor(scope: Scope, private readonly verifier: ControlVerifier, private readonly decode: ControlPayloadDecoder, private readonly monotonicNowMs: () => number, policy: Partial<ClockPolicy> = {}) {
     identifier(scope.tenantId); identifier(scope.sessionId); this.scope = { ...scope }; this.policy = { ...defaultPolicy, ...policy };
     invariant(scope.application === 'scenesignal' || scope.application === 'distributed-radio', 'INVALID_APPLICATION');
+    invariant(verifier.matchesScope(scope), 'CLOCK_SCOPE_MISMATCH');
     const p = this.policy; integer(p.maxRoundTripMs, 1, 5000); integer(p.maxSampleAgeMs, p.maxRoundTripMs, 60000);
     finite(p.maxDriftPpm, 1, 1000); finite(p.localResolutionMs, 0.001, 100); finite(p.maxServerUncertaintyMs, 0, 1000); integer(p.minSamples, 1, 8);
   }

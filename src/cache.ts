@@ -102,11 +102,15 @@ export class CachingChunkTransport implements CiphertextChunkTransport {
     if (!entry) {
       const controller = new AbortController();
       const promise = (async () => {
-        const result = await this.upstream.read(local, controller.signal);
-        invariant(!this.closed && !controller.signal.aborted, 'CACHE_TRANSPORT_CLOSED_OR_ABORTED');
-        invariant(result.length === local.expectedBytes, 'CIPHERTEXT_LENGTH_MISMATCH'); const snapshot = Uint8Array.from(result);
-        const now = this.nowUnixMs(); if (snapshot.length <= this.cache.maxEntryBytes) this.cache.put(local, snapshot, now, now + this.retentionMs);
-        return snapshot;
+        let cancel!: () => void;
+        const cancellation = new Promise<never>((_resolve, reject) => { cancel = () => reject(new Error('CACHE_TRANSPORT_CLOSED_OR_ABORTED')); controller.signal.addEventListener('abort', cancel, { once: true }); });
+        try {
+          const result = await Promise.race([this.upstream.read(local, controller.signal), cancellation]);
+          invariant(!this.closed && !controller.signal.aborted, 'CACHE_TRANSPORT_CLOSED_OR_ABORTED');
+          invariant(result.length === local.expectedBytes, 'CIPHERTEXT_LENGTH_MISMATCH'); const snapshot = Uint8Array.from(result);
+          const now = this.nowUnixMs(); if (snapshot.length <= this.cache.maxEntryBytes) this.cache.put(local, snapshot, now, now + this.retentionMs);
+          return snapshot;
+        } finally { controller.signal.removeEventListener('abort', cancel); }
       })();
       entry = { controller, promise, waiters: 0 }; this.pending.set(key, entry);
       const created = entry; const cleanup = () => { if (this.pending.get(key) === created) this.pending.delete(key); };

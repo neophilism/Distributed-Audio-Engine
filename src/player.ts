@@ -63,7 +63,7 @@ export class EndpointProgramPlayer {
   private now(): number {
     const now = this.options.nowUnixMs(); integer(now, this.lastNowMs); this.lastNowMs = now; return now;
   }
-  private clearCache(): void { this.cached?.audio.samples.fill(0); this.cached = undefined; }
+  private clearCache(): void { if (this.cached) { this.cached.audio.samples.fill(0); this.cached.descriptor.manifest.attachmentKeyHex = ''; } this.cached = undefined; }
   private check(generation: number, signal: AbortSignal): void { invariant(!this.closed && !signal.aborted && this.generation === generation, 'PLAYBACK_OPERATION_SUPERSEDED'); }
   private target(nowMs: number) {
     const current = this.options.timeline.frameAt(nowMs + this.leadMs);
@@ -72,6 +72,7 @@ export class EndpointProgramPlayer {
   private validateDescriptor(descriptor: EndpointMediaAsset, assetId: string, nowMs: number): void {
     invariant(Object.keys(descriptor).sort().join(',') === 'assetId,authorizationValidUntilMs,channels,context,frames,manifest,sampleRate', 'INVALID_ASSET_DESCRIPTOR');
     invariant(descriptor.assetId === assetId && descriptor.context.tenantId === this.options.scope.tenantId && descriptor.context.application === this.options.scope.application, 'ASSET_SCOPE_MISMATCH');
+    invariant(Object.keys(descriptor.context).sort().join(',') === 'application,parentMessageId,tenantId', 'INVALID_ASSET_CONTEXT');
     identifier(descriptor.context.parentMessageId); integer(descriptor.sampleRate, 8000, 192000); integer(descriptor.channels, 1, 8); integer(descriptor.frames, 1);
     integer(descriptor.authorizationValidUntilMs, nowMs + 1, nowMs + 300000);
     invariant(descriptor.manifest.mediaType === 'audio/wav', 'UNSUPPORTED_ENDPOINT_CODEC');
@@ -104,6 +105,8 @@ export class EndpointProgramPlayer {
         const metadata = analyzePcm(decoded);
         invariant(metadata.sampleRate === descriptor.sampleRate && metadata.channels === descriptor.channels && metadata.frames === descriptor.frames, 'ASSET_METADATA_MISMATCH');
         this.cached = { descriptor, audio: decoded }; decoded = undefined;
+        // The copied raw key is no longer needed once this bounded asset has been decoded.
+        descriptor.manifest.attachmentKeyHex = '';
       }
       const beforePermission = this.now(); const candidate = this.target(beforePermission);
       if (candidate.assetId !== this.cached.descriptor.assetId) { this.clearCache(); return { status: 'retry-current-target' }; }

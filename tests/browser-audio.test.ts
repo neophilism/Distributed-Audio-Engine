@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BrowserAudioSink, ControlVerifier, createControlSigningKey, MemoryCheckpointStore, PlaybackAuthority, signControl } from '../src/index.js';
+import { ControlVerifier, createControlSigningKey, MemoryCheckpointStore, PlaybackAuthority, signControl } from '../src/index.js';
+import { BrowserAudioSink } from '../src/browser/index.js';
 import type { ControlBody, LeasePolicy } from '../src/index.js';
 class FakeBuffer {
   readonly data: Float32Array[];
