@@ -32,8 +32,3 @@ All 105 tests pass, including actual file reopen and separate-process checkpoint
 | [#23](https://github.com/neophilism/Distributed-Audio-Engine/pull/23) | Portable pipeline, consumer packages and cancellation hardening |
 
 No service is deployed, no registry package is published, and no physical speaker trial or independent release certification has been performed. SceneSignal, Distributed Radio Engine and TrackZero remain in planning as requested. Android/iOS SDK work and the remaining evidence/entitlement/commerce/operations modules continue within the audio engine before dependent application implementation.
-
-## Output-evidence implementation candidate
-
-The next implementation adds portable active-route invalidation, challenged authenticated measurement decisions and conservative qualifying intervals (partial DAE-12 through DAE-15 and DAE-20). All 120 software tests pass locally with merged canonical-input and checkout modules, together with strict typing, source/boundary, roadmap, portable consumer and packed-install checks. Test measurement decisions and decoders are explicit adapters. This supplies neither native route integration nor independent acoustic qualification. See [output evidence](output-evidence.md).
-

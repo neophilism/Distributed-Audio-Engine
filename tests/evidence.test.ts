@@ -1,7 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ControlVerifier, MemoryCheckpointStore, OutputEvidenceEndpoint, createControlSigningKey, signControl, evaluateContribution, contributionCoverage, OutputLifecycle } from '../src/index.js';
-import type { AcousticEvidence, ContributionBand, ControlBody, AcceptedAcousticEvidence } from '../src/index.js';
+import { ControlVerifier, MemoryCheckpointStore, createControlSigningKey, signControl } from '../src/controls.js';
+import { OutputEvidenceEndpoint, evaluateContribution, contributionCoverage } from '../src/evidence.js';
+import { OutputLifecycle } from '../src/output-lifecycle.js';
+import type { AcousticEvidence, ContributionBand, AcceptedAcousticEvidence } from '../src/evidence.js';
+import type { ControlBody } from '../src/controls.js';
 const scope = { tenantId: 't', application: 'distributed-radio' as const, sessionId: 's' };
 const route = { endpointId: 'e', routeId: 'r', outputId: 'o', kind: 'bluetooth-speaker' as const, generation: 1 };
 const policy: ContributionBand = { version: 'v1', geometryId: 'reference-1m', measurementWindowMs: 1000, minimumDbA: 60, safetyCeilingDbA: 80, maximumUncertaintyDb: 3, maximumClockUncertaintyMs: 20, allowedKinds: ['bluetooth-speaker'] };
