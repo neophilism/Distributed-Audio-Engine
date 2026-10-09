@@ -8,7 +8,8 @@
     "node": ">=24.19.0 <25"
   },
   "exports": {
-    ".": "./dist/src/index.js"
+    ".": "./dist/src/index.js",
+    "./node": "./dist/src/node/index.js"
   },
   "types": "./dist/src/index.d.ts",
   "scripts": {

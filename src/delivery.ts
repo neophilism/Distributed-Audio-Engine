@@ -12,6 +12,7 @@ export interface ChunkRequest {
 }
 export interface CiphertextChunkTransport {
   read(request: ChunkRequest, signal?: AbortSignal): Promise<Uint8Array>;
+  invalidate?(request: ChunkRequest): Promise<void>;
 }
 export function validateChunkRequest(request: ChunkRequest): void {
   invariant(Object.keys(request).sort().join(',') === 'application,chunkIndex,expectedBytes,storageObjectId,tenantId', 'INVALID_CHUNK_REQUEST');
@@ -43,7 +44,9 @@ export async function readAttachmentRange(
       const request: ChunkRequest = { tenantId: reader.tenantId, application: reader.application, storageObjectId: reader.storageObjectId, chunkIndex: index, expectedBytes: reader.ciphertextLength(index) };
       const ciphertext = await transport.read(request, options.signal);
       notAborted(options.signal);
-      const chunk = await reader.decryptChunk(index, ciphertext);
+      let chunk: Uint8Array;
+      try { chunk = await reader.decryptChunk(index, ciphertext); }
+      catch (error) { await transport.invalidate?.(request); throw error; }
       try {
         notAborted(options.signal);
         const base = index * reader.chunkSizeBytes;
