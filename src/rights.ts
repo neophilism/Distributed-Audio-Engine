@@ -1,4 +1,4 @@
-import { identifier, integer, invariant } from './validation.js';
+import { canonicalJson, identifier, integer, invariant } from './validation.js';
 import type { IdentityScope, AuthenticatedActor } from './identity.js';
 import { requireAccess } from './identity.js';
 export type PermittedUse='stream'|'public-playback'|'cache'|'download'|'sale'|'derive-spatial';
@@ -15,7 +15,12 @@ const layers=new Set<RightsLayer>(['recording','composition','spoken-work','artw
 export class RightsCatalog {
   private readonly grants=new Map<string,RightsGrant>();
   private readonly scope:IdentityScope;
-  constructor(scope:IdentityScope){this.scope=structuredClone(scope);}
+  constructor(scope:IdentityScope){
+    identifier(scope.tenantId); identifier(scope.identityId);
+    invariant(scope.application==='scenesignal'||scope.application==='distributed-radio','INVALID_APPLICATION');
+    this.scope=structuredClone(scope);
+  }
+  matchesScope(scope:IdentityScope):boolean{return canonicalJson(scope)===canonicalJson(this.scope);}
   add(actor:AuthenticatedActor,grant:RightsGrant,nowMs:number):void{
     requireAccess(actor,this.scope,'rights:write',nowMs);const g=structuredClone(grant);
     invariant(Object.keys(g).sort().join(',')==='assetId,authorizationEvidenceRef,id,layer,revoked,territories,uses,validFromMs,validUntilMs','UNKNOWN_RIGHTS_FIELDS');
