@@ -28,8 +28,14 @@ The attachment codec handles bounded objects (64 MiB default, configurable up to
 
 `CoordinatorMonitor` accepts primary-signed program/scoped leases, and `CoordinatorChunkTransport` uses configured local ciphertext transports with bounded fallback. `CachingChunkTransport` and `EndpointCiphertextCache` cache only opaque ciphertext. Local hosts/caches never acquire keys or playback authority; the same canonical timeline drives either transport path.
 
+## Output evidence and authorized business facts
+
+The `/evidence` and `/output-lifecycle` entries supply partial portable route/measurement foundations. Qualified intervals require challenged authenticated verifier decisions, whole-window calibration and conservative clock/level bands. Endpoint-local immutable receipts cannot be reconstructed from a JSON qualification flag. See [output evidence](output-evidence.md).
+
+`CheckoutEngine`, `ReconciliationEngine` and `EntitlementLedger` are portable core APIs. SQLite purchase/accounting/entitlement stores are in `/node`. They process intentionally authorized opaque business facts; they never store or transmit media keys or private manifests. A settled purchase or entitlement does not by itself authorize a recipient key delivery. Read [commerce](commerce.md), [entitlements](entitlements.md) and the [component/data-flow inventory](security-flow-inventory.json) before integration.
+
 ## Dependencies still requiring integration
 
-Native Android/iOS audio/measurement/secure-state adapters; actual E2EESA pairwise/group key distribution and control channels; authenticated root/recovery storage; durable upload state/object-store adapters; compressed-media/resampling adapters; deployed retention/restore drills and LAN provisioning; entitlement/commerce adapters; full acoustic evidence integration; physical-device trials; independent release review and client-update assurance.
+Native Android/iOS audio/measurement/secure-state adapters; actual E2EESA pairwise/group key distribution and control channels; authenticated root/recovery storage; durable upload state/object-store adapters; compressed-media/resampling adapters; deployed retention/restore drills and LAN provisioning; actual signed payment-provider/dispatch adapters and complete-product/refund fulfillment; full acoustic evidence integration; physical-device trials; independent release review and client-update assurance.
 
 Keep work moving through these separately recorded packages. Nothing in a portable unit test supplies independent field evidence or an upstream certification claim.

@@ -13,3 +13,7 @@ No cloud cost, production deployment, actual hardware result, independent crypto
 Ciphertext relay retention is bounded to 30 days under the pinned server profile. Long-term fan/artist archives require an independently assessed endpoint-controlled backup profile. Expiration does not recall content already delivered to a listener.
 
 The SQLite cache schema persists only opaque ciphertext and scope/object/access/retention metadata. The checkpoint schema persists only canonical routing scope and replay counters. Neither accepts a private manifest, content key, decrypted control payload or decoded PCM column. File-reopen and process-concurrency tests exercise local persistence; malicious checkpoint snapshot rollback, replica deletion and deployed recovery still need separate assessment.
+
+## Authorized business endpoints
+
+Purchase, accounting and entitlement processors are explicitly authorized recipients of the opaque facts needed for those operations, distinct from ciphertext-only media relays. Their SQLite stores enforce business-field whitelists and private POSIX files. Required authenticated transport, disk/backup encryption, retention/deletion, provider verification and deployed restore/rollback controls remain integration gates. These facts never expand media recipients or convey manifests/keys. The [component/data-flow inventory](security-flow-inventory.json) records the exact current boundaries without asserting product conformance.
