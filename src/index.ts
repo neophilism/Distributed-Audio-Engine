@@ -7,3 +7,4 @@ export * from './identity.js';
 export * from './ingestion.js';
 export * from './rights.js';
 export * from './media.js';
+export * from './timeline.js';
