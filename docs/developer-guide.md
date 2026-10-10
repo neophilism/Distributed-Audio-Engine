@@ -16,6 +16,8 @@ The attachment codec handles bounded objects (64 MiB default, configurable up to
 
 `AndroidAudioSink` from `/android` binds the same player and signed authority to a trusted Android host. The host must source active routes from AudioManager, copy bounded PCM synchronously into AudioTrack-owned storage, enforce monotonic fade/stop deadlines and report focus/lifecycle/output changes. Review the [Android host contract](android-playback.md). Portable bridge tests are not real-device qualification.
 
+`IOSAudioSink` from `/ios` applies the same fail-closed boundary to an AVAudioSession/AVAudioEngine host. The host supplies current-route generations, copies PCM before return, enforces host-time deadlines and reports interruptions, route loss, media-services resets and engine state. Review the [iOS host contract](ios-playback.md). Host-double tests do not qualify a device.
+
 ## Timeline and spatial flow
 
 `compileProgram` and `ProgramTimeline` give a canonical sample clock, exact clip/loop positions and transition markers. Clock/network alignment does not imply calibrated speaker-emission alignment. Native sinks and route-specific timing remain next-stage work.
@@ -38,6 +40,6 @@ The `/evidence` and `/output-lifecycle` entries supply partial portable route/me
 
 ## Dependencies still requiring integration
 
-A real Android AudioManager/AudioTrack host and device qualification; native iOS audio/measurement/secure-state adapters; actual E2EESA pairwise/group key distribution and control channels; authenticated root/recovery storage; durable upload state/object-store adapters; compressed-media/resampling adapters; deployed retention/restore drills and LAN provisioning; actual signed payment-provider/dispatch adapters and complete-product/refund fulfillment; full acoustic evidence integration; physical-device trials; independent release review and client-update assurance.
+Real Android AudioManager/AudioTrack and iOS AVAudioSession/AVAudioEngine hosts plus device qualification; native measurement/secure-state adapters; actual E2EESA pairwise/group key distribution and control channels; authenticated root/recovery storage; durable upload state/object-store adapters; compressed-media/resampling adapters; deployed retention/restore drills and LAN provisioning; actual signed payment-provider/dispatch adapters and complete-product/refund fulfillment; full acoustic evidence integration; physical-device trials; independent release review and client-update assurance.
 
 Keep work moving through these separately recorded packages. Nothing in a portable unit test supplies independent field evidence or an upstream certification claim.
