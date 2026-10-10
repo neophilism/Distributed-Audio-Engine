@@ -21,3 +21,4 @@ export * from './clock.js';
 export * from './commerce.js';
 export * from './reconciliation.js';
 export * from './entitlements.js';
+export * from './sponsorship.js';
