@@ -15,7 +15,7 @@ try {
   await run('npm', ['install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', join(dir, packed.filename)], { cwd: consumer, maxBuffer: 1024 * 1024 });
   await writeFile(join(consumer, 'smoke.mjs'), `
     import assert from 'node:assert/strict';
-    import { compileProgram, ProgramTimeline, encryptAttachment, EndpointAttachmentReader, readAttachmentRange, canonicalJson, CheckoutEngine, ReconciliationEngine, EntitlementLedger } from '@neophilism/distributed-audio-engine';
+    import { compileProgram, ProgramTimeline, encryptAttachment, EndpointAttachmentReader, readAttachmentRange, canonicalJson, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance } from '@neophilism/distributed-audio-engine';
     import { BrowserAudioSink } from '@neophilism/distributed-audio-engine/browser';
     import { AndroidAudioSink } from '@neophilism/distributed-audio-engine/android';
     import { IOSAudioSink } from '@neophilism/distributed-audio-engine/ios';
@@ -31,7 +31,7 @@ try {
     assert.equal(timeline.targetAt(250).offsetFrames, 2000); assert.equal(typeof BrowserAudioSink, 'function');
     const checkpoints = new SqliteCheckpointStore(':memory:');
     assert.equal(checkpoints.compareAndSet(canonicalJson({ tenantId: 'tenant', application: 'distributed-radio', sessionId: 'session' }), undefined, { epoch: 1, sequence: 1 }), true); checkpoints.close();
-    for (const value of [CheckoutEngine, ReconciliationEngine, OutputEvidenceEndpoint, OutputLifecycle, AndroidAudioSink, IOSAudioSink]) assert.equal(typeof value, 'function');
+    for (const value of [CheckoutEngine, ReconciliationEngine, OperationsEvidenceAcceptor, assessOperationsAssurance, OutputEvidenceEndpoint, OutputLifecycle, AndroidAudioSink, IOSAudioSink]) assert.equal(typeof value, 'function');
     const scope = { tenantId: 'tenant', application: 'distributed-radio', identityId: 'issuer' };
     const actor = { ...scope, deviceId: 'device', expiresAtMs: 1000, permissions: ['entitlements:manage'] };
     const grants = new SqliteEntitlementStore(':memory:'), ledger = new EntitlementLedger(scope, grants);

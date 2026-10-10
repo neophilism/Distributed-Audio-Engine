@@ -23,6 +23,7 @@ export * from './reconciliation.js';
 export * from './entitlements.js';
 export * from './sponsorship.js';
 export * from './observability.js';
+export * from './operations.js';
 
 export * from './android-audio.js';
 
