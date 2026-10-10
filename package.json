@@ -37,6 +37,11 @@
       "types": "./dist/src/android/index.d.ts",
       "import": "./dist/src/android/index.js",
       "default": "./dist/src/android/index.js"
+    },
+    "./ios": {
+      "types": "./dist/src/ios/index.d.ts",
+      "import": "./dist/src/ios/index.js",
+      "default": "./dist/src/ios/index.js"
     }
   },
   "types": "./dist/src/index.d.ts",
