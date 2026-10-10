@@ -32,6 +32,11 @@
       "types": "./dist/src/output-lifecycle.d.ts",
       "import": "./dist/src/output-lifecycle.js",
       "default": "./dist/src/output-lifecycle.js"
+    },
+    "./android": {
+      "types": "./dist/src/android/index.d.ts",
+      "import": "./dist/src/android/index.js",
+      "default": "./dist/src/android/index.js"
     }
   },
   "types": "./dist/src/index.d.ts",

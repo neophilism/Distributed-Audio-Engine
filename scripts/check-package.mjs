@@ -10,13 +10,14 @@ try {
   const [packed] = JSON.parse(stdout);
   const paths = new Set(packed.files.map(file => file.path));
   for (const path of paths) if (/(^|\/)(?:node_modules|tests|\.env(?:\..*)?|\.git)(\/|$)|\.(?:sqlite|tgz)$/.test(path)) throw new Error(`Unexpected package file: ${path}`);
-  for (const path of ['dist/src/index.js', 'dist/src/index.d.ts', 'dist/src/browser/index.js', 'dist/src/browser/index.d.ts', 'dist/src/node/index.js', 'dist/src/node/index.d.ts', 'src/index.ts', 'docs/security-baseline.json']) if (!paths.has(path)) throw new Error(`Missing package file: ${path}`);
+  for (const path of ['dist/src/index.js', 'dist/src/index.d.ts', 'dist/src/browser/index.js', 'dist/src/browser/index.d.ts', 'dist/src/android/index.js', 'dist/src/android/index.d.ts', 'dist/src/node/index.js', 'dist/src/node/index.d.ts', 'src/index.ts', 'docs/security-baseline.json']) if (!paths.has(path)) throw new Error(`Missing package file: ${path}`);
   const consumer = join(dir, 'consumer'); await mkdir(consumer); await writeFile(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
   await run('npm', ['install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', join(dir, packed.filename)], { cwd: consumer, maxBuffer: 1024 * 1024 });
   await writeFile(join(consumer, 'smoke.mjs'), `
     import assert from 'node:assert/strict';
     import { compileProgram, ProgramTimeline, encryptAttachment, EndpointAttachmentReader, readAttachmentRange, canonicalJson, CheckoutEngine, ReconciliationEngine, EntitlementLedger } from '@neophilism/distributed-audio-engine';
     import { BrowserAudioSink } from '@neophilism/distributed-audio-engine/browser';
+    import { AndroidAudioSink } from '@neophilism/distributed-audio-engine/android';
     import { SqliteCheckpointStore, SqliteCommerceStore, SqliteAccountingStore, SqliteEntitlementStore } from '@neophilism/distributed-audio-engine/node';
     import { OutputEvidenceEndpoint } from '@neophilism/distributed-audio-engine/evidence';
     import { OutputLifecycle } from '@neophilism/distributed-audio-engine/output-lifecycle';
@@ -29,7 +30,7 @@ try {
     assert.equal(timeline.targetAt(250).offsetFrames, 2000); assert.equal(typeof BrowserAudioSink, 'function');
     const checkpoints = new SqliteCheckpointStore(':memory:');
     assert.equal(checkpoints.compareAndSet(canonicalJson({ tenantId: 'tenant', application: 'distributed-radio', sessionId: 'session' }), undefined, { epoch: 1, sequence: 1 }), true); checkpoints.close();
-    for (const value of [CheckoutEngine, ReconciliationEngine, OutputEvidenceEndpoint, OutputLifecycle]) assert.equal(typeof value, 'function');
+    for (const value of [CheckoutEngine, ReconciliationEngine, OutputEvidenceEndpoint, OutputLifecycle, AndroidAudioSink]) assert.equal(typeof value, 'function');
     const scope = { tenantId: 'tenant', application: 'distributed-radio', identityId: 'issuer' };
     const actor = { ...scope, deviceId: 'device', expiresAtMs: 1000, permissions: ['entitlements:manage'] };
     const grants = new SqliteEntitlementStore(':memory:'), ledger = new EntitlementLedger(scope, grants);

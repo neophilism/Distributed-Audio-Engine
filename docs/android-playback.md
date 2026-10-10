@@ -1,0 +1,11 @@
+# Android endpoint audio host binding (DAE-09 partial)
+
+Import `AndroidAudioSink` from `@neophilism/distributed-audio-engine/android`. This module connects the portable current-position player and signed playback authority to a trusted Android host bridge. It is a bounded SDK contract, not evidence that any Android device, output route or acoustic path has been qualified.
+
+The host implementation must obtain active routes from `AudioManager` callbacks, maintain a strictly increasing route generation, and drive PCM through an `AudioTrack` configured for the reported sample rate and channel count. Paired-device lists, user-visible names and cached Bluetooth metadata are not active-route evidence. The bridge must synchronously copy each request into bounded native-owned storage before `enqueue` returns because the SDK immediately wipes its temporary PCM view.
+
+Scheduling translates the Unix timeline target onto Android's monotonic clock, rejects clock rollback, enforces exact sample-rate compatibility, bounds channels and queued samples, and rejects overlapping output. Signed authority supplies the gain ceiling, fade start and hard stop delivered to the native audio graph. Renewals can reduce queued output but never extend its deadline. The native implementation must apply those deadlines independently of JavaScript timers and report completion so accounting is released.
+
+Audio-focus loss, calls, becoming-noisy events, unsafe app suspension, service destruction, route changes and disconnects invalidate queued output before a new route can become active. A lock screen is not automatically success or failure: a foreground playback service may continue only when its actual lifecycle, focus and output state remain valid under the selected product policy. Reconnect requires a new route generation and timeline join; stale buffers are never resumed.
+
+Portable tests exercise bridge copying, time translation, route generations, focus/lifecycle invalidation, authority contraction, queue bounds and fail-closed bridge errors. They use a host double. Before DAE-09 can be complete, a real Kotlin/Android bridge and supported-device matrix must cover interruptions, lock screen, output changes, reconnects, AudioTrack underruns, process/service destruction and OS-version behavior. No hardware, field, deployment or release state is asserted here.
