@@ -1,4 +1,4 @@
-import { compileProgram, EndpointProgramPlayer, ProgramTimeline, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance } from '@neophilism/distributed-audio-engine';
+import { compileProgram, EndpointProgramPlayer, ProgramTimeline, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, SettledPurchaseEntitlementIssuer } from '@neophilism/distributed-audio-engine';
 import type { CiphertextChunkTransport } from '@neophilism/distributed-audio-engine';
 import { SqliteCheckpointStore, SqliteEntitlementStore } from '@neophilism/distributed-audio-engine/node';
 import { OutputEvidenceEndpoint } from '@neophilism/distributed-audio-engine/evidence';
@@ -7,4 +7,4 @@ import { AndroidAudioSink } from '@neophilism/distributed-audio-engine/android';
 import { IOSAudioSink } from '@neophilism/distributed-audio-engine/ios';
 const timeline = new ProgramTimeline(0, compileProgram('program', 8000, [{ id: 'clip', assetId: 'asset', frames: 8000, markerAfter: null }]));
 declare const transport: CiphertextChunkTransport;
-void [timeline, transport, EndpointProgramPlayer, SqliteCheckpointStore, SqliteEntitlementStore, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, OutputEvidenceEndpoint, OutputLifecycle, AndroidAudioSink, IOSAudioSink];
+void [timeline, transport, EndpointProgramPlayer, SqliteCheckpointStore, SqliteEntitlementStore, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, SettledPurchaseEntitlementIssuer, OutputEvidenceEndpoint, OutputLifecycle, AndroidAudioSink, IOSAudioSink];
