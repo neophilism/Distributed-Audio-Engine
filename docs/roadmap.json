@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-09-v4",
+  "version": "2026-10-10-v5",
   "original_baseline_total": 88,
   "total": 120,
   "counts": {
@@ -496,12 +496,24 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-19",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "merged",
+      "github_pr": 32,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        32
+      ],
+      "implementation_scope": "Portable scoped sponsor campaigns and authenticated delivery accounting with quotas, replay deduplication, separate qualified-output references and no people inference.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-verifier-adapter",
+        "tests": "tests/sponsorship.test.ts",
+        "providerAttestation": false,
+        "physicalOutput": false,
+        "fieldEvidence": false
+      }
     },
     {
       "id": "DAE-20",
@@ -548,12 +560,23 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-21",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "merged",
+      "github_pr": 34,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        34
+      ],
+      "implementation_scope": "Portable fail-unknown operational snapshots with freshness-aware health, nullable totals, bounded source fields and currency-separated cost aggregation.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-observation-adapter",
+        "tests": "tests/observability.test.ts",
+        "hostedTelemetry": false,
+        "fieldEvidence": false
+      }
     },
     {
       "id": "DAE-22",
