@@ -18,6 +18,8 @@ All 145 software tests pass. Strict typecheck, source/boundary checks, roadmap D
 | Checkout | Immutable complete-product quotes, all-asset rights, exact money, provider idempotency, verified-event seam and SQLite purchase state | Real provider signature/API adapter, sandbox and complete-product fulfillment |
 | Reconciliation | Exact splits, cumulative refunds, visible liabilities/failures, atomic transfer reservations and SQLite accounting | Actual transfer/refund dispatch, provider sandbox, recovery and production operations |
 | Entitlements | Atomic scoped grants, source deduplication, expiry, terminal revocation and SQLite persistence | Source verification, purchase/refund/contribution integration and real recipient/key delivery |
+| Sponsorship | Scoped approved campaigns, authenticated delivery facts, quotas and separately referenced qualified output | Durable provider/evidence adapters, billing integration and production operations |
+| Observability | Freshness-aware fail-unknown health, nullable aggregates and currency-separated cost snapshots | Authenticated hosted ingestion, persistence, alerting and access controls |
 
 ## This merged round
 
