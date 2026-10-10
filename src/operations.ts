@@ -70,9 +70,15 @@ export class OperationsEvidenceAcceptor {
     invariant(value.expiresAtMs > nowMs && nowMs - value.observedAtMs <= this.binding.maximumAgeMs, 'STALE_OPERATIONS_EVIDENCE');
     invariant(!this.evidenceIds.has(value.evidenceId), 'DUPLICATE_OPERATIONS_EVIDENCE_ID');
     invariant(!this.evidenceDigests.has(value.evidenceDigest), 'DUPLICATE_OPERATIONS_EVIDENCE_DIGEST');
-    invariant(await this.verifier.verify(value), 'UNVERIFIED_OPERATIONS_EVIDENCE');
+    // Reserve before awaiting the external verifier so concurrent replays cannot both pass.
     this.evidenceIds.add(value.evidenceId); this.evidenceDigests.add(value.evidenceDigest);
-    Object.freeze(value.scope); Object.freeze(value); accepted.add(value); return value as AcceptedOperationsEvidence;
+    Object.freeze(value.scope); Object.freeze(value);
+    try {
+      invariant(await this.verifier.verify(value), 'UNVERIFIED_OPERATIONS_EVIDENCE');
+    } catch (error) {
+      this.evidenceIds.delete(value.evidenceId); this.evidenceDigests.delete(value.evidenceDigest); throw error;
+    }
+    accepted.add(value); return value as AcceptedOperationsEvidence;
   }
 }
 
