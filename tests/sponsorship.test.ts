@@ -22,7 +22,7 @@ test('sponsor records authenticated deliveries, separately qualified output, and
  assert.deepEqual(await f.accounting.accept(raw,'authenticated',201),first);
  f.set(proof);const verified=await f.accounting.accept(raw,'authenticated',301);
  assert.equal(verified.deliveredEvents,1);assert.equal(verified.qualifiedOutputEvents,1);assert.equal(verified.peopleCount,null);
- await assert.rejects(f.accounting.accept(raw,'authenticated',301),/SPONSOR/).catch(()=>{});
+ assert.deepEqual(await f.accounting.accept(raw,'authenticated',301),verified);
  f.set({...proof,eventId:'proof2'});await assert.rejects(f.accounting.accept(raw,'authenticated',310),/SPONSOR_DUPLICATE_QUALIFICATION/);
  assert.equal(f.accounting.report(manager,'campaign',310).qualifiedOutputEvents,1);
 });
