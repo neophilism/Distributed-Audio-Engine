@@ -1,14 +1,14 @@
 # Implementation and evidence status
 
-The engine has 31 merged implementation/hardening PRs. Seventeen roadmap IDs retain merged reference status: DAE-01 through DAE-08, DAE-19, DAE-21, DAE-24 through DAE-28, DAE-33 and DAE-34. Ten additional IDs have partial portable implementations: DAE-09, DAE-11 through DAE-18 and DAE-20. Seven IDs remain planned. GitHub PR #15, #24, #31 and #33 maintain documentation/status or integration registration; roadmap IDs and GitHub PR numbers remain separate.
+The engine has 32 merged implementation/hardening PRs. Seventeen roadmap IDs retain merged reference status: DAE-01 through DAE-08, DAE-19, DAE-21, DAE-24 through DAE-28, DAE-33 and DAE-34. Eleven additional IDs have partial portable implementations: DAE-09 through DAE-18 and DAE-20. Six IDs remain planned. GitHub PR #15, #24, #31 and #33 maintain documentation/status or integration registration; roadmap IDs and GitHub PR numbers remain separate.
 
-All 151 software tests pass. Strict typecheck, source/boundary checks, roadmap DAG, Node consumer types without DOM, browser consumer types without Node, real offline packed-installation smoke and dependency audit pass. Each implementation PR's hosted CI was checked at its exact head before merging. Tests include actual SQLite reopen and separate-process races; audio graphs, measurement decisions and payment signatures/providers use explicitly documented adapters.
+All 157 software tests pass. Strict typecheck, source/boundary checks, roadmap DAG, Node consumer types without DOM, browser consumer types without Node, real offline packed-installation smoke and dependency audit pass. Each implementation PR's hosted CI was checked at its exact head before merging. Tests include actual SQLite reopen and separate-process races; audio graphs, measurement decisions and payment signatures/providers use explicitly documented adapters.
 
 | Area | Current scope | Remaining integration or qualification |
 |---|---|---|
 | Encryption/delivery | Endpoint AES-GCM chunks, private manifests, bounded authenticated ranges, complete-file hash and HTTPS response limits | Authenticated parent key channel, independent crypto/interoperability review |
 | Canonical inputs | Stable v1 valid bytes, Unicode/order vectors, bounded parsing and duplicate/member rejection | Explicit versioned migration when an approved upstream contract changes |
-| Playback | Current-position linear player, rights/recipient expiry, bounded PCM queues, browser graph and Android host-binding fade/stop/lifecycle resets | Real Android AudioManager/AudioTrack host, browser/device interoperability and suspended-context qualification |
+| Playback | Current-position linear player, rights/recipient expiry, bounded PCM queues, browser graph plus Android and iOS host-binding fade/stop/lifecycle resets | Real Android AudioManager/AudioTrack and iOS AVAudioSession/AVAudioEngine hosts, browser/device interoperability and suspended-context qualification |
 | Controls/clock | Scoped signatures, leases/emergency supersession, SQLite replay checkpoints, challenged clock intervals | Native protected state, E2EE payload delivery, route-specific output delay and acoustic measurements |
 | Output evidence | Active-route invalidation, post-challenge measurement decisions, full-window calibration, immutable conservative intervals and physical-output coverage | Real native routes, calibration/source/output attribution and independent qualification |
 | Local coordination/cache | Primary leases, registered opaque transports, bounded failover and quota/expiry SQLite ciphertext cache | LAN discovery/provisioning and replica/restore qualification |
@@ -35,9 +35,10 @@ All 151 software tests pass. Strict typecheck, source/boundary checks, roadmap D
 | [#32](https://github.com/neophilism/Distributed-Audio-Engine/pull/32) | Scoped sponsor campaigns and authenticated delivery accounting primitives |
 | [#34](https://github.com/neophilism/Distributed-Audio-Engine/pull/34) | Fail-unknown engine observability and cost snapshots |
 | [#36](https://github.com/neophilism/Distributed-Audio-Engine/pull/36) | Partial Android host SDK with monotonic scheduling and lifecycle invalidation |
+| [#37](https://github.com/neophilism/Distributed-Audio-Engine/pull/37) | Partial iOS host SDK with host-time scheduling and audio-session invalidation |
 
 ## Work remaining
 
-The next major packages are a real Android host and device qualification, the iOS SDK, native clock/route/acoustic qualification, authenticated E2EE parent/key delivery, complete-product/refund fulfillment, actual payment-provider sandbox/dispatch, durable sponsor/provider adapters, hosted observability and operations. Optional live-input/advanced-hardware adapters and integrated scale/release qualification follow their recorded dependencies. The [roadmap](roadmap.json) preserves original versus added scope and separate implementation/deployment/integration/field/release states.
+The next major packages are real Android and iOS hosts plus device qualification, native clock/route/acoustic qualification, authenticated E2EE parent/key delivery, complete-product/refund fulfillment, actual payment-provider sandbox/dispatch, durable sponsor/provider adapters, hosted observability and operations. Optional live-input/advanced-hardware adapters and integrated scale/release qualification follow their recorded dependencies. The [roadmap](roadmap.json) preserves original versus added scope and separate implementation/deployment/integration/field/release states.
 
 No service has been deployed, no registry package has been published, and physical speaker trials and independent release certification remain pending. SceneSignal, Distributed Radio Engine and TrackZero remain planning repositories in the requested build order.
