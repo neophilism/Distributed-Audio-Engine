@@ -69,6 +69,19 @@ test('forgery, replayed IDs or reports, and self-review fail closed', async () =
   await assert.rejects(acceptor.accept(evidence('deletion-drill', { evidenceId: first.evidenceId }), now), /DUPLICATE_OPERATIONS_EVIDENCE_ID/);
   await assert.rejects(acceptor.accept(evidence('deletion-drill', { evidenceDigest: first.evidenceDigest }), now), /DUPLICATE_OPERATIONS_EVIDENCE_DIGEST/);
   await assert.rejects(acceptor.accept(evidence('independent-security-review', { subjectId: 'same', verifierId: 'same' }), now), /SELF_REVIEW_IS_NOT_INDEPENDENT/);
+
+  const concurrent = evidence('deletion-drill', { evidenceId: 'concurrent', evidenceDigest: 'sha256:' + 'e'.repeat(64) });
+  const slow = new OperationsEvidenceAcceptor(binding, { async verify() { await new Promise(resolve => setImmediate(resolve)); return true; } });
+  const attempts = await Promise.allSettled([slow.accept(concurrent, now), slow.accept(concurrent, now)]);
+  assert.equal(attempts.filter(result => result.status === 'fulfilled').length, 1);
+  assert.equal(attempts.filter(result => result.status === 'rejected').length, 1);
+
+  const failed = evidence('restore-drill', { result: 'failed', evidenceId: 'immutable', evidenceDigest: 'sha256:' + 'd'.repeat(64) });
+  const immutable = new OperationsEvidenceAcceptor(binding, { async verify(record) {
+    assert.throws(() => { (record as OperationsEvidenceRecord).result = 'passed'; }); return true;
+  } });
+  const acceptedFailure = await immutable.accept(failed, now);
+  assert.deepEqual(assessOperationsAssurance([acceptedFailure], assessmentBinding, now).failed, ['restore-drill']);
 });
 
 test('copied or expired accepted records cannot become release evidence', async () => {
