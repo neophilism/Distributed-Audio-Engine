@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-10-v6",
+  "version": "2026-10-10-v7",
   "original_baseline_total": 88,
   "total": 120,
   "counts": {
@@ -251,12 +251,25 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-10",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 37,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "github_prs": [
+        37
+      ],
+      "partial": true,
+      "implementation_scope": "Portable iOS host binding for trusted route generations, host-time PCM scheduling, signed authority deadlines, bounded queues and audio-session/lifecycle invalidation. Real AVAudioSession/AVAudioEngine host and device qualification remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/ios-audio.test.ts",
+        "nativeHost": "test-double",
+        "physicalOutput": "test-double",
+        "fieldEvidence": false
+      }
     },
     {
       "id": "DAE-11",
@@ -2513,6 +2526,7 @@
     "audio_engine_merged_roadmap_ids": 17,
     "audio_engine_partial_roadmap_ids": [
       "DAE-09",
+      "DAE-10",
       "DAE-11",
       "DAE-12",
       "DAE-13",
@@ -2523,14 +2537,14 @@
       "DAE-18",
       "DAE-20"
     ],
-    "audio_engine_implementation_prs": 31,
+    "audio_engine_implementation_prs": 32,
     "audio_engine_documentation_prs": [
       15,
       24,
       31,
       33
     ],
-    "portable_tests": 151,
+    "portable_tests": 157,
     "portable_consumer_types_checked": true,
     "packed_consumer_smoke_checked": true,
     "production_deployed": false,

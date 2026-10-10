@@ -1,0 +1,11 @@
+# iOS endpoint audio host binding (DAE-10 partial)
+
+Import `IOSAudioSink` from `@neophilism/distributed-audio-engine/ios`. This module binds the portable current-position player and signed playback authority to a trusted iOS host. It does not claim that any iPhone, iPad, route or acoustic path is qualified.
+
+The host implementation must derive active routes from `AVAudioSession.currentRoute` and route-change notifications, maintain a strictly increasing route generation, and render PCM through a bounded `AVAudioEngine` / `AVAudioPlayerNode` graph configured for the reported sample rate and channel capacity. Stored accessory names and previously connected routes are not active-output evidence. The bridge must copy each request into Swift/native-owned storage before `enqueue` returns because the SDK immediately wipes its temporary PCM view.
+
+Scheduling maps Unix timeline targets onto a nondecreasing host-time source, rejects rollback, requires an exact sample rate, bounds channel layouts and queued samples, and rejects overlapping output. Signed authority supplies the gain ceiling, fade start and hard stop that the native graph must enforce without depending on JavaScript timers. Renewals may reduce an existing deadline but never extend queued output.
+
+Audio-session interruptions, old-device-unavailable route changes, media-services resets, unsafe suspension, engine stops and disconnects invalidate queued output. Resumption requires a newly active route generation and a fresh timeline join. Lock-screen playback may continue only when the configured audio-session category, background entitlement, signed authority, engine state and active route all remain valid; the portable layer does not infer that state.
+
+Host-double tests cover buffer copying, host-time translation, route generations, interruption/reset invalidation, authority contraction, queue bounds and fail-closed bridge errors. DAE-10 remains incomplete until a real Swift bridge and supported-device matrix exercise interruptions, lock screen, permissions/session activation, route changes, reconnects, media-services resets, engine restarts and OS-version behavior. No deployment, hardware, field or release evidence is asserted.

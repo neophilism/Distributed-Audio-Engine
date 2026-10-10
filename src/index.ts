@@ -25,3 +25,5 @@ export * from './sponsorship.js';
 export * from './observability.js';
 
 export * from './android-audio.js';
+
+export * from './ios-audio.js';
