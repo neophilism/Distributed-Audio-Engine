@@ -617,12 +617,26 @@
       "gate": "Actual field evidence for hardware/production claims",
       "baseline_id": "DAE-22",
       "origin": "original",
-      "status": "planned",
-      "github_pr": null,
+      "status": "implemented",
+      "github_pr": 38,
       "deployed": false,
       "integration_tested": false,
       "field_validated": false,
-      "released": false
+      "released": false,
+      "partial": true,
+      "github_prs": [
+        38
+      ],
+      "implementation_scope": "Portable exact-scope operations evidence acceptance and fail-closed retention, deletion, restore and independent-review assessment bound to an artifact digest and pinned E2EESA commit. Deployed drills, external review, profile refresh, field validation and release remain pending.",
+      "portable_integration_tested": true,
+      "portable_integration_evidence": {
+        "kind": "software-with-explicit-test-adapters",
+        "tests": "tests/operations.test.ts",
+        "externalVerifier": "test-double",
+        "deployedDrills": false,
+        "independentReview": false,
+        "fieldEvidence": false
+      }
     },
     {
       "id": "DAE-23",
@@ -2535,16 +2549,17 @@
       "DAE-16",
       "DAE-17",
       "DAE-18",
-      "DAE-20"
+      "DAE-20",
+      "DAE-22"
     ],
-    "audio_engine_implementation_prs": 32,
+    "audio_engine_implementation_prs": 33,
     "audio_engine_documentation_prs": [
       15,
       24,
       31,
       33
     ],
-    "portable_tests": 157,
+    "portable_tests": 162,
     "portable_consumer_types_checked": true,
     "packed_consumer_smoke_checked": true,
     "production_deployed": false,

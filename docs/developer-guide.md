@@ -38,6 +38,8 @@ The `/evidence` and `/output-lifecycle` entries supply partial portable route/me
 
 `CheckoutEngine`, `ReconciliationEngine` and `EntitlementLedger` are portable core APIs. SQLite purchase/accounting/entitlement stores are in `/node`. They process intentionally authorized opaque business facts; they never store or transmit media keys or private manifests. A settled purchase or entitlement does not by itself authorize a recipient key delivery. Read [commerce](commerce.md), [entitlements](entitlements.md) and the [component/data-flow inventory](security-flow-inventory.json) before integration.
 
+`OperationsEvidenceAcceptor` and `assessOperationsAssurance` expose the DAE-22 portable operations gate. Applications provide an evidence verifier and exact release binding; the core rejects stale, replayed, cross-scope, cross-artifact and self-reviewed records and reports each missing gate. Read [operations assurance](operations-assurance.md). Unit adapters do not replace deployed deletion/restore drills or an independent review.
+
 ## Dependencies still requiring integration
 
 Real Android AudioManager/AudioTrack and iOS AVAudioSession/AVAudioEngine hosts plus device qualification; native measurement/secure-state adapters; actual E2EESA pairwise/group key distribution and control channels; authenticated root/recovery storage; durable upload state/object-store adapters; compressed-media/resampling adapters; deployed retention/restore drills and LAN provisioning; actual signed payment-provider/dispatch adapters and complete-product/refund fulfillment; full acoustic evidence integration; physical-device trials; independent release review and client-update assurance.
