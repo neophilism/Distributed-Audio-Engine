@@ -1,8 +1,8 @@
 # Implementation and evidence status
 
-The engine has 28 merged implementation/hardening PRs. Fifteen roadmap IDs retain merged reference status: DAE-01 through DAE-08, DAE-24 through DAE-28, DAE-33 and DAE-34. Nine additional IDs have partial portable implementations: DAE-11 through DAE-18 and DAE-20. Ten IDs remain planned. GitHub PR #15, #24 and #31 maintain documentation/status; roadmap IDs and GitHub PR numbers remain separate.
+The engine has 30 merged implementation/hardening PRs. Seventeen roadmap IDs retain merged reference status: DAE-01 through DAE-08, DAE-19, DAE-21, DAE-24 through DAE-28, DAE-33 and DAE-34. Nine additional IDs have partial portable implementations: DAE-11 through DAE-18 and DAE-20. Eight IDs remain planned. GitHub PR #15, #24, #31 and #33 maintain documentation/status or integration registration; roadmap IDs and GitHub PR numbers remain separate.
 
-All 139 software tests pass. Strict typecheck, source/boundary checks, roadmap DAG, Node consumer types without DOM, browser consumer types without Node, real offline packed-installation smoke and dependency audit pass. Each implementation PR's hosted CI was checked at its exact head before merging. Tests include actual SQLite reopen and separate-process races; audio graphs, measurement decisions and payment signatures/providers use explicitly documented adapters.
+All 145 software tests pass. Strict typecheck, source/boundary checks, roadmap DAG, Node consumer types without DOM, browser consumer types without Node, real offline packed-installation smoke and dependency audit pass. Each implementation PR's hosted CI was checked at its exact head before merging. Tests include actual SQLite reopen and separate-process races; audio graphs, measurement decisions and payment signatures/providers use explicitly documented adapters.
 
 | Area | Current scope | Remaining integration or qualification |
 |---|---|---|
@@ -30,9 +30,11 @@ All 139 software tests pass. Strict typecheck, source/boundary checks, roadmap D
 | [#29](https://github.com/neophilism/Distributed-Audio-Engine/pull/29) | Durable purchase/accounting state, private files and process races |
 | [#30](https://github.com/neophilism/Distributed-Audio-Engine/pull/30) | Atomic entitlement grants and durable source deduplication |
 | [#31](https://github.com/neophilism/Distributed-Audio-Engine/pull/31) | Roadmap/evidence reconciliation and component/data-flow inventory |
+| [#32](https://github.com/neophilism/Distributed-Audio-Engine/pull/32) | Scoped sponsor campaigns and authenticated delivery accounting primitives |
+| [#34](https://github.com/neophilism/Distributed-Audio-Engine/pull/34) | Fail-unknown engine observability and cost snapshots |
 
 ## Work remaining
 
-The next major packages are Android/iOS SDKs, native clock/route/acoustic qualification, authenticated E2EE parent/key delivery, complete-product/refund fulfillment, actual payment-provider sandbox/dispatch, sponsor delivery accounting, observability and operations. Optional live-input/advanced-hardware adapters and integrated scale/release qualification follow their recorded dependencies. The [roadmap](roadmap.json) preserves original versus added scope and separate implementation/deployment/integration/field/release states.
+The next major packages are Android/iOS SDKs, native clock/route/acoustic qualification, authenticated E2EE parent/key delivery, complete-product/refund fulfillment, actual payment-provider sandbox/dispatch, durable sponsor/provider adapters, hosted observability and operations. Optional live-input/advanced-hardware adapters and integrated scale/release qualification follow their recorded dependencies. The [roadmap](roadmap.json) preserves original versus added scope and separate implementation/deployment/integration/field/release states.
 
-No service has been deployed, no registry package has been published, and physical speaker trials and independent release certification remain pending. SceneSignal, Distributed Radio Engine and TrackZero remain planning repositories in the requested build order. Development stops after this checked and merged round at the owner's request.
+No service has been deployed, no registry package has been published, and physical speaker trials and independent release certification remain pending. SceneSignal, Distributed Radio Engine and TrackZero remain planning repositories in the requested build order.
