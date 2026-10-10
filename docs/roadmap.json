@@ -625,9 +625,10 @@
       "released": false,
       "partial": true,
       "github_prs": [
-        38
+        38,
+        40
       ],
-      "implementation_scope": "Portable exact-scope operations evidence acceptance and fail-closed retention, deletion, restore and independent-review assessment bound to an artifact digest and pinned E2EESA commit. Deployed drills, external review, profile refresh, field validation and release remain pending.",
+      "implementation_scope": "Portable exact-scope operations evidence acceptance and fail-closed retention, deletion, restore and independent-review assessment bound to an artifact digest and pinned E2EESA commit, including serialized replay reservations across the asynchronous verifier boundary. Deployed drills, external review, profile refresh, field validation and release remain pending.",
       "portable_integration_tested": true,
       "portable_integration_evidence": {
         "kind": "software-with-explicit-test-adapters",
@@ -2552,7 +2553,7 @@
       "DAE-20",
       "DAE-22"
     ],
-    "audio_engine_implementation_prs": 33,
+    "audio_engine_implementation_prs": 34,
     "audio_engine_documentation_prs": [
       15,
       24,

@@ -1,6 +1,6 @@
 # Implementation and evidence status
 
-The engine has 33 implementation/hardening PRs through active PR #38. Seventeen roadmap IDs retain merged reference status: DAE-01 through DAE-08, DAE-19, DAE-21, DAE-24 through DAE-28, DAE-33 and DAE-34. Twelve additional IDs have partial portable implementations: DAE-09 through DAE-18, DAE-20 and DAE-22. Five IDs remain planned. GitHub PR #15, #24, #31 and #33 maintain documentation/status or integration registration; roadmap IDs and GitHub PR numbers remain separate.
+The engine has 34 merged implementation/hardening PRs through PR #40. Seventeen roadmap IDs retain merged reference status: DAE-01 through DAE-08, DAE-19, DAE-21, DAE-24 through DAE-28, DAE-33 and DAE-34. Twelve additional IDs have partial portable implementations: DAE-09 through DAE-18, DAE-20 and DAE-22. Five IDs remain planned. GitHub PR #15, #24, #31 and #33 maintain documentation/status or integration registration; roadmap IDs and GitHub PR numbers remain separate.
 
 All 162 software tests pass. Strict typecheck, source/boundary checks, roadmap DAG, Node consumer types without DOM, browser consumer types without Node, real offline packed-installation smoke and dependency audit pass. Each merged implementation PR's hosted CI was checked at its exact head. Tests include actual SQLite reopen and separate-process races; audio graphs, measurement decisions, operations verifiers and payment signatures/providers use explicitly documented adapters.
 
@@ -38,6 +38,7 @@ All 162 software tests pass. Strict typecheck, source/boundary checks, roadmap D
 | [#36](https://github.com/neophilism/Distributed-Audio-Engine/pull/36) | Partial Android host SDK with monotonic scheduling and lifecycle invalidation |
 | [#37](https://github.com/neophilism/Distributed-Audio-Engine/pull/37) | Partial iOS host SDK with host-time scheduling and audio-session invalidation |
 | [#38](https://github.com/neophilism/Distributed-Audio-Engine/pull/38) | Partial DAE-22 fail-closed operations assurance and evidence boundaries |
+| [#40](https://github.com/neophilism/Distributed-Audio-Engine/pull/40) | Serialized replay reservations and immutable verifier inputs for DAE-22 |
 
 ## Work remaining
 
