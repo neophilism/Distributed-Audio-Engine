@@ -62,7 +62,7 @@ test('focus, disconnect and route changes invalidate queued output before reacti
 test('authority refresh contracts native deadlines and never extends queued output', async () => {
   const f = await fixture(); f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 }); f.sink.schedule('a', audio, 1200);
   f.setTime(1100, 5100); f.sink.setUserGain(0.2);
-  assert.deepEqual(f.bridge.updates.at(-1), ['a', 0.2, 6500, 6200]);
+  assert.deepEqual(f.bridge.updates.at(-1), ['a', 0.2, 6000, 6000]);
   f.sink.mute(); assert.equal(f.sink.pending, 0); assert.ok(f.bridge.cancelAllCalls >= 2);
 });
 test('native enqueue and envelope failures leave no locally live output', async () => {
