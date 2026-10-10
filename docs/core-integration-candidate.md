@@ -1,0 +1,9 @@
+# DAE-23 core integration candidate
+
+This package exposes a portable software candidate for downstream SceneSignal or Distributed Radio Engine integration. The candidate composes endpoint-encrypted asset delivery, signed controls and shared-clock estimates, generic timeline playback, output evidence, complete-product settlement, generic entitlements, reconciliation, and fail-closed operations assurance. It remains a development package and is not a production or hardware-qualified release.
+
+`SettledPurchaseEntitlementIssuer` closes the software boundary between the authoritative checkout and entitlement modules. It reads the checkout through `CheckoutEngine`, requires a settled provider event, resolves the exact immutable product revision, recomputes the quoted product digest, and grants only caller-declared generic uses for assets in that product. A pending checkout, product substitution, unauthorized issuer, or conflicting replay rejects. The bridge handles no provider credential, raw webhook, media key, private manifest, or recipient key delivery.
+
+Software evidence is split across `tests/engine-pipeline.test.ts` (encrypted playback, clock, signed authority, rights, cache and failover), `tests/candidate.test.ts` (settlement-to-entitlement integration), the platform sink and evidence suites, the operations suite, consumer type checks, and the packed-install smoke test.
+
+The following DAE-23 acceptance gates remain open: real Android and iOS hosts, six-hour supported-device soaks, an evidence-backed supported-device matrix, acoustic clock/route/output qualification, authenticated E2EE parent and recipient-key delivery, payment-provider sandbox and dispatch, deployed retention/deletion/restore drills, independent security review, field validation, publication, and release approval. Test adapters and portable CI results cannot satisfy those gates.
