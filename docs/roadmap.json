@@ -508,7 +508,7 @@
       "implementation_scope": "Portable scoped sponsor campaigns and authenticated delivery accounting with quotas, replay deduplication, separate qualified-output references and no people inference.",
       "portable_integration_tested": true,
       "portable_integration_evidence": {
-        "kind": "software-with-explicit-verifier-adapter",
+        "kind": "software-with-explicit-test-adapters",
         "tests": "tests/sponsorship.test.ts",
         "providerAttestation": false,
         "physicalOutput": false,
@@ -572,7 +572,7 @@
       "implementation_scope": "Portable fail-unknown operational snapshots with freshness-aware health, nullable totals, bounded source fields and currency-separated cost aggregation.",
       "portable_integration_tested": true,
       "portable_integration_evidence": {
-        "kind": "software-with-explicit-observation-adapter",
+        "kind": "software-with-explicit-test-adapters",
         "tests": "tests/observability.test.ts",
         "hostedTelemetry": false,
         "fieldEvidence": false
