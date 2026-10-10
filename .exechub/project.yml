@@ -1,0 +1,22 @@
+project:
+  name: Distributed-Audio-Engine
+  display_name: Distributed Audio Engine
+  repository: neophilism/Distributed-Audio-Engine
+  status: active-development
+
+roadmap:
+  version: 1
+  planned_prs: 34
+  approved: true
+
+milestones:
+  - name: Portable core and authenticated media
+    prs: 8
+  - name: Native SDK and output verification
+    prs: 8
+  - name: Commerce and operations
+    prs: 7
+  - name: Spatial and coordination
+    prs: 5
+  - name: Integration and production release
+    prs: 6
