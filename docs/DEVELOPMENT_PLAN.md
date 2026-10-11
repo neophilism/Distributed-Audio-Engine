@@ -1,3 +1,5 @@
+> **Canonical PR tracking:** [`registry/roadmap.json`](../registry/roadmap.json). Historical detailed plan continues below; add/change PRs only in the canonical file.
+
 # Distributed-Audio-Engine: canonical development plan
 
 Original source: [docs/distributed-audio-engine-development-plan.md](../docs/distributed-audio-engine-development-plan.md). Full detailed milestone and acceptance plan follows unchanged.
