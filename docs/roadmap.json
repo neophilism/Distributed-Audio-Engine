@@ -2566,5 +2566,7 @@
     "production_deployed": false,
     "field_validated": false,
     "independent_review": "pending"
-  }
+  },
+  "_canonicalRoadmap": "registry/roadmap.json",
+  "_canonicalRoadmapNotice": "Cross-repository historical aggregation only. Edit this repository's registry/roadmap.json for current PR totals and mappings."
 }
