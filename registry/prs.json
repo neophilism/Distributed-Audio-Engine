@@ -1,0 +1,888 @@
+{
+  "schemaVersion": 1,
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "roadmapVersion": 1,
+  "planVerified": true,
+  "plannedPrCount": 34,
+  "observedAt": "2026-10-11T17:40:51.271Z",
+  "units": [
+    {
+      "id": "DAE-01",
+      "title": "Architecture, contracts, repository and CI",
+      "origin": "original",
+      "prs": [
+        1
+      ]
+    },
+    {
+      "id": "DAE-02",
+      "title": "Device and acoustics feasibility harness",
+      "origin": "original",
+      "prs": [
+        4
+      ]
+    },
+    {
+      "id": "DAE-03",
+      "title": "Identity, tenants and scoped roles",
+      "origin": "original",
+      "prs": [
+        5
+      ]
+    },
+    {
+      "id": "DAE-04",
+      "title": "Secure asset ingestion",
+      "origin": "original",
+      "prs": [
+        6
+      ]
+    },
+    {
+      "id": "DAE-05",
+      "title": "Rights and permitted-use records",
+      "origin": "original",
+      "prs": [
+        7
+      ]
+    },
+    {
+      "id": "DAE-06",
+      "title": "Media packaging and loudness metadata",
+      "origin": "original",
+      "prs": [
+        8
+      ]
+    },
+    {
+      "id": "DAE-07",
+      "title": "Canonical generic audio timeline",
+      "origin": "original",
+      "prs": [
+        9
+      ]
+    },
+    {
+      "id": "DAE-08",
+      "title": "Encrypted delivery and broad-compatibility adapter",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-09",
+      "title": "Android audio SDK",
+      "origin": "original",
+      "prs": [
+        36
+      ]
+    },
+    {
+      "id": "DAE-10",
+      "title": "iOS audio SDK",
+      "origin": "original",
+      "prs": [
+        37
+      ]
+    },
+    {
+      "id": "DAE-11",
+      "title": "Clock discipline and acoustic timing",
+      "origin": "original",
+      "prs": [
+        21
+      ]
+    },
+    {
+      "id": "DAE-12",
+      "title": "Device profiles and route evidence",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-13",
+      "title": "Opt-in acoustic evidence adapters",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-14",
+      "title": "Qualifying-window and level evaluator",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-15",
+      "title": "Neutral contribution-policy primitives",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-16",
+      "title": "Generic entitlement ledger primitives",
+      "origin": "original",
+      "prs": [
+        30
+      ]
+    },
+    {
+      "id": "DAE-17",
+      "title": "Album checkout and payment adapter",
+      "origin": "original",
+      "prs": [
+        27
+      ]
+    },
+    {
+      "id": "DAE-18",
+      "title": "Splits, refunds and reconciliation",
+      "origin": "original",
+      "prs": [
+        28
+      ]
+    },
+    {
+      "id": "DAE-19",
+      "title": "Sponsor campaigns and delivery accounting",
+      "origin": "original",
+      "prs": [
+        32
+      ]
+    },
+    {
+      "id": "DAE-20",
+      "title": "Anti-abuse and signed evidence",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-21",
+      "title": "Observability, cost and roadmap exports",
+      "origin": "original",
+      "prs": [
+        34
+      ]
+    },
+    {
+      "id": "DAE-22",
+      "title": "Security, privacy and operations baseline",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-23",
+      "title": "Core audio integration candidate",
+      "origin": "original",
+      "prs": [
+        42
+      ]
+    },
+    {
+      "id": "DAE-24",
+      "title": "Spatial asset and scene contracts",
+      "origin": "original",
+      "prs": [
+        10
+      ]
+    },
+    {
+      "id": "DAE-25",
+      "title": "Portable spatial DSP renderer",
+      "origin": "original",
+      "prs": [
+        11
+      ]
+    },
+    {
+      "id": "DAE-26",
+      "title": "Local coordinator and edge caching",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-27",
+      "title": "Safety controls and bounded authority",
+      "origin": "original",
+      "prs": [
+        12
+      ]
+    },
+    {
+      "id": "DAE-28",
+      "title": "Placement and tracking adapters",
+      "origin": "original",
+      "prs": [
+        13
+      ]
+    },
+    {
+      "id": "DAE-29",
+      "title": "Optional live-input transport",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-30",
+      "title": "Optional advanced hardware adapters",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-31",
+      "title": "Scale, resilience and contract qualification",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-32",
+      "title": "Engine stable release and maintainer kit",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "DAE-33",
+      "title": "Endpoint-encrypted chunked media and private manifests",
+      "origin": "original",
+      "prs": [
+        2
+      ]
+    },
+    {
+      "id": "DAE-34",
+      "title": "Authenticated controls and replay-safe authority",
+      "origin": "original",
+      "prs": []
+    }
+  ],
+  "pullRequests": [
+    {
+      "id": 4812421142,
+      "number": 42,
+      "title": "DAE-23: integrate settled purchases into the core candidate",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/42",
+      "state": "closed",
+      "draft": true,
+      "createdAt": "2026-10-10T15:43:48.000Z",
+      "updatedAt": "2026-10-10T15:44:36.000Z",
+      "closedAt": "2026-10-10T15:44:36.000Z",
+      "mergedAt": null,
+      "headSha": "5461e1d064917313fe25d3063e658ec870b12e91",
+      "baseRef": "main",
+      "mergeCommitSha": "1c050c41b4d5adf84f2e49cbb7bdf9c9e939a5be"
+    },
+    {
+      "id": 4812418627,
+      "number": 41,
+      "title": "docs: reconcile DAE-22 hardening evidence",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/41",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-10T15:43:27.000Z",
+      "updatedAt": "2026-10-10T15:45:56.000Z",
+      "closedAt": "2026-10-10T15:45:56.000Z",
+      "mergedAt": "2026-10-10T15:45:56.000Z",
+      "headSha": "fad5bca9747d598e6cf98f7319018e940a67e3ba",
+      "baseRef": "main",
+      "mergeCommitSha": "8cf30ef8e94453820d7e798ffe1e1440798200e2"
+    },
+    {
+      "id": 4812392913,
+      "number": 40,
+      "title": "DAE-22: serialize concurrent evidence replay checks",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/40",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-10T15:39:41.000Z",
+      "updatedAt": "2026-10-10T15:40:38.000Z",
+      "closedAt": "2026-10-10T15:40:38.000Z",
+      "mergedAt": "2026-10-10T15:40:38.000Z",
+      "headSha": "fbe5ac40720e109ca5a6d8d78e68cff18d80f552",
+      "baseRef": "main",
+      "mergeCommitSha": "5f9567cdc3c5d3b5b4673b0e2663dcecc5b23571"
+    },
+    {
+      "id": 4812383631,
+      "number": 39,
+      "title": "DAE-22: serialize concurrent evidence replay checks",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/39",
+      "state": "closed",
+      "draft": true,
+      "createdAt": "2026-10-10T15:38:14.000Z",
+      "updatedAt": "2026-10-10T15:39:54.000Z",
+      "closedAt": "2026-10-10T15:39:54.000Z",
+      "mergedAt": null,
+      "headSha": "2fe89446e2d9b5f20c0c3acfe307634d69a43ec5",
+      "baseRef": "main",
+      "mergeCommitSha": null
+    },
+    {
+      "id": 4812345477,
+      "number": 38,
+      "title": "DAE-22: add fail-closed operations assurance",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/38",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-10T15:32:14.000Z",
+      "updatedAt": "2026-10-10T15:36:42.000Z",
+      "closedAt": "2026-10-10T15:36:42.000Z",
+      "mergedAt": "2026-10-10T15:36:42.000Z",
+      "headSha": "314158e0b93affce9a3137d660c8e6e2a9fc4a6f",
+      "baseRef": "main",
+      "mergeCommitSha": "5c53b09c1bee88eda07840cea95c5e2ba5848694"
+    },
+    {
+      "id": 4812032100,
+      "number": 37,
+      "title": "DAE-10: add bounded iOS audio host SDK",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/37",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-10T14:45:44.000Z",
+      "updatedAt": "2026-10-10T14:47:12.000Z",
+      "closedAt": "2026-10-10T14:47:12.000Z",
+      "mergedAt": "2026-10-10T14:47:12.000Z",
+      "headSha": "02c88b1a364576861f56d2d7e67619536d83cfb3",
+      "baseRef": "main",
+      "mergeCommitSha": "b006c8ec6bcebc08823887d9e41153b5f65a3042"
+    },
+    {
+      "id": 4811996032,
+      "number": 36,
+      "title": "DAE-09: add bounded Android audio host SDK",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/36",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-10T14:40:33.000Z",
+      "updatedAt": "2026-10-10T14:43:28.000Z",
+      "closedAt": "2026-10-10T14:43:28.000Z",
+      "mergedAt": "2026-10-10T14:43:28.000Z",
+      "headSha": "f2078fef8c2f34effc6264be961716bf7c8d7e26",
+      "baseRef": "main",
+      "mergeCommitSha": "627c98ac7643c52b74eaed414e15df5e3e2ccc2c"
+    },
+    {
+      "id": 4811913553,
+      "number": 35,
+      "title": "Reconcile DAE-19 and DAE-21 roadmap evidence",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/35",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-10T14:28:49.000Z",
+      "updatedAt": "2026-10-10T14:31:26.000Z",
+      "closedAt": "2026-10-10T14:31:25.000Z",
+      "mergedAt": "2026-10-10T14:31:25.000Z",
+      "headSha": "5dd4d51bcd98cdb465ad4b2bd7ff532e74498539",
+      "baseRef": "main",
+      "mergeCommitSha": "12cb3fd276de222a6c8fa2c1b488a6f59777807a"
+    },
+    {
+      "id": 4807432016,
+      "number": 34,
+      "title": "DAE-21: fail-unknown engine observability and cost snapshots",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/34",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-10T00:47:26.000Z",
+      "updatedAt": "2026-10-10T00:49:42.000Z",
+      "closedAt": "2026-10-10T00:49:41.000Z",
+      "mergedAt": "2026-10-10T00:49:41.000Z",
+      "headSha": "2598e72fd60a71a2c06df210c11431083f51ce49",
+      "baseRef": "main",
+      "mergeCommitSha": "6bcb498872c29948f2529d5066eed3754f9bc85d"
+    },
+    {
+      "id": 4807426368,
+      "number": 33,
+      "title": "Register Distributed Audio Engine roadmap with Engine Room",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/33",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-10T00:46:29.000Z",
+      "updatedAt": "2026-10-10T00:47:35.000Z",
+      "closedAt": "2026-10-10T00:47:35.000Z",
+      "mergedAt": "2026-10-10T00:47:35.000Z",
+      "headSha": "1026432fca91c6e0326f253db9d818e5524ef30e",
+      "baseRef": "main",
+      "mergeCommitSha": "4fea03fbe5cc737297e0a7463e5cd2508e948749"
+    },
+    {
+      "id": 4807424167,
+      "number": 32,
+      "title": "DAE-19: scoped sponsor campaign and delivery accounting primitives",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/32",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-10T00:46:05.000Z",
+      "updatedAt": "2026-10-10T00:46:41.000Z",
+      "closedAt": "2026-10-10T00:46:41.000Z",
+      "mergedAt": "2026-10-10T00:46:41.000Z",
+      "headSha": "afb5f5e16b3601cdc0b74485c4a5122960a2badb",
+      "baseRef": "main",
+      "mergeCommitSha": "2a2536c7faa971a62f2b528712c8e9b6cb0dbf0c"
+    },
+    {
+      "id": 4806759875,
+      "number": 31,
+      "title": "Reconcile engine roadmap, component evidence and remaining gates",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/31",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T22:58:50.000Z",
+      "updatedAt": "2026-10-09T23:01:34.000Z",
+      "closedAt": "2026-10-09T23:01:33.000Z",
+      "mergedAt": "2026-10-09T23:01:33.000Z",
+      "headSha": "19b1d9b6a1a5f757095c0f986c979107e59feec7",
+      "baseRef": "main",
+      "mergeCommitSha": "cc3cb37e53fac831767ed4faf26630d8dc0504dc"
+    },
+    {
+      "id": 4806735842,
+      "number": 30,
+      "title": "DAE-16: atomic scoped entitlements and durable source deduplication",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/30",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T22:55:31.000Z",
+      "updatedAt": "2026-10-09T22:58:33.000Z",
+      "closedAt": "2026-10-09T22:58:33.000Z",
+      "mergedAt": "2026-10-09T22:58:33.000Z",
+      "headSha": "7984352abe672a3e406a9c02b3b5eb232ca4cc81",
+      "baseRef": "main",
+      "mergeCommitSha": "1efc29f5d8f22aa83ff067e362ccbbadee1ef85a"
+    },
+    {
+      "id": 4806661073,
+      "number": 29,
+      "title": "Persist purchase and accounting facts in atomic private SQLite stores",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/29",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T22:45:11.000Z",
+      "updatedAt": "2026-10-09T22:47:09.000Z",
+      "closedAt": "2026-10-09T22:47:09.000Z",
+      "mergedAt": "2026-10-09T22:47:09.000Z",
+      "headSha": "d58ba1549a4de9bcc2329262f598ca2dac82fbd2",
+      "baseRef": "main",
+      "mergeCommitSha": "cb016bb97f87e90606abebb7d47fa00849a96314"
+    },
+    {
+      "id": 4806628283,
+      "number": 28,
+      "title": "DAE-18: exact splits, cumulative refunds and transfer reconciliation",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/28",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T22:40:57.000Z",
+      "updatedAt": "2026-10-09T22:43:45.000Z",
+      "closedAt": "2026-10-09T22:43:45.000Z",
+      "mergedAt": "2026-10-09T22:43:45.000Z",
+      "headSha": "fd79fb43670cce735915beec294df9b2009d29ac",
+      "baseRef": "main",
+      "mergeCommitSha": "d1f52d3d123933bcbc89f5ca113952c7fbefa920"
+    },
+    {
+      "id": 4806584627,
+      "number": 27,
+      "title": "DAE-17: complete-product checkout and verified payment events",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/27",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T22:35:20.000Z",
+      "updatedAt": "2026-10-09T22:37:58.000Z",
+      "closedAt": "2026-10-09T22:37:58.000Z",
+      "mergedAt": "2026-10-09T22:37:58.000Z",
+      "headSha": "ed3c584aa6cf374817d28506ae8ac142821535bb",
+      "baseRef": "main",
+      "mergeCommitSha": "8bda19bd6ced3e103f97e0239da675b4c40aafae"
+    },
+    {
+      "id": 4806569253,
+      "number": 26,
+      "title": "Add output evidence, route invalidation and conservative contribution intervals",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/26",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T22:33:27.000Z",
+      "updatedAt": "2026-10-09T22:53:20.000Z",
+      "closedAt": "2026-10-09T22:53:19.000Z",
+      "mergedAt": "2026-10-09T22:53:19.000Z",
+      "headSha": "08eaf3de6fb352264fc69fdb90fedf1ed6c0eadc",
+      "baseRef": "main",
+      "mergeCommitSha": "3897a6498a0b2fc8f009dfb1c33c4cc6c56cd06c"
+    },
+    {
+      "id": 4806554496,
+      "number": 25,
+      "title": "Harden canonical v1 inputs and duplicate-key parsing",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/25",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T22:31:33.000Z",
+      "updatedAt": "2026-10-09T22:34:18.000Z",
+      "closedAt": "2026-10-09T22:34:18.000Z",
+      "mergedAt": "2026-10-09T22:34:18.000Z",
+      "headSha": "68293d3c0b0b2ff827b69f01543a0a9c340e47bf",
+      "baseRef": "main",
+      "mergeCommitSha": "2cf5c978aee35b4844b7fb66b93cb15cde4ec4c5"
+    },
+    {
+      "id": 4806349389,
+      "number": 24,
+      "title": "Record delivery, coordination, clock and persistence implementation evidence",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/24",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T22:04:10.000Z",
+      "updatedAt": "2026-10-09T22:04:48.000Z",
+      "closedAt": "2026-10-09T22:04:48.000Z",
+      "mergedAt": "2026-10-09T22:04:48.000Z",
+      "headSha": "456390da85451ace3cef4df35087e1b0cdcb40f5",
+      "baseRef": "main",
+      "mergeCommitSha": "814a32513ad5cf05114652df4ead06bedfebb783"
+    },
+    {
+      "id": 4806298529,
+      "number": 23,
+      "title": "Verify portable engine pipeline, consumer packages and cancellation boundaries",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/23",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T21:57:32.000Z",
+      "updatedAt": "2026-10-09T22:00:23.000Z",
+      "closedAt": "2026-10-09T22:00:23.000Z",
+      "mergedAt": "2026-10-09T22:00:23.000Z",
+      "headSha": "8a3769377521a8b60b8a2c97ad4cf1104cab2c09",
+      "baseRef": "main",
+      "mergeCommitSha": "2f789cb6d8a7a5710237255f8f1ff1263e0cd507"
+    },
+    {
+      "id": 4806218979,
+      "number": 22,
+      "title": "DAE-34: durable atomic replay checkpoints",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/22",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T21:47:33.000Z",
+      "updatedAt": "2026-10-09T21:50:53.000Z",
+      "closedAt": "2026-10-09T21:50:53.000Z",
+      "mergedAt": "2026-10-09T21:50:53.000Z",
+      "headSha": "f7fb6a25abac1eaf5e94e2b25e87ea3b34ef2c52",
+      "baseRef": "main",
+      "mergeCommitSha": "a1cec0d888d4bab9bacca00efe716d62446dc523"
+    },
+    {
+      "id": 4806189133,
+      "number": 21,
+      "title": "DAE-11: portable authenticated clock discipline and uncertainty bounds",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/21",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T21:43:53.000Z",
+      "updatedAt": "2026-10-09T21:46:57.000Z",
+      "closedAt": "2026-10-09T21:46:57.000Z",
+      "mergedAt": "2026-10-09T21:46:57.000Z",
+      "headSha": "e10b49634465f146f8054655756a863fc6d1a01e",
+      "baseRef": "main",
+      "mergeCommitSha": "63b96625612150c52dedf8b2d213dc512dac0395"
+    },
+    {
+      "id": 4806154737,
+      "number": 20,
+      "title": "DAE-26: signed coordinator leases and bounded ciphertext failover",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/20",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T21:39:49.000Z",
+      "updatedAt": "2026-10-09T21:42:33.000Z",
+      "closedAt": "2026-10-09T21:42:32.000Z",
+      "mergedAt": "2026-10-09T21:42:32.000Z",
+      "headSha": "5cf6b713ae767ed97ccd2c900ce11bca1e46306d",
+      "baseRef": "main",
+      "mergeCommitSha": "7ff1f98eb83de049581792297568979dd9b6cd84"
+    },
+    {
+      "id": 4806122999,
+      "number": 19,
+      "title": "DAE-26: bounded ciphertext cache and durable SQLite adapter",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/19",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T21:36:24.000Z",
+      "updatedAt": "2026-10-09T21:39:16.000Z",
+      "closedAt": "2026-10-09T21:39:16.000Z",
+      "mergedAt": "2026-10-09T21:39:16.000Z",
+      "headSha": "dc5a715c0cc2311bdb035efb13a048d50976498e",
+      "baseRef": "main",
+      "mergeCommitSha": "bc491a0b50857db9c4742e22c42eb2edd5d782de"
+    },
+    {
+      "id": 4806074724,
+      "number": 18,
+      "title": "DAE-08: encrypted current-position program player",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/18",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T21:31:09.000Z",
+      "updatedAt": "2026-10-09T21:35:18.000Z",
+      "closedAt": "2026-10-09T21:35:18.000Z",
+      "mergedAt": "2026-10-09T21:35:18.000Z",
+      "headSha": "a6196408f1b06b67edfee04167f84c960af07ad4",
+      "baseRef": "main",
+      "mergeCommitSha": "a174ef5694304f9cae82cf4845def0a323c96665"
+    },
+    {
+      "id": 4806030395,
+      "number": 17,
+      "title": "DAE-08: browser endpoint playback with bounded authority",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/17",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T21:26:01.000Z",
+      "updatedAt": "2026-10-09T21:29:52.000Z",
+      "closedAt": "2026-10-09T21:29:52.000Z",
+      "mergedAt": "2026-10-09T21:29:52.000Z",
+      "headSha": "294e01e9f4da01cbcf4f7f03245b4a893c695edb",
+      "baseRef": "main",
+      "mergeCommitSha": "3610a4694a112690a8da9551ff89f6d4275bbd29"
+    },
+    {
+      "id": 4805996705,
+      "number": 16,
+      "title": "DAE-08: bounded endpoint encrypted range delivery",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/16",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T21:21:48.000Z",
+      "updatedAt": "2026-10-09T21:25:02.000Z",
+      "closedAt": "2026-10-09T21:25:02.000Z",
+      "mergedAt": "2026-10-09T21:25:02.000Z",
+      "headSha": "2939fe10960e711f348ab2ce39afd6b2e9061c17",
+      "baseRef": "main",
+      "mergeCommitSha": "5297319ed931b6b684f0b2828e51b257a2b86d09"
+    },
+    {
+      "id": 4805761397,
+      "number": 15,
+      "title": "Document implemented modules, release gates and four-project status",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/15",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:54:34.000Z",
+      "updatedAt": "2026-10-09T20:58:41.000Z",
+      "closedAt": "2026-10-09T20:58:41.000Z",
+      "mergedAt": "2026-10-09T20:58:40.000Z",
+      "headSha": "4e1d421ec9e4b6262df33f4641847ee6673008e6",
+      "baseRef": "main",
+      "mergeCommitSha": "b71ab2d8c6ee6269500d0f3e7ba58a8bff818cc9"
+    },
+    {
+      "id": 4805723351,
+      "number": 14,
+      "title": "Harden attachment limits, canonical payloads and timeline/parser boundaries",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/14",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:50:37.000Z",
+      "updatedAt": "2026-10-09T20:52:56.000Z",
+      "closedAt": "2026-10-09T20:52:56.000Z",
+      "mergedAt": "2026-10-09T20:52:56.000Z",
+      "headSha": "0462bed8ae9cf577c98a022e942fff4a5397a3c1",
+      "baseRef": "main",
+      "mergeCommitSha": "e9ce63c687b81fa5218a0751db6cc308f5f7b669"
+    },
+    {
+      "id": 4805696930,
+      "number": 13,
+      "title": "DAE-28: fixed/object-specific tracking adapters and confidence gates",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/13",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:47:56.000Z",
+      "updatedAt": "2026-10-09T20:49:48.000Z",
+      "closedAt": "2026-10-09T20:49:48.000Z",
+      "mergedAt": "2026-10-09T20:49:48.000Z",
+      "headSha": "6952eef2f0e739e470f906eba52da9f2108a761f",
+      "baseRef": "main",
+      "mergeCommitSha": "d8be79e61109d82c163c77b62619e35bfbe70e28"
+    },
+    {
+      "id": 4805663378,
+      "number": 12,
+      "title": "DAE-27: expiring playback authority, safe fade and emergency stop",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/12",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:44:16.000Z",
+      "updatedAt": "2026-10-09T20:47:27.000Z",
+      "closedAt": "2026-10-09T20:47:27.000Z",
+      "mergedAt": "2026-10-09T20:47:27.000Z",
+      "headSha": "fd8f2a5cb56032da54e56f64683b2be73f49040d",
+      "baseRef": "main",
+      "mergeCommitSha": "0c7ce895a66ea15b6cb4c97c5aca1e042b5542be"
+    },
+    {
+      "id": 4805638555,
+      "number": 11,
+      "title": "DAE-25: portable density-aware spatial renderer and bounded mixing",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/11",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:41:29.000Z",
+      "updatedAt": "2026-10-09T20:43:51.000Z",
+      "closedAt": "2026-10-09T20:43:51.000Z",
+      "mergedAt": "2026-10-09T20:43:51.000Z",
+      "headSha": "baf6663d88a579d98c374d15248c9fffa322c3ca",
+      "baseRef": "main",
+      "mergeCommitSha": "a6e4569f259cf3bedcb237dfe75e4fbe0a287b3a"
+    },
+    {
+      "id": 4805616886,
+      "number": 10,
+      "title": "DAE-24: spatial scenes, speaker placement and physical-anchor contracts",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/10",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:39:00.000Z",
+      "updatedAt": "2026-10-09T20:40:48.000Z",
+      "closedAt": "2026-10-09T20:40:48.000Z",
+      "mergedAt": "2026-10-09T20:40:47.000Z",
+      "headSha": "717dd2a6cd69419b1f6869ea4da096c1571e8748",
+      "baseRef": "main",
+      "mergeCommitSha": "c201a95e74cc76274b2a80c24c9e60d2a9bdfaa7"
+    },
+    {
+      "id": 4805600397,
+      "number": 9,
+      "title": "DAE-07: deterministic sample timelines and exact transition markers",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/9",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:37:07.000Z",
+      "updatedAt": "2026-10-09T20:38:33.000Z",
+      "closedAt": "2026-10-09T20:38:33.000Z",
+      "mergedAt": "2026-10-09T20:38:33.000Z",
+      "headSha": "112ae5cf4df32976f9c51e25dee2da7af086aae9",
+      "baseRef": "main",
+      "mergeCommitSha": "99fe9a053079dfa792ed510c40f32eeb841a6c18"
+    },
+    {
+      "id": 4805584070,
+      "number": 8,
+      "title": "DAE-06: endpoint PCM packaging, alignment and encrypted renditions",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/8",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:35:14.000Z",
+      "updatedAt": "2026-10-09T20:36:25.000Z",
+      "closedAt": "2026-10-09T20:36:25.000Z",
+      "mergedAt": "2026-10-09T20:36:25.000Z",
+      "headSha": "26ae573ad76861988579b0761fe5d9539bbb9d75",
+      "baseRef": "main",
+      "mergeCommitSha": "1ea7b43302ab55c9f7f737a8ee03b1f0760c91cb"
+    },
+    {
+      "id": 4805570660,
+      "number": 7,
+      "title": "DAE-05: rights layers and fail-closed permitted-use decisions",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/7",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:33:43.000Z",
+      "updatedAt": "2026-10-09T20:34:49.000Z",
+      "closedAt": "2026-10-09T20:34:49.000Z",
+      "mergedAt": "2026-10-09T20:34:49.000Z",
+      "headSha": "85f0ce82182998c58494287d46ae5f6d8461e972",
+      "baseRef": "main",
+      "mergeCommitSha": "006048329e608cdd552e040ae3a069f57acc7b5c"
+    },
+    {
+      "id": 4805549409,
+      "number": 6,
+      "title": "DAE-04: resumable ciphertext ingestion, quotas and retention",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/6",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:31:23.000Z",
+      "updatedAt": "2026-10-09T20:33:04.000Z",
+      "closedAt": "2026-10-09T20:33:04.000Z",
+      "mergedAt": "2026-10-09T20:33:03.000Z",
+      "headSha": "3690cf59e2975e0806c36f1c3d1bd39da97a9c5f",
+      "baseRef": "main",
+      "mergeCommitSha": "0ce835aa550ceffcd9e4ad8fe6ffc7fb169c37b9"
+    },
+    {
+      "id": 4805531216,
+      "number": 5,
+      "title": "DAE-03: scoped access and endpoint-authorized device identities",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/5",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:29:27.000Z",
+      "updatedAt": "2026-10-09T20:30:51.000Z",
+      "closedAt": "2026-10-09T20:30:51.000Z",
+      "mergedAt": "2026-10-09T20:30:51.000Z",
+      "headSha": "4daab452764c2ade3cc8b6028eed705491468783",
+      "baseRef": "main",
+      "mergeCommitSha": "4b17cdf5d6fac9944bc313574f2ced2b23552f16"
+    },
+    {
+      "id": 4805508408,
+      "number": 4,
+      "title": "DAE-02: acoustic feasibility harness and honest qualification reports",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/4",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:27:13.000Z",
+      "updatedAt": "2026-10-09T20:28:30.000Z",
+      "closedAt": "2026-10-09T20:28:29.000Z",
+      "mergedAt": "2026-10-09T20:28:29.000Z",
+      "headSha": "4d712df969f96fae4e936546c8bca3cccb003d16",
+      "baseRef": "main",
+      "mergeCommitSha": "78fbcfd7d90d40306ccdce00e5a9ea0ef2fd2728"
+    },
+    {
+      "id": 4805489844,
+      "number": 3,
+      "title": "DAE-34: authenticated scoped controls and replay-safe authority",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/3",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:25:19.000Z",
+      "updatedAt": "2026-10-09T20:26:37.000Z",
+      "closedAt": "2026-10-09T20:26:37.000Z",
+      "mergedAt": "2026-10-09T20:26:37.000Z",
+      "headSha": "aa6af61ebd58f0a592279f21fd968302788d2e93",
+      "baseRef": "main",
+      "mergeCommitSha": "ad6bc41ee6c7f45c3fa29f28d9a1e2b65fa8b24d"
+    },
+    {
+      "id": 4805456715,
+      "number": 2,
+      "title": "DAE-33: endpoint-encrypted media chunks and private manifests",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/2",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:21:48.000Z",
+      "updatedAt": "2026-10-09T20:24:19.000Z",
+      "closedAt": "2026-10-09T20:24:19.000Z",
+      "mergedAt": "2026-10-09T20:24:19.000Z",
+      "headSha": "7839f1ce7aa13492b17b326843d01224a59366e0",
+      "baseRef": "main",
+      "mergeCommitSha": "02af9d5da294c70cf93d6adf269138ad92ee9363"
+    },
+    {
+      "id": 4805429524,
+      "number": 1,
+      "title": "DAE-01: typed audio core and four-project roadmap",
+      "url": "https://github.com/neophilism/Distributed-Audio-Engine/pull/1",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-09T20:18:43.000Z",
+      "updatedAt": "2026-10-09T20:20:35.000Z",
+      "closedAt": "2026-10-09T20:20:35.000Z",
+      "mergedAt": "2026-10-09T20:20:35.000Z",
+      "headSha": "d0a9c97b6db3025986712ed0892840773818ff0a",
+      "baseRef": "main",
+      "mergeCommitSha": "1864cfbdbeb8ecea2dfcdb316d8761b3324b9b4f"
+    }
+  ]
+}
