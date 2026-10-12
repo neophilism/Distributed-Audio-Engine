@@ -1,0 +1,23 @@
+{
+  "name": "@neophilism/dae-signal-parent",
+  "version": "0.1.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Endpoint-only Signal parent-channel adapter for Distributed Audio Engine",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "dependencies": {
+    "@signalapp/libsignal-client": "0.105.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --project tsconfig.json",
+    "test": "node --test --test-reporter=tap tests/*.test.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.d.mts",
+      "import": "./src/index.mjs"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-12-v6",
+  "version": "2026-10-12-v7",
   "standardBasis": {
     "repository": "neophilism/End-To-End-Everywhere-Security-Architecture-Standard",
     "commit": "dea8f54cab9130da86a71f36de553766a978daf2",
@@ -20,9 +20,9 @@
         "explicit listening endpoints"
       ],
       "relayMayDecrypt": false,
-      "implemented": "AES-GCM chunk codec, authenticated range and bounded endpoint rendering",
+      "implemented": "AES-GCM chunk codec, authenticated range and bounded endpoint rendering; actual root-bound Signal parent distribution in separate Node endpoint integration",
       "pending": [
-        "real authenticated parent manifest/key distribution",
+        "mobile parent manifest/key distribution and deployed transport",
         "recipient enrollment/revocation integration",
         "independent protocol review"
       ]
@@ -49,9 +49,9 @@
         "scoped listening/control endpoints"
       ],
       "relayMayDecrypt": false,
-      "implemented": "scoped signatures, atomic replay checkpoints and authority evaluator with decoder seam",
+      "implemented": "scoped signatures, atomic replay checkpoints and authority evaluator with decoder seam; maintained Signal private-payload adapter and encrypted replay state for Node endpoints",
       "pending": [
-        "real authenticated E2EE payload channel",
+        "mobile authenticated E2EE payload channel bindings",
         "rollback-resistant native state"
       ]
     },
@@ -167,10 +167,26 @@
       "implemented": "Owned session composition; native lifecycle invalidation revokes pending operations and wipes cached PCM. Expiry-safe concurrent lease renewal, bounded per-asset queue rights revalidation and terminal close.",
       "pending": [
         "complete iOS endpoint bootstrap and Android JS runtime bridge",
-        "approved authenticated parent channel",
+        "mobile parent bindings and independent profile qualification",
         "protected native state",
         "physical output and independent review"
       ]
+    },
+    {
+      "id": "signal-parent-node-endpoint",
+      "classification": "Protected parent content and private protocol state at authorized Node endpoints only",
+      "producer": "Account-root-verified authorized device",
+      "authorizedRecipients": [
+        "Explicit root-verified listening/control peer endpoints"
+      ],
+      "relayMayDecrypt": false,
+      "implemented": "Maintained libsignal prekey/ratchet channel, scoped inner envelope, one-time keys, encrypted atomic state and membership-aware playback binding",
+      "pending": [
+        "Mobile protocol/runtime bindings",
+        "Hardware key/revision-floor storage",
+        "Deployment/restore and independent profile assessment"
+      ],
+      "source": "registry/signal-parent-integration.json"
     }
   ],
   "softwareEvidence": [
@@ -190,7 +206,11 @@
     "native/android/tests/NativePcmTest.java",
     "tests/playback-session.test.ts",
     "native/integration/playback.test.mjs",
-    "native/ios/Tests/JavaScriptCoreAudioBridgeTests.swift"
+    "native/ios/Tests/JavaScriptCoreAudioBridgeTests.swift",
+    "integrations/signal-parent/tests/channel.test.mjs",
+    "integrations/signal-parent/tests/vault.test.mjs",
+    "integrations/signal-parent/tests/playback.test.mjs",
+    "integrations/signal-parent/tests/native.integration.mjs"
   ],
   "testAdapterLimitations": [
     "payment provider and raw-signature verifier are local test adapters",
@@ -199,7 +219,8 @@
     "operations unit evidence is not a deployed deletion/restore drill or independent review",
     "Native kernel timestamps are synthetic software fixtures, not hardware or acoustic qualification",
     "Swift/JNI tests exercise real language-to-C handoffs, but native platform compilation is not physical device/route or consuming-app qualification.",
-    "JavaScriptCore runtime tests exercise the real VM and Swift/C bridge, with synthetic host routes/clocks. They do not establish the complete endpoint bootstrap, authenticated parent protocol or physical playback."
+    "JavaScriptCore runtime tests exercise the real VM and Swift/C bridge, with synthetic host routes/clocks. They do not establish the complete endpoint bootstrap, authenticated parent protocol or physical playback.",
+    "Signal integration tests use real upstream cryptography and encrypted storage, but synthetic audio routes/clocks and local rights policy; no mobile protocol, field or independent certification evidence."
   ],
   "dependentApplications": {
     "SceneSignal": "not re-assessed in this native implementation round",

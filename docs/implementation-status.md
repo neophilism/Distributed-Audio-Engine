@@ -2,6 +2,16 @@
 
 ## Current checkpoint: October 12, 2026
 
+The [Node Signal parent integration](../integrations/signal-parent/README.md) now
+implements real maintained-library key establishment and ratcheting for private
+manifests and controls, with root-bound membership and encrypted atomic endpoint
+state. Its separate suite contains 31 endpoint/storage tests and 10 additional
+Signal-to-production-C-renderer cases. This supersedes earlier descriptions of the
+Node parent channel as only a decoder seam. Android/iOS protocol bindings, actual
+mobile runtime bootstrap and independent profile review remain pending. No relay
+receives media keys; no deployment or hardware-protected rollback claim is added.
+See [scoped implementation record](../registry/signal-parent-integration.json).
+
 The [owned playback session](playback-session.md) now composes signed authority,
 encrypted delivery, and both portable native sinks. Native route/lifecycle
 changes revoke pending work and cached PCM; explicit signed rejoin is required.
@@ -58,10 +68,10 @@ milestones and build order remain authoritative.
 
 | Area | Current scope | Remaining integration or qualification |
 |---|---|---|
-| Encryption/delivery | Endpoint AES-GCM chunks, private manifests, bounded authenticated ranges, complete-file hash and HTTPS response limits | Authenticated parent key channel, independent crypto/interoperability review |
+| Encryption/delivery | Endpoint AES-GCM chunks, private manifests, bounded authenticated ranges, complete-file hash and HTTPS response limits | Mobile parent bindings, deployed transport and independent crypto/interoperability review |
 | Canonical inputs | Stable v1 valid bytes, Unicode/order vectors, bounded parsing and duplicate/member rejection | Explicit versioned migration when an approved upstream contract changes |
 | Playback | Current-position linear player, rights/recipient expiry, bounded PCM queues, browser graph, shared native PCM kernel, Android AudioTrack/JNI and iOS AVAudioEngine/Swift foreground hosts plus system JavaScriptCore audio bridge | Complete endpoint runtime wiring, exact-format/rate/drift integration, physical route/interruption tests and any separately implemented background policy |
-| Controls/clock | Scoped signatures, leases/emergency supersession, SQLite replay checkpoints, challenged clock intervals | Native protected state, E2EE payload delivery, route-specific output delay and acoustic measurements |
+| Controls/clock | Scoped signatures, leases/emergency supersession, SQLite replay checkpoints, challenged clock intervals | Native protected state, mobile E2EE payload binding, route-specific output delay and acoustic measurements |
 | Output evidence | Active-route invalidation, post-challenge measurement decisions, full-window calibration, immutable conservative intervals and physical-output coverage | Physical calibration/source/output attribution, consented measurement integration and independent qualification |
 | Local coordination/cache | Primary leases, registered opaque transports, bounded failover and quota/expiry SQLite ciphertext cache | LAN discovery/provisioning and replica/restore qualification |
 | Identity/rights | Root-authorized device events, tenant/app roles and explicit layered permissions | Real identity provisioning, root/recovery storage, agreement protocol and rights persistence |
@@ -95,7 +105,7 @@ milestones and build order remain authoritative.
 ## Work remaining
 
 The next software work is Android runtime bridging, complete endpoint bootstrap
-(including qualified web/crypto globals and module loading), and an authenticated
+(including qualified web/crypto globals and module loading), and mobile bindings to the implemented Signal
 parent channel for private manifests, recipient keys and control payloads, plus
 protected native state and explicit rate/channel/drift adapters. Do not describe
 those as merely hardware testing. Native classes intentionally do not implement

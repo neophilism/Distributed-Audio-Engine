@@ -14,6 +14,17 @@ Current implementation and evidence are recorded in [implementation status](impl
 
 Requested order: Distributed-Audio-Engine → SceneSignal → Distributed-Radio-Engine → TrackZero.
 
+## Current implementation sequence (October 12 continuation)
+
+The Node parent-channel implementation in PR #53 is tracked in
+[`registry/signal-parent-integration.json`](../registry/signal-parent-integration.json).
+Its acceptance includes real upstream Signal establishment/ratcheting, root-bound
+membership, encrypted atomic persistence, replay across restart, malformed input,
+and signed/private media-to-native rendering. It refines DAE-03/08/23/34 without
+adding milestones or promoting the integrated production candidate. Next integrate
+bounded deployed ciphertext transport and mobile runtime/protocol bindings, then
+qualify hardware-protected state, physical outputs, operations and independent review.
+
 ## DAE-01 — Architecture, contracts, repository and CI
 
 Dependencies: None. Origin: original (DAE-01).
