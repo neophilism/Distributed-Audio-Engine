@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-12-v3",
+  "version": "2026-10-12-v4",
   "repository": "neophilism/Distributed-Audio-Engine",
   "canonicalRoadmap": "registry/roadmap.json",
   "milestones": [
@@ -30,9 +30,11 @@
     "native/integration/playback.test.mjs",
     "native/integration/pcm_addon.c",
     "native/integration/test.sh",
-    "native/ios/Tests/JavaScriptCoreAudioBridgeTests.swift"
+    "native/ios/Tests/JavaScriptCoreAudioBridgeTests.swift",
+    "tests/safety.test.ts",
+    "tests/player.test.ts"
   ],
-  "evidenceScope": "189 portable tests including 21 session cases; 17 additional in-process JavaScript/production-C-kernel integration cases under UBSan. Real signed controls and AES-GCM media; temporary fixture-provisioned payload key, synthetic routes/clocks and local manifest resolver. Not an approved parent protocol, mobile JS runtime or physical audio evidence. Hosted checks required before merge; see PR checks for exact source binding.",
+  "evidenceScope": "197 portable tests including 23 session cases; 17 additional in-process JavaScript/production-C-kernel integration cases under UBSan. Real signed controls and AES-GCM media; temporary fixture-provisioned payload key, synthetic routes/clocks and local manifest resolver. Not an approved parent protocol, mobile JS runtime or physical audio evidence. Hosted checks required before merge; see PR checks for exact source binding.",
   "pending": [
     "Android JS runtime bridge and configured iOS endpoint runtime (module loading, WebCrypto/web globals, parent channel)",
     "Approved authenticated pairwise/group parent channel and identity provisioning",
@@ -68,10 +70,22 @@
   "iosRuntimeBridge": {
     "implementation": "System JavaScriptCore synchronous audio bridge to IOSAudioHost; typed-array owned copies, native time, events and cleanup",
     "guide": "native/ios/javascriptcore.md",
-    "runtimeTests": "10 macOS JavaScriptCore/Swift/C cases; synthetic host clock/routes. Hosted native CI must execute them before merge. Linux excludes this platform-specific module.",
+    "runtimeTests": "10 macOS JavaScriptCore/Swift/C cases passed alongside 7 existing Swift/C queue cases in native CI run 38305247811 at PR51 head a31b95b539fb574b965974adf109f96617da52c1; source tree 4ebd49bc05370d0a17fc6593889c169fbe542dbb. Synthetic host clock/routes, not physical playback.",
     "actualIOSHostBuild": "Unsigned iOS simulator compilation in hosted native CI",
     "completeEndpointRuntime": false,
     "parentChannelImplemented": false,
     "hardwareValidated": false
+  },
+  "mergedIOSRuntimeBridgePr": 51,
+  "sessionHardening": {
+    "implementation": [
+      "Allow valid renewal during forward playback-clock progress; reject expired or superseded payloads",
+      "Bound queued-asset tracking and recheck every unexpired asset, including previous tracks",
+      "Reject permission contraction that no longer covers queued output",
+      "Generation check after reentrant native scheduling; terminal close despite stop failure"
+    ],
+    "newRegressionCases": 8,
+    "localEvidence": "197 portable tests and 17 JS/C integration cases pass; hosted exact-head checks required before merge",
+    "hardwareStopLatencyMeasured": false
   }
 }

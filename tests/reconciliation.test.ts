@@ -49,11 +49,28 @@ test('full refunds with retained provider fees expose signed liabilities', async
   await assert.rejects(f.engine.reserveTransfer(manager, 'checkout', 'transfer', 'a', '1', 700), /TRANSFER_EXCEEDS_BALANCE/);
 });
 test('concurrent transfer reservations prevent overspending and uncertain dispatch stays pending', async () => {
-  const f = await fixture(); const results = await Promise.allSettled([f.engine.reserveTransfer(manager, 'checkout', 't1', 'a', '20', 500), f.engine.reserveTransfer(manager, 'checkout', 't2', 'a', '20', 500)]);
-  assert.equal(results.filter(x => x.status === 'fulfilled').length, 1); assert.equal(results.filter(x => x.status === 'rejected').length, 1);
-  const first = await f.engine.reserveTransfer(manager, 'checkout', 't1', 'a', '20', 600); assert.equal(first.status, 'pending');
-  assert.equal(f.engine.statement(manager, 'checkout', 600).obligations[0]!.reservedMinor, '20');
-  await assert.rejects(f.engine.reserveTransfer(manager, 'checkout', 't1', 'b', '20', 600), /TRANSFER_ID_CONFLICT/);
+  for (const ids of [['t1', 't2'], ['t2', 't1']]) {
+    const f = await fixture();
+    // The digest before the transaction is asynchronous; invocation order does
+    // not determine which reservation wins. Test both orders and retry only the
+    // actual winner, without weakening the one-reservation balance invariant.
+    const results = await Promise.allSettled(ids.map(id =>
+      f.engine.reserveTransfer(manager, 'checkout', id, 'a', '20', 500)));
+    assert.equal(results.filter(x => x.status === 'fulfilled').length, 1);
+    assert.equal(results.filter(x => x.status === 'rejected').length, 1);
+    const winner = results.find(x => x.status === 'fulfilled');
+    const loser = results.find(x => x.status === 'rejected');
+    assert.ok(winner?.status === 'fulfilled'); assert.ok(loser?.status === 'rejected');
+    assert.equal(loser.reason.code, 'TRANSFER_EXCEEDS_BALANCE');
+    const reserved = winner.value;
+    const loserId = ids.find(id => id !== reserved.id)!;
+    const retry = await f.engine.reserveTransfer(manager, 'checkout', reserved.id, 'a', '20', 600);
+    assert.deepEqual(retry, reserved); assert.equal(retry.status, 'pending');
+    await assert.rejects(f.engine.reserveTransfer(manager, 'checkout', loserId, 'a', '20', 600), /TRANSFER_EXCEEDS_BALANCE/);
+    assert.equal(f.engine.statement(manager, 'checkout', 600).obligations[0]!.reservedMinor, '20');
+    assert.equal(f.engine.statement(manager, 'checkout', 600).obligations[0]!.balanceMinor, '11');
+    await assert.rejects(f.engine.reserveTransfer(manager, 'checkout', reserved.id, 'b', '20', 600), /TRANSFER_ID_CONFLICT/);
+  }
 });
 test('confirmed transfer failure is visible, and success reduces the available balance once', async () => {
   const f = await fixture(); await f.engine.reserveTransfer(manager, 'checkout', 't1', 'a', '20', 500);

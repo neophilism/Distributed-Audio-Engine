@@ -41,6 +41,9 @@ restart output or stop a newer generation. The native bridge must synchronously
 copy the PCM buffer before returning, as before.
 
 Every pump checks authority and rights, including when the native queue is full.
+It retains at most 64 queued asset end times and rechecks every unexpired queued
+asset, not only the next timeline target. Revoked or shortened permission cancels
+the queue conservatively; expired prior tracks no longer gate unrelated output.
 Rights denial cancels the existing queue at the next pump; asynchronous rights or
 membership revocation notifications should call `stop` immediately. Queued PCM
 is also bounded by the permission/recipient expiry that authorized it. An expired
@@ -54,7 +57,10 @@ The original exact-sequence verifier still rejects gaps; transport must preserve
 control order. Adapter promises cannot be forcibly terminated: a new lease is
 rejected as busy until an outstanding decoder settles, even after stop. An
 application must bound its adapter network timeouts and handle the rejection.
-No internal timer or automatic reconnection is installed by this class.
+Normal forward clock progress from pumping does not invalidate a renewal still
+being decoded. Its expiry is checked against the latest observed time before
+commit and again by the owning session. A superseded or already expired request
+cannot rearm output. No internal timer or automatic reconnection is installed.
 
 Native callbacks enforce their own deadlines even when JavaScript is suspended.
 The application must close the OS host it owns as well as the session. Driver
