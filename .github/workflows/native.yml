@@ -1,0 +1,25 @@
+name: Native audio CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: native-audio-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pcm-core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Build with memory and undefined-behavior sanitizers
+        run: >-
+          cmake -S native/core -B /tmp/dae-native -DCMAKE_BUILD_TYPE=Debug
+          '-DCMAKE_C_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer'
+      - run: cmake --build /tmp/dae-native --parallel 2
+      - name: Native contract and adversarial tests
+        env:
+          ASAN_OPTIONS: detect_leaks=1
+        run: ctest --test-dir /tmp/dae-native --output-on-failure --verbose

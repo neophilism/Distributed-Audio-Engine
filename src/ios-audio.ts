@@ -13,7 +13,9 @@ export type IOSAudioEvent =
   | { type: 'completed'; id: string };
 
 export interface IOSPcmRequest {
+  /** Opaque per-dispatch identity; echo it in completion events, never a clip label. */
   id: string;
+  routeGeneration: number;
   samples: Float32Array;
   sampleRate: number;
   channels: number;
@@ -44,6 +46,10 @@ export interface IOSSinkOptions {
 interface IOSFormat { route: Readonly<OutputRoute>; sampleRate: number; maxChannels: number }
 interface Voice {
   id: string;
+  nativeId: string;
+  gainCeiling: number;
+  nativeFadeStartMs: number;
+  nativeDeadlineMs: number;
   startsAtMs: number;
   endsAtMs: number;
   fadeStartMs: number;
@@ -57,6 +63,9 @@ export class IOSAudioSink {
   private readonly maxQueuedSamples: number;
   private readonly lifecycle: OutputLifecycle;
   private readonly voices = new Map<string, Voice>();
+  private readonly nativeVoices = new Map<string, string>();
+  private readonly dispatchPrefix = globalThis.crypto.randomUUID();
+  private nextDispatch = 0;
   private readonly unsubscribe: () => void;
   private format: IOSFormat | undefined;
   private queuedSamples = 0;
@@ -81,7 +90,8 @@ export class IOSAudioSink {
   private observe(): { nowMs: number; hostTimeMs: number } {
     invariant(!this.closed, 'IOS_AUDIO_SINK_CLOSED');
     const nowMs = this.options.nowUnixMs(), hostTimeMs = this.options.nowHostTimeMs();
-    integer(nowMs, this.lastUnixMs); finite(hostTimeMs, this.lastHostTimeMs);
+    try { integer(nowMs, this.lastUnixMs); finite(hostTimeMs, this.lastHostTimeMs); }
+    catch (error) { this.format = undefined; this.lifecycle.interrupt(); throw error; }
     this.lastUnixMs = nowMs; this.lastHostTimeMs = hostTimeMs;
     return { nowMs, hostTimeMs };
   }
@@ -113,16 +123,20 @@ export class IOSAudioSink {
     this.format = undefined; this.lifecycle.disconnect();
   }
 
-  private complete(id: string): void {
+  private complete(nativeId: string): void {
+    const id = this.nativeVoices.get(nativeId);
+    if (!id) return;
     const voice = this.voices.get(id);
-    if (!voice) return;
+    if (!voice || voice.nativeId !== nativeId) return;
+    this.nativeVoices.delete(nativeId);
     this.voices.delete(id); this.queuedSamples -= voice.samples;
   }
 
   private cancel(voice: Voice): void {
-    if (!this.voices.delete(voice.id)) return;
+    if (this.voices.get(voice.id) !== voice) return;
+    this.voices.delete(voice.id); this.nativeVoices.delete(voice.nativeId);
     this.queuedSamples -= voice.samples;
-    this.bridge.cancel(voice.id);
+    this.bridge.cancel(voice.nativeId);
   }
 
   schedule(id: string, audio: PcmAudio, targetUnixMs: number, offsetFrames = 0, requestedFrames = audio.samples.length / audio.channels - offsetFrames) {
@@ -147,19 +161,27 @@ export class IOSAudioSink {
     invariant(this.queuedSamples + samples <= this.maxQueuedSamples, 'IOS_AUDIO_QUEUE_LIMIT');
     const pcm = audio.samples.slice(offsetFrames * audio.channels, (offsetFrames + frames) * audio.channels);
     const deadlineMs = Math.min(endsAtMs, envelope.deadlineMs);
-    const voice: Voice = { id, startsAtMs: targetUnixMs, endsAtMs, fadeStartMs: envelope.fadeStartMs, deadlineMs, samples };
-    this.voices.set(id, voice); this.queuedSamples += samples;
+    integer(++this.nextDispatch, 1);
+    const nativeId = `${this.dispatchPrefix}-${this.nextDispatch}`;
+    const nativeFadeStartMs = hostTimeMs + Math.max(0, envelope.fadeStartMs - nowMs);
+    const nativeDeadlineMs = hostTimeMs + deadlineMs - nowMs;
+    const voice: Voice = { id, nativeId, gainCeiling: envelope.gainCeiling, nativeFadeStartMs, nativeDeadlineMs,
+      startsAtMs: targetUnixMs, endsAtMs, fadeStartMs: envelope.fadeStartMs, deadlineMs, samples };
+    this.voices.set(id, voice); this.nativeVoices.set(nativeId, id); this.queuedSamples += samples;
     try {
       this.bridge.enqueue({
-        id, samples: pcm, sampleRate: audio.sampleRate, channels: audio.channels, frames,
+        id: nativeId, routeGeneration: format.route.generation,
+        samples: pcm, sampleRate: audio.sampleRate, channels: audio.channels, frames,
         startAtHostTimeMs: hostTimeMs + targetUnixMs - nowMs,
         gainCeiling: envelope.gainCeiling,
-        fadeStartHostTimeMs: hostTimeMs + Math.max(0, envelope.fadeStartMs - nowMs),
-        stopAtHostTimeMs: hostTimeMs + deadlineMs - nowMs
+        fadeStartHostTimeMs: nativeFadeStartMs,
+        stopAtHostTimeMs: nativeDeadlineMs
       });
     } catch (error) {
-      this.voices.delete(id); this.queuedSamples -= samples;
-      try { this.bridge.cancel(id); } catch { /* Local state is already fail-closed. */ }
+      if (this.voices.get(id) === voice) {
+        this.voices.delete(id); this.nativeVoices.delete(nativeId); this.queuedSamples -= samples;
+      }
+      try { this.bridge.cancel(nativeId); } catch { /* Local state is already fail-closed. */ }
       throw error;
     } finally { pcm.fill(0); }
     return { frames, startsAtMs: targetUnixMs, endsAtMs, alignment: 'timeline-only' as const };
@@ -175,12 +197,10 @@ export class IOSAudioSink {
         if (voice.endsAtMs <= nowMs || voice.startsAtMs >= envelope.deadlineMs) { this.cancel(voice); continue; }
         voice.deadlineMs = Math.min(voice.deadlineMs, envelope.deadlineMs);
         voice.fadeStartMs = Math.min(voice.fadeStartMs, envelope.fadeStartMs, voice.deadlineMs);
-        this.bridge.updateEnvelope(
-          voice.id,
-          envelope.gainCeiling,
-          hostTimeMs + Math.max(0, voice.fadeStartMs - nowMs),
-          hostTimeMs + voice.deadlineMs - nowMs
-        );
+        voice.gainCeiling = Math.min(voice.gainCeiling, envelope.gainCeiling);
+        voice.nativeFadeStartMs = Math.min(voice.nativeFadeStartMs, hostTimeMs + Math.max(0, voice.fadeStartMs - nowMs));
+        voice.nativeDeadlineMs = Math.min(voice.nativeDeadlineMs, hostTimeMs + voice.deadlineMs - nowMs);
+        this.bridge.updateEnvelope(voice.nativeId, voice.gainCeiling, voice.nativeFadeStartMs, voice.nativeDeadlineMs);
       }
     } catch (error) { this.stopAll(); throw error; }
   }
@@ -188,13 +208,13 @@ export class IOSAudioSink {
   setUserGain(gain: number): void { this.authority.setUserGain(gain); this.refreshAuthority(); }
   mute(muted = true): void { this.authority.mute(muted); this.refreshAuthority(); }
   stopAll(): void {
-    this.voices.clear(); this.queuedSamples = 0;
+    this.voices.clear(); this.nativeVoices.clear(); this.queuedSamples = 0;
     this.bridge.cancelAll();
   }
   leave(): void { this.authority.leave(); this.stopAll(); }
   close(): void {
     if (this.closed) return;
-    this.unsubscribe(); this.format = undefined; this.authority.leave();
-    try { this.lifecycle.disconnect(); } finally { this.closed = true; }
+    this.closed = true; this.format = undefined; this.authority.leave();
+    try { this.lifecycle.disconnect(); } finally { this.unsubscribe(); }
   }
 }

@@ -56,13 +56,13 @@ test('focus, disconnect and route changes invalidate queued output before reacti
   f.emit({ type: 'interrupted', reason: 'focus-loss' }); assert.equal(f.sink.pending, 0); assert.equal(f.sink.outputState().state, 'interrupted');
   assert.throws(() => f.sink.schedule('b', audio, 1100), /UNAVAILABLE/);
   f.emit({ type: 'route-active', route: { ...route, generation: 3 }, sampleRate: 8000, maxChannels: 2 }); f.sink.schedule('b', audio, 1100);
-  f.emit({ type: 'completed', id: 'b' }); assert.equal(f.sink.pending, 0);
+  f.emit({ type: 'completed', id: f.bridge.copied.at(-1)!.id }); assert.equal(f.sink.pending, 0);
   f.emit({ type: 'disconnected' }); assert.equal(f.sink.outputState().state, 'unavailable');
 });
 test('authority refresh contracts native deadlines and never extends queued output', async () => {
   const f = await fixture(); f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 }); f.sink.schedule('a', audio, 1200);
   f.setTime(1100, 5100); f.sink.setUserGain(0.2);
-  assert.deepEqual(f.bridge.updates.at(-1), ['a', 0.2, 6000, 6000]);
+  assert.deepEqual(f.bridge.updates.at(-1), [f.bridge.copied[0]!.id, 0.2, 6000, 6000]);
   f.sink.mute(); assert.equal(f.sink.pending, 0); assert.ok(f.bridge.cancelAllCalls >= 2);
 });
 test('native enqueue and envelope failures leave no locally live output', async () => {
@@ -76,4 +76,33 @@ test('duplicate route events are idempotent while clock rollback and closure fai
   const calls = f.bridge.cancelAllCalls; f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 }); assert.equal(f.bridge.cancelAllCalls, calls);
   f.sink.schedule('a', audio, 1100); f.setTime(900, 4900); assert.throws(() => f.sink.refreshAuthority());
   f.sink.close(); f.sink.close(); assert.equal(f.bridge.listener, undefined); assert.throws(() => f.sink.schedule('b', audio, 1100), /CLOSED/);
+});
+
+test('android native completions cannot retire a reused logical clip', async () => {
+  const f = await fixture(); f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
+  f.sink.schedule('clip', audio, 1100, 0, 800);
+  const first = f.bridge.copied.at(-1)!;
+  assert.equal(first.routeGeneration, 1);
+  f.emit({ type: 'completed', id: first.id });
+  f.sink.schedule('clip', audio, 1100, 0, 800);
+  const second = f.bridge.copied.at(-1)!;
+  assert.notEqual(first.id, second.id);
+  f.emit({ type: 'completed', id: first.id }); assert.equal(f.sink.pending, 1);
+  f.emit({ type: 'completed', id: second.id }); assert.equal(f.sink.pending, 0);
+});
+test('android queued gain and native deadlines cannot increase during refresh', async () => {
+  const f = await fixture(); f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
+  f.sink.schedule('clip', audio, 1200);
+  f.setTime(1100, 5100); f.sink.setUserGain(0.2);
+  const first = f.bridge.updates.at(-1)!;
+  f.setTime(1200, 5300); f.sink.setUserGain(0.6);
+  const second = f.bridge.updates.at(-1)!;
+  assert.equal(second[1], 0.2); assert.ok(Number(second[2]) <= Number(first[2]));
+  assert.ok(Number(second[3]) <= Number(first[3]));
+});
+test('android clock rollback invalidates rather than leaving native audio queued', async () => {
+  const f = await fixture(); f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
+  f.sink.schedule('clip', audio, 1100); f.setTime(900, 4900);
+  assert.throws(() => f.sink.refreshAuthority());
+  assert.equal(f.sink.pending, 0); assert.equal(f.sink.outputState().state, 'interrupted');
 });
