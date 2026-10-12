@@ -39,6 +39,8 @@ export interface IOSAudioBridge {
 export interface IOSSinkOptions {
   nowUnixMs: () => number;
   nowHostTimeMs: () => number;
+  /** Revokes the owning endpoint session on route/lifecycle invalidation. */
+  onInvalidated?: () => void;
   maxAheadMs?: number;
   maxQueuedSamples?: number;
 }
@@ -78,7 +80,9 @@ export class IOSAudioSink {
     this.maxQueuedSamples = options.maxQueuedSamples ?? 4 * 1024 * 1024;
     integer(this.maxAheadMs, 1, 5000);
     integer(this.maxQueuedSamples, 1, 16 * 1024 * 1024);
-    this.lifecycle = new OutputLifecycle(() => this.stopAll());
+    this.lifecycle = new OutputLifecycle(() => {
+      try { this.stopAll(); } finally { options.onInvalidated?.(); }
+    });
     this.unsubscribe = bridge.subscribe(event => this.onEvent(event));
     invariant(typeof this.unsubscribe === 'function', 'INVALID_IOS_SUBSCRIPTION');
   }

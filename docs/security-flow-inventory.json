@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-12-v4",
+  "version": "2026-10-12-v5",
   "standardBasis": {
     "repository": "neophilism/End-To-End-Everywhere-Security-Architecture-Standard",
     "commit": "dea8f54cab9130da86a71f36de553766a978daf2",
@@ -154,6 +154,22 @@
         "network transport",
         "PCM logging or disk persistence",
         "hardware identity inferred from a Bluetooth name"
+      ]
+    },
+    {
+      "id": "owned-endpoint-playback-session",
+      "classification": "endpoint-only protected plaintext and authority state",
+      "producer": "authenticated endpoint player and payload decoder",
+      "authorizedRecipients": [
+        "same endpoint native audio host"
+      ],
+      "relayMayDecrypt": false,
+      "implemented": "Owned session composition; native lifecycle invalidation revokes pending operations and wipes cached PCM",
+      "pending": [
+        "actual mobile JS runtime bridge",
+        "approved authenticated parent channel",
+        "protected native state",
+        "physical output and independent review"
       ]
     }
   ],
