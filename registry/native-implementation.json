@@ -1,0 +1,186 @@
+{
+  "version": "2026-10-12-v1",
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "canonicalRoadmap": "registry/roadmap.json",
+  "scope": "Native playback implementation and evidence supplement; no milestone or release promotion",
+  "supersedes": "Native-host implementation descriptions in the historical 2026-10-10-v7 docs/roadmap.json snapshot only; original scope/dependencies and all unpassed gates remain unchanged.",
+  "githubPrs": [
+    44,
+    45,
+    46,
+    47
+  ],
+  "milestones": {
+    "DAE-09": {
+      "githubPrs": [
+        36,
+        45,
+        47
+      ],
+      "partial": true,
+      "implemented": "Foreground Android AudioTrack host, actual routed-device/timestamp observations, bounded JNI PCM, focus/noisy/Activity invalidation; Java 17, Android API 26+, arm64-v8a/x86_64.",
+      "pending": [
+        "consumer runtime bridge",
+        "actual signed-authority-to-native integration",
+        "physical route and interruption matrix",
+        "native protected state",
+        "background playback if required by the product"
+      ]
+    },
+    "DAE-10": {
+      "githubPrs": [
+        37,
+        45,
+        46
+      ],
+      "partial": true,
+      "implemented": "Foreground iOS AVAudioSession/AVAudioEngine/AVAudioSourceNode host, bounded Swift/C PCM, current-route observations and session/lifecycle fault invalidation; iOS 15+.",
+      "pending": [
+        "consumer runtime bridge",
+        "actual signed-authority-to-native integration",
+        "physical route and interruption matrix",
+        "native protected state",
+        "background playback if required by the product"
+      ]
+    },
+    "DAE-11": {
+      "githubPrs": [
+        21,
+        23,
+        45,
+        46,
+        47
+      ],
+      "partial": true,
+      "implemented": "Shared-clock primitives plus native monotonic/host sample timelines, Android 32-bit frame unwrapping and discontinuity gates.",
+      "pending": [
+        "measured route-specific output delay",
+        "supported drift correction and resampling integration",
+        "physical acoustic synchronization measurements",
+        "six-hour supported-device soaks"
+      ]
+    },
+    "DAE-12": {
+      "githubPrs": [
+        26,
+        46,
+        47
+      ],
+      "partial": true,
+      "implemented": "Native active-route generation observations and conservative output classification; ambiguous Bluetooth/USB outputs remain unknown.",
+      "pending": [
+        "calibrated physical output/source attribution",
+        "device support matrix",
+        "consented measurement integration"
+      ]
+    },
+    "DAE-27": {
+      "githubPrs": [
+        12,
+        45,
+        46,
+        47
+      ],
+      "implemented": "Native sample-timeline gain/fade/deadline contraction, fault latching, stale completion isolation and lifecycle invalidation.",
+      "pending": [
+        "measured audible stop latency",
+        "real authority/control/key-channel integration",
+        "independent security review"
+      ]
+    },
+    "DAE-23": {
+      "githubPrs": [
+        44,
+        45,
+        46,
+        47
+      ],
+      "status": "planned",
+      "groundworkOnly": true,
+      "pending": [
+        "integrated authenticated media-to-native consumer",
+        "evidence/commerce/entitlement integration",
+        "hardware matrix and six-hour soaks",
+        "operations qualification"
+      ]
+    },
+    "DAE-32": {
+      "githubPrs": [
+        44
+      ],
+      "status": "planned",
+      "groundworkOnly": true,
+      "implemented": "Checksum-bound source, built npm development package and native build instructions.",
+      "pending": [
+        "stable version and publication",
+        "independent approvals",
+        "artifact-bound complete release evidence"
+      ]
+    }
+  },
+  "softwareChecks": [
+    {
+      "suite": "portable-core",
+      "count": 168,
+      "evidence": "Engine CI: npm run check and dependency audit",
+      "limitations": [
+        "native bridge doubles and browser graph doubles are not physical output"
+      ]
+    },
+    {
+      "suite": "native-C",
+      "count": 13,
+      "adversarialSequences": 10000,
+      "evidence": "native/core/tests/pcm_test.c with ASan/UBSan, leaks and concurrent render/control",
+      "limitations": [
+        "synthetic timestamps, no physical output"
+      ]
+    },
+    {
+      "suite": "Swift-C",
+      "count": 7,
+      "evidence": "native/ios/Tests/NativePCMQueueTests.swift; macOS Swift tests and unsigned iOS simulator compilation",
+      "limitations": [
+        "simulator build is not iPhone playback qualification"
+      ]
+    },
+    {
+      "suite": "Java-JNI-C",
+      "count": 7,
+      "evidence": "native/android/test-jni.sh; Android compile/lint and packaged native ABIs",
+      "limitations": [
+        "JVM tests and Android compilation are not device qualification"
+      ]
+    }
+  ],
+  "claims": {
+    "nativeSourceImplemented": true,
+    "consumerIntegrated": false,
+    "deployed": false,
+    "fieldValidated": false,
+    "backgroundPlaybackQualified": false,
+    "stableReleased": false,
+    "independentlyReviewed": false,
+    "e2eesaConformant": false
+  },
+  "spending": "No paid services, paid APIs, app signing or registry publication created by this implementation round.",
+  "nextExecutionOrder": [
+    "Finish exact-runtime consumer bridge and authority/media/key-channel integration without inventing a key-establishment protocol.",
+    "Integrate explicit rate/channel/drift adapters, protected native state and recipient lifecycle.",
+    "Run physical route/interruption/lock-screen and six-hour soak matrix with actual measurements.",
+    "Complete provider sandbox/fulfillment, persistence and operations drills, then artifact-bound independent review and release."
+  ],
+  "verifiedImplementationTree": "3584d20b919475ed4547ee4e20a6c49c34c55ae8",
+  "hostedVerification": {
+    "head": "b4a60348df4383e797ec9d52374f7a0ab8ca6681",
+    "engineRun": 38281443313,
+    "nativeRun": 38281442769,
+    "conclusions": "success",
+    "nativeJobs": [
+      "pcm-core",
+      "swift-host",
+      "android-host"
+    ],
+    "mergedIn": "9e8459c44b6327eedf8fbb9a558a9ab3c598815d"
+  }
+}
