@@ -21,6 +21,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run check
       - run: npm audit --audit-level=moderate
+      - name: Signed endpoint-to-native integration
+        run: sh native/integration/test.sh
       - name: Assemble development artifacts
         shell: bash
         run: |

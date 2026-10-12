@@ -5,8 +5,10 @@
 The [owned playback session](playback-session.md) now composes signed authority,
 encrypted delivery, and both portable native sinks. Native route/lifecycle
 changes revoke pending work and cached PCM; explicit signed rejoin is required.
-These tests use native bridge and parent decoder doubles. They do not complete
-mobile runtime wiring or the authenticated parent key channel. See
+The 21 portable session tests use native bridge and parent decoder doubles.
+An additional 17 [native integration cases](../native/integration/README.md)
+exercise real JavaScript-to-C rendering, using fixture keys and synthetic routes.
+Neither completes mobile runtime wiring or the authenticated parent key channel. See
 [`registry/playback-integration.json`](../registry/playback-integration.json).
 
 The engine now includes real foreground Android and iOS playback host source,
