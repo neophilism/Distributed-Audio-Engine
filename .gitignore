@@ -12,3 +12,4 @@ native/android/library/build/
 native/android/local.properties
 /.build/
 /.swiftpm/
+native/android/library/.cxx/

@@ -37,3 +37,32 @@ jobs:
           xcodebuild -quiet -scheme DistributedAudioHost \
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath /tmp/dae-ios CODE_SIGNING_ALLOWED=NO build
+  android-host:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Use installed Java 17
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+          echo "$JAVA_HOME_17_X64/bin" >> "$GITHUB_PATH"
+      - name: Java JNI contract and lifetime tests
+        run: sh native/android/test-jni.sh
+      - name: Install pinned Android build components using existing runner licenses
+        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
+      - name: Compile and lint the Android host and native ABIs
+        run: sh native/android/build.sh
+      - name: Bind development AAR to source and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/dae-android-artifact
+          cp native/android/library/build/outputs/aar/library-debug.aar /tmp/dae-android-artifact/
+          git rev-parse HEAD > /tmp/dae-android-artifact/SOURCE_COMMIT
+          (cd /tmp/dae-android-artifact && sha256sum library-debug.aar SOURCE_COMMIT > SHA256SUMS)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-host-development-${{ github.sha }}
+          path: /tmp/dae-android-artifact/
+          if-no-files-found: error
+          retention-days: 7
