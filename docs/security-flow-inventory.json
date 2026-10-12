@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-12-v7",
+  "version": "2026-10-12-v8",
   "standardBasis": {
     "repository": "neophilism/End-To-End-Everywhere-Security-Architecture-Standard",
     "commit": "dea8f54cab9130da86a71f36de553766a978daf2",
@@ -187,6 +187,23 @@
         "Deployment/restore and independent profile assessment"
       ],
       "source": "registry/signal-parent-integration.json"
+    },
+    {
+      "id": "tls-ciphertext-relay",
+      "classification": "Public prekeys, ciphertext and explicit routing/retention metadata; TLS keys are transport keys only",
+      "producer": "Root-verified Signal/attachment creator endpoints",
+      "authorizedRecipients": [
+        "Configured ciphertext relay for ciphertext and metadata only",
+        "Explicit listening endpoints decrypt only after membership and control checks"
+      ],
+      "relayMayDecrypt": false,
+      "implemented": "TLS-only routing, immutable ciphertext chunks, public bundle takes and persistent expiring mailbox records",
+      "pending": [
+        "Deployed TLS identity and routing credentials",
+        "Endpoint crash journal",
+        "Mobile clients, physical qualification and independent review"
+      ],
+      "source": "registry/relay-integration.json"
     }
   ],
   "softwareEvidence": [
@@ -210,7 +227,11 @@
     "integrations/signal-parent/tests/channel.test.mjs",
     "integrations/signal-parent/tests/vault.test.mjs",
     "integrations/signal-parent/tests/playback.test.mjs",
-    "integrations/signal-parent/tests/native.integration.mjs"
+    "integrations/signal-parent/tests/native.integration.mjs",
+    "services/ciphertext-relay/tests/store.test.mjs",
+    "services/ciphertext-relay/tests/https.test.mjs",
+    "services/ciphertext-relay/tests/launcher.test.mjs",
+    "services/ciphertext-relay/tests/network.integration.mjs"
   ],
   "testAdapterLimitations": [
     "payment provider and raw-signature verifier are local test adapters",

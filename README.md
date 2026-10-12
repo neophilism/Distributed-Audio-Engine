@@ -23,3 +23,5 @@ Native endpoint implementation and remaining platform gates are tracked in [nati
 Use [owned playback sessions](docs/playback-session.md) to coordinate signed authority, encrypted delivery and native lifecycle invalidation. Complete mobile runtime and parent-protocol bindings remain pending; the separate Node integration below supplies the implemented endpoint channel.
 
 A separate [Node Signal parent adapter](integrations/signal-parent/README.md) now delivers private manifests and controls with actual upstream key exchange, root-verified peers and encrypted atomic endpoint state. Its mobile bindings and independent profile review remain pending; the portable core gains no third-party runtime dependency.
+
+The [TLS ciphertext relay](services/ciphertext-relay/README.md) provides persistent public-key, private-message ciphertext and encrypted audio-chunk delivery for Node endpoints. Network integration tests now traverse real TLS sockets through to C rendering. It is a runnable service with explicit operator configuration, not an existing deployment or mobile release.
