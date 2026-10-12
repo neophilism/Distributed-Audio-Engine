@@ -48,6 +48,7 @@ export class EndpointProgramPlayer {
   private readonly leadMs: number;
   private cached: CachedAsset | undefined;
   private cursor: bigint | undefined;
+  private readonly queuedAssets = new Map<string, number>();
   private abort: AbortController | undefined;
   private generation = 0;
   private scheduleSequence = 0;
@@ -82,11 +83,25 @@ export class EndpointProgramPlayer {
     invariant(Object.keys(permission).sort().join(',') === 'allowed,validUntilMs', 'INVALID_PLAYBACK_PERMISSION');
     integer(permission.validUntilMs, nowMs + 1, nowMs + 300000); return permission.validUntilMs;
   }
+  private async recheckQueuedRights(generation: number, signal: AbortSignal): Promise<void> {
+    for (const [assetId, endsAtMs] of this.queuedAssets) {
+      const atMs = this.now();
+      if (endsAtMs <= atMs) { this.queuedAssets.delete(assetId); continue; }
+      const permission = await this.options.authorizePlayback(assetId, atMs, signal);
+      this.check(generation, signal);
+      const nowMs = this.now();
+      if (endsAtMs <= nowMs) { this.queuedAssets.delete(assetId); continue; }
+      // The portable sink cannot selectively shorten a previously queued asset.
+      // Conservatively stop everything if its permission no longer covers it.
+      invariant(this.permissionUntil(permission, nowMs) >= endsAtMs, 'QUEUED_PLAYBACK_PERMISSION_REDUCED');
+    }
+  }
   async pump(): Promise<PumpResult> {
     invariant(!this.closed, 'PLAYER_CLOSED'); if (this.abort) return { status: 'busy' };
     const abort = new AbortController(); this.abort = abort; const generation = this.generation;
     let decoded: PcmAudio | undefined;
     try {
+      await this.recheckQueuedRights(generation, abort.signal); this.check(generation, abort.signal);
       const initialNow = this.now(); const initial = this.target(initialNow);
       const initialPermission = await this.options.authorizePlayback(initial.assetId, initialNow, abort.signal); this.check(generation, abort.signal);
       this.permissionUntil(initialPermission, this.now());
@@ -122,8 +137,11 @@ export class EndpointProgramPlayer {
       invariant(cache.descriptor.frames === target.clipFrames && cache.descriptor.sampleRate === target.sampleRate, 'TIMELINE_ASSET_MISMATCH');
       const authorizedFrames = Math.floor((validUntilMs - startsAtMs) * target.sampleRate / 1000);
       const frames = Math.min(target.remainingFrames, authorizedFrames); invariant(frames > 0, 'ASSET_AUTHORIZATION_EXPIRED');
+      invariant(this.queuedAssets.has(target.assetId) || this.queuedAssets.size < 64, 'QUEUED_ASSET_LIMIT');
       const result = this.options.sink.schedule(`playback-${++this.scheduleSequence}`, cache.audio, startsAtMs, target.offsetFrames, frames);
-      integer(result.frames, 1, frames);
+      this.check(generation, abort.signal); integer(result.frames, 1, frames);
+      const endsAtMs = startsAtMs + result.frames * 1000 / target.sampleRate;
+      this.queuedAssets.set(target.assetId, Math.max(this.queuedAssets.get(target.assetId) ?? 0, endsAtMs));
       this.cursor = target.absoluteFrame + BigInt(result.frames);
       return { status: 'scheduled', assetId: target.assetId, absoluteFrame: target.absoluteFrame, frames: result.frames, alignment: 'timeline-only' };
     } catch (error) {
@@ -133,6 +151,6 @@ export class EndpointProgramPlayer {
     } finally { decoded?.samples.fill(0); if (this.abort === abort) this.abort = undefined; }
   }
   /** Call before lifecycle/output changes. Late fetches cannot rearm output. */
-  interrupt(): void { this.generation++; this.abort?.abort(); this.abort = undefined; this.cursor = undefined; this.clearCache(); this.options.sink.stopAll(); }
-  close(): void { if (this.closed) return; this.interrupt(); this.closed = true; }
+  interrupt(): void { this.generation++; this.abort?.abort(); this.abort = undefined; this.cursor = undefined; this.queuedAssets.clear(); this.clearCache(); this.options.sink.stopAll(); }
+  close(): void { if (this.closed) return; this.closed = true; this.interrupt(); }
 }

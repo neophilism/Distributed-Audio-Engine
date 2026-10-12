@@ -48,3 +48,21 @@ test('leaving also supersedes a lease whose signature verification is still runn
   const authority=new PlaybackAuthority(verifier,async()=>policy,0.8);const signed=await signControl(f.body,f.keys.privateKey);
   const renewal=authority.renew(signed,1000);authority.leave();await assert.rejects(renewal);authority.mute(false);assert.equal(authority.gainAt(1100),0);
 });
+
+test('a decrypted renewal already expired at the latest playback observation cannot replace a live lease', async () => {
+  const f = await fixture(policy);
+  const verifier = new ControlVerifier(scope, new Map([['key', f.keys.publicKey]]), new Set(['lease']), new MemoryCheckpointStore());
+  let entered!: () => void, release!: (value: LeasePolicy) => void;
+  const started = new Promise<void>(resolve => { entered = resolve; });
+  let calls = 0;
+  const authority = new PlaybackAuthority(verifier, async () => {
+    if (++calls === 1) return policy;
+    entered(); return new Promise<LeasePolicy>(resolve => { release = resolve; });
+  }, 0.8);
+  await authority.renew(await signControl(f.body, f.keys.privateKey), 1000);
+  const renewal = authority.renew(await signControl({ ...f.body, sequence: 2 }, f.keys.privateKey), 1100);
+  const rejected = assert.rejects(renewal, /AUTHORITY_LEASE_EXPIRED/);
+  await started; assert.equal(authority.gainAt(1600), 0.6);
+  release({ ...policy, expiresAtMs: 1500, fadeMs: 100 }); await rejected;
+  assert.equal(authority.gainAt(1601), 0.6);
+});

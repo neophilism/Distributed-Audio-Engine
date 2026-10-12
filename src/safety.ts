@@ -24,8 +24,11 @@ export class PlaybackAuthority {
     const policy=structuredClone(payload) as LeasePolicy;
     integer(policy.expiresAtMs,nowMs+1,body.expiresAtMs);integer(policy.stopAtMs,nowMs+1);integer(policy.fadeMs,1,30000);finite(policy.maxLinearGain,0,this.consentedGainCeiling);
     invariant(policy.fadeMs<=Math.min(policy.expiresAtMs,policy.stopAtMs)-nowMs,'LEASE_TOO_SHORT_FOR_FADE');
-    invariant(nowMs>=this.lastTimeMs,'AUTHORITY_CONCURRENT_TIME_ADVANCE');
     invariant(generation===this.operationGeneration,'AUTHORITY_CONTROL_SUPERSEDED');
+    // A playback pump may observe a later time while verification/decryption is
+    // pending. Normal forward progress is not rollback; the new lease must still
+    // be live at the latest observation before it replaces the previous lease.
+    invariant(Math.min(policy.expiresAtMs,policy.stopAtMs)>this.lastTimeMs,'AUTHORITY_LEASE_EXPIRED');
     this.lease=policy;
   }
   async emergencyStop(control:SignedControl,nowMs:number):Promise<void>{

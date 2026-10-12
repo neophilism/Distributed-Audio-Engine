@@ -14,6 +14,11 @@ The shared C kernel and hardened TypeScript dispatch are in PR #45. The actual
 foreground-only and require explicit restart/rejoin after interruption or app
 suspension. The current evidence and remaining gates are recorded in
 [`registry/native-implementation.json`](../registry/native-implementation.json).
+PR #49 composes signed authority and encrypted delivery with these lifecycles;
+PR #50 tests the full software path through real C rendering. PR #51 adds the
+[system JavaScriptCore audio bridge](ios/javascriptcore.md) to the iOS host, with
+10 real runtime tests. Complete endpoint bootstrap and authenticated parent key
+delivery remain pending. See [integration progress](../registry/playback-integration.json).
 No device-support, acoustic, background-playback or production claim follows
 from these implementations or their build checks.
 

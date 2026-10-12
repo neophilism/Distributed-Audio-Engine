@@ -83,3 +83,54 @@ test('fractional frame scheduling preserves a continuous sample cursor across qu
   const frame = 12345n; assert.equal(timeline.targetAtFrame(frame).offsetFrames, 12345); assert.equal(timeline.timeAtFrame(frame), 1000 + 12345 * 1000 / 44100);
   assert.throws(() => timeline.timeAtFrame(10n ** 30n)); assert.throws(() => timeline.targetAtFrame(-1n));
 });
+
+test('revoking the still-queued previous asset stops playback even when the cursor targets the next asset', async () => {
+  let denied = false;
+  const f = await fixture({ authorizePlayback: async id => denied && id === 'asset-a'
+    ? { allowed: false } : { allowed: true, validUntilMs: 10000 } });
+  await f.player.pump(); f.setNow(1600); await f.player.pump();
+  denied = true;
+  await assert.rejects(f.player.pump(), /RIGHTS_DENIED/);
+  assert.equal(f.stops, 1); assert.equal(f.scheduled.length, 2);
+});
+test('full-queue checks cover every unexpired queued asset and fail closed on shortened permission', async () => {
+  let shortened = false;
+  const f = await fixture({ authorizePlayback: async id => ({ allowed: true,
+    validUntilMs: shortened && id === 'asset-a' ? 1950 : 10000 }) });
+  await f.player.pump(); f.setNow(1600); await f.player.pump(); f.setNow(1900); await f.player.pump();
+  shortened = true;
+  await assert.rejects(f.player.pump(), /QUEUED_PLAYBACK_PERMISSION_REDUCED/);
+  assert.equal(f.stops, 1);
+});
+test('expired queued assets do not deny unrelated future playback', async () => {
+  let denied = false;
+  const checked: string[] = [];
+  const f = await fixture({ authorizePlayback: async id => {
+    checked.push(id);
+    return denied && id === 'asset-a' ? { allowed: false } : { allowed: true, validUntilMs: 10000 };
+  } });
+  await f.player.pump(); f.setNow(1600); await f.player.pump();
+  denied = true; checked.length = 0; f.setNow(2050);
+  assert.equal((await f.player.pump()).status, 'scheduled');
+  assert.ok(checked.every(id => id === 'asset-b')); assert.equal(f.stops, 0);
+});
+test('a reentrant native interruption cannot commit a stale sample cursor', async () => {
+  const f = await fixture();
+  const original = f.options.sink.schedule.bind(f.options.sink); let first = true;
+  f.options.sink.schedule = (...args) => {
+    const result = original(...args);
+    if (first) { first = false; f.player.interrupt(); }
+    return result;
+  };
+  await assert.rejects(f.player.pump(), /SUPERSEDED/);
+  assert.equal((await f.player.pump()).status, 'scheduled');
+  assert.equal(f.scheduled[1]!.at, f.scheduled[0]!.at);
+  assert.equal(f.stops, 1);
+});
+test('close stays terminal even when the native stop call fails', async () => {
+  const f = await fixture(); await f.player.pump();
+  f.options.sink.stopAll = () => { throw Error('native-stop-failed'); };
+  assert.throws(() => f.player.close(), /native-stop-failed/);
+  await assert.rejects(f.player.pump(), /PLAYER_CLOSED/);
+  assert.doesNotThrow(() => f.player.close());
+});

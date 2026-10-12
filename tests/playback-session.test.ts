@@ -149,6 +149,15 @@ for (const platform of ['android', 'ios'] as const) {
     await f.session.join(await f.control(2)); await f.session.pump(); assert.equal(f.resolutions, 2);
     f.session.stop(); f.session.close(); f.session.close(); await assert.rejects(f.session.join(await f.control(3)), /CLOSED/);
   });
+  test(`${platform} normal playback can advance while a valid renewal payload is in flight`, async () => {
+    const f = await fixture(platform); f.activate(); await f.session.join(await f.control(1)); await f.session.pump();
+    const entered = gate(), blocked = gate();
+    f.blockDecode(async () => { entered.release(); await blocked.promise; });
+    const renewing = f.session.renew(await f.control(2));
+    await entered.promise; f.setNow(1100); await f.session.pump();
+    blocked.release(); await renewing;
+    assert.equal(f.session.snapshot().phase, 'playing'); f.session.close();
+  });
   test(`${platform} native cancellation failure still revokes session and pending authority`, async () => {
     const f = await fixture(platform); f.activate(); await f.session.join(await f.control(1));
     f.failCancel(); assert.throws(() => f.disconnect(), /driver-stop-failed/);

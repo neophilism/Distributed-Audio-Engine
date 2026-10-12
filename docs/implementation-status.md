@@ -5,11 +5,26 @@
 The [owned playback session](playback-session.md) now composes signed authority,
 encrypted delivery, and both portable native sinks. Native route/lifecycle
 changes revoke pending work and cached PCM; explicit signed rejoin is required.
-The 21 portable session tests use native bridge and parent decoder doubles.
+The 23 portable session tests use native bridge and parent decoder doubles.
 An additional 17 [native integration cases](../native/integration/README.md)
 exercise real JavaScript-to-C rendering, using fixture keys and synthetic routes.
 Neither completes mobile runtime wiring or the authenticated parent key channel. See
 [`registry/playback-integration.json`](../registry/playback-integration.json).
+
+PR #49 added owned-session orchestration, #50 added the signed-to-native C
+integration harness, and #51 added the real system JavaScriptCore-to-iOS audio
+bridge. All 10 new JSCore runtime tests passed in hosted macOS CI, and the concrete
+iOS bridge compiled for the unsigned simulator target. This is an actual audio
+bridge, not a complete endpoint: qualified web/crypto globals, module loading,
+parent key delivery and Android JavaScript runtime integration remain pending.
+
+Further session hardening permits valid lease renewal during normal forward clock
+progress, while rejecting an already expired decrypted lease. The player rechecks
+every still-queued asset, including the previous track when the cursor has advanced,
+and cancels on revoked or shortened permission. Reentrant interruption cannot
+commit a stale cursor, and close stays terminal even if native stopping fails.
+Eight additional regressions cover these cases. Physical stopping latency is not
+established by software cancellation.
 
 The engine now includes real foreground Android and iOS playback host source,
 not only portable host interfaces. PR #44 added reproducible development
@@ -18,9 +33,9 @@ artifacts; #45 added the shared native PCM kernel and six portable regressions;
 hosted checks are required before each merge. These changes close the missing
 native-host implementation layer, not the integrated production release.
 
-The portable suite has **189 tests**, including 21 owned-session integration cases. Separate native verification has **13 C
-contract cases** (plus 10,000 adversarial sequences and concurrency tests), **7
-Swift/C cases**, and **7 Java/JNI/C cases**. Hosted checks also build the actual
+The portable suite has **197 tests**, including 23 owned-session integration cases. Separate native verification has **13 C
+contract cases** (plus 10,000 adversarial sequences and concurrency tests), **17
+Swift/C/JavaScriptCore cases** (7 queue cases plus 10 real JSCore bridge cases), and **7 Java/JNI/C cases**. Hosted checks also build the actual
 iOS-only host for an unsigned simulator target and compile/lint the Android
 library for arm64-v8a and x86_64. ASan/UBSan, dependency audit, strict types,
 source boundaries, roadmap DAG and offline packed-consumer checks remain active.
@@ -45,7 +60,7 @@ milestones and build order remain authoritative.
 |---|---|---|
 | Encryption/delivery | Endpoint AES-GCM chunks, private manifests, bounded authenticated ranges, complete-file hash and HTTPS response limits | Authenticated parent key channel, independent crypto/interoperability review |
 | Canonical inputs | Stable v1 valid bytes, Unicode/order vectors, bounded parsing and duplicate/member rejection | Explicit versioned migration when an approved upstream contract changes |
-| Playback | Current-position linear player, rights/recipient expiry, bounded PCM queues, browser graph, shared native PCM kernel, Android AudioTrack/JNI and iOS AVAudioEngine/Swift foreground hosts | Consumer runtime wiring, exact-format/rate/drift integration, physical route/interruption tests and any separately implemented background policy |
+| Playback | Current-position linear player, rights/recipient expiry, bounded PCM queues, browser graph, shared native PCM kernel, Android AudioTrack/JNI and iOS AVAudioEngine/Swift foreground hosts plus system JavaScriptCore audio bridge | Complete endpoint runtime wiring, exact-format/rate/drift integration, physical route/interruption tests and any separately implemented background policy |
 | Controls/clock | Scoped signatures, leases/emergency supersession, SQLite replay checkpoints, challenged clock intervals | Native protected state, E2EE payload delivery, route-specific output delay and acoustic measurements |
 | Output evidence | Active-route invalidation, post-challenge measurement decisions, full-window calibration, immutable conservative intervals and physical-output coverage | Physical calibration/source/output attribution, consented measurement integration and independent qualification |
 | Local coordination/cache | Primary leases, registered opaque transports, bounded failover and quota/expiry SQLite ciphertext cache | LAN discovery/provisioning and replica/restore qualification |
@@ -79,7 +94,8 @@ milestones and build order remain authoritative.
 
 ## Work remaining
 
-The next software work is the consuming runtime bridge and an actual authenticated
+The next software work is Android runtime bridging, complete endpoint bootstrap
+(including qualified web/crypto globals and module loading), and an authenticated
 parent channel for private manifests, recipient keys and control payloads, plus
 protected native state and explicit rate/channel/drift adapters. Do not describe
 those as merely hardware testing. Native classes intentionally do not implement
