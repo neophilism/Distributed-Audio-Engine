@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 /** Foreground-only endpoint host. No microphone, network, pairing scan, or media persistence.
@@ -66,6 +67,7 @@ public final class AndroidAudioHost implements AutoCloseable {
         final NativePcm pcm;
         final long generation;
         final AtomicLong revision=new AtomicLong();
+        final ReentrantLock delivery=new ReentrantLock();
         volatile boolean running=true, announced;
         volatile int routedId=-1;
         AudioFocusRequest focus;
@@ -166,13 +168,14 @@ public final class AndroidAudioHost implements AutoCloseable {
         }
     }
     private void pump(Session s) {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
-        int channels=s.pcm.channels, bytesPerFrame=channels*4;
-        ByteBuffer block=ByteBuffer.allocateDirect(BLOCK_FRAMES*bytesPerFrame).order(ByteOrder.nativeOrder());
-        AudioTimestamp stamp=new AudioTimestamp(); FrameClock clock=new FrameClock(s.pcm.sampleRate);
-        long written=0; double started=nowMonotonicMs(); int underruns=s.track.getUnderrunCount();
-        boolean activated=false;
+        ByteBuffer block=null;
         try {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+            int channels=s.pcm.channels, bytesPerFrame=channels*4;
+            block=ByteBuffer.allocateDirect(BLOCK_FRAMES*bytesPerFrame).order(ByteOrder.nativeOrder());
+            AudioTimestamp stamp=new AudioTimestamp(); FrameClock clock=new FrameClock(s.pcm.sampleRate);
+            long written=0; double started=nowMonotonicMs(); int underruns=s.track.getUnderrunCount();
+            boolean activated=false;
             while(s.running) {
                 double now=nowMonotonicMs();
                 AudioDeviceInfo device=s.track.getRoutedDevice();
@@ -198,8 +201,14 @@ public final class AndroidAudioHost implements AutoCloseable {
                 } else NativePcm.zero(block);
                 double stalledAt=nowMonotonicMs();
                 while(block.hasRemaining()&&s.running) {
-                    if(revision!=s.revision.get()) { NativePcm.zero(block); revision=s.revision.get(); }
-                    int count=s.track.write(block,block.remaining(),AudioTrack.WRITE_NON_BLOCKING);
+                    int count=0;
+                    if(s.delivery.tryLock()) {
+                        try {
+                            if(!s.running)break;
+                            if(revision!=s.revision.get()) { NativePcm.zero(block); revision=s.revision.get(); }
+                            count=s.track.write(block,block.remaining(),AudioTrack.WRITE_NON_BLOCKING);
+                        } finally { s.delivery.unlock(); }
+                    }
                     if(count<0||count%bytesPerFrame!=0)throw new IllegalStateException("AUDIO_WRITE_FAILED");
                     if(count==0) {
                         if(nowMonotonicMs()-stalledAt>(activated?100:3000))throw new IllegalStateException("AUDIO_WRITE_STALLED");
@@ -213,11 +222,17 @@ public final class AndroidAudioHost implements AutoCloseable {
         } catch(RuntimeException error) {
             s.pcm.latchFault(); // Do not log PCM, IDs, device names or exception payloads.
         } finally {
-            s.running=false; s.pcm.latchFault(); block.clear(); NativePcm.zero(block);
-            try { s.track.pause(); s.track.flush(); } catch(IllegalStateException ignored) { }
-            if(s.routing!=null)s.track.removeOnRoutingChangedListener(s.routing);
-            s.track.release(); s.pcm.close();
-            main.post(() -> interrupt(s,"service-destroyed"));
+            s.running=false; s.pcm.latchFault();
+            if(block!=null) { block.clear(); NativePcm.zero(block); }
+            s.delivery.lock();
+            try {
+                try { s.track.pause(); s.track.flush(); } catch(IllegalStateException ignored) { }
+                if(s.routing!=null)s.track.removeOnRoutingChangedListener(s.routing);
+                s.track.release();
+            } finally {
+                s.pcm.close(); s.delivery.unlock();
+                main.post(() -> interrupt(s,"service-destroyed"));
+            }
         }
     }
     private Session ready() {
@@ -227,25 +242,30 @@ public final class AndroidAudioHost implements AutoCloseable {
     }
     public void enqueue(NativePcm.Request request) { Session s=ready();s.pcm.enqueue(request,nowMonotonicMs()); }
     public void updateEnvelope(String id,float gain,double fade,double stop) {
-        Session s=ready();s.revision.incrementAndGet();
-        try { s.pcm.updateEnvelope(id,gain,fade,stop); } finally { s.revision.incrementAndGet(); }
+        Session s=ready();s.delivery.lock();
+        try { s.revision.incrementAndGet();s.pcm.updateEnvelope(id,gain,fade,stop); }
+        finally { s.revision.incrementAndGet();s.delivery.unlock(); }
     }
     public void cancel(String id) {
-        Session s=ready();s.revision.incrementAndGet();
-        try { s.pcm.cancel(id); } finally { s.revision.incrementAndGet(); }
+        Session s=ready();s.delivery.lock();
+        try { s.revision.incrementAndGet();s.pcm.cancel(id); }
+        finally { s.revision.incrementAndGet();s.delivery.unlock(); }
     }
     public void cancelAll() {
         requireMain();Session s=current;
         if(s!=null&&s.running) {
-            s.revision.incrementAndGet();
-            try { s.pcm.cancelAll(); } finally { s.revision.incrementAndGet(); }
+            s.delivery.lock();
+            try { s.revision.incrementAndGet();s.pcm.cancelAll(); }
+            finally { s.revision.incrementAndGet();s.delivery.unlock(); }
         }
     }
     private void poll(Session s) {
         if(current!=s||!s.running)return;
         if(s.announced) {
-            if(!s.pcm.active()) { interrupt(s,"service-destroyed");return; }
-            for(String id:s.pcm.drainCompleted())emit(Event.completed(id));
+            try {
+                if(!s.pcm.active()) { interrupt(s,"service-destroyed");return; }
+                for(String id:s.pcm.drainCompleted())emit(Event.completed(id));
+            } catch(IllegalStateException error) { interrupt(s,"service-destroyed");return; }
         }
         main.postDelayed(() -> poll(s),20);
     }
@@ -253,7 +273,9 @@ public final class AndroidAudioHost implements AutoCloseable {
         if(s==null)return;
         s.running=false;s.revision.incrementAndGet();s.pcm.latchFault();
         if(s.focus!=null)manager.abandonAudioFocusRequest(s.focus);
+        s.delivery.lock();
         try { s.track.pause();s.track.flush(); } catch(IllegalStateException ignored) { }
+        finally { s.delivery.unlock(); }
         // Worker owns final release. Its try/finally keeps native lifetime bounded.
     }
     private void interrupt(Session expected,String reason) {
