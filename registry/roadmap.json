@@ -6,7 +6,8 @@
   "plannedPrCount": 34,
   "sourceFiles": [
     ".exechub/project.yml",
-    "docs/DEVELOPMENT_PLAN.md"
+    "docs/DEVELOPMENT_PLAN.md",
+    "native/README.md"
   ],
   "milestones": [
     {
