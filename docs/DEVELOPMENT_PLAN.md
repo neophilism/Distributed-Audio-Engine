@@ -25,6 +25,18 @@ adding milestones or promoting the integrated production candidate. Next integra
 bounded deployed ciphertext transport and mobile runtime/protocol bindings, then
 qualify hardware-protected state, physical outputs, operations and independent review.
 
+### Node ciphertext transport acceptance
+
+`services/ciphertext-relay` supplies the runnable TLS-only mailbox/public-key/chunk
+service and bounded endpoint client for DAE-04/08/23/26/34. Acceptance includes
+real SQLite reopen, own-mailbox isolation, duplicate/expiry/quota tests, actual
+TLS failure/cancellation tests and Signal-to-native network integration. It
+requires explicit operator TLS/routing configuration and adds no cloud resources.
+Application-level crash recovery requires an endpoint journal in addition to
+ratchet and relay persistence; do not assert automatic replay or exactly-once
+playback from these transport checks. Mobile/bootstrap, field, deployment and
+independent review gates remain separate. See `registry/relay-integration.json`.
+
 ## DAE-01 — Architecture, contracts, repository and CI
 
 Dependencies: None. Origin: original (DAE-01).

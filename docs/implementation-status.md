@@ -2,6 +2,14 @@
 
 ## Current checkpoint: October 12, 2026
 
+The [TLS relay and endpoint client](../services/ciphertext-relay/README.md) now
+provide actual network delivery for public prekeys, encrypted manifests/controls,
+and bounded multi-chunk audio. Twenty-four SQLite/TLS/launcher cases and eight
+Signal-to-TLS-to-native C cases cover persistence, isolation, expiration, replay
+suppression, verified transport, cancellation and actual rendered samples. This
+is not yet a hosted deployment, complete mobile runtime, durable endpoint inbox,
+or physical-output qualification. See `registry/relay-integration.json`.
+
 The [Node Signal parent integration](../integrations/signal-parent/README.md) now
 implements real maintained-library key establishment and ratcheting for private
 manifests and controls, with root-bound membership and encrypted atomic endpoint

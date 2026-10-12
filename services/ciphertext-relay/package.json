@@ -1,0 +1,20 @@
+{
+  "name": "@neophilism/dae-ciphertext-relay",
+  "version": "0.1.0-dev",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "scripts": {
+    "test": "node --test --test-reporter=tap tests/*.test.mjs",
+    "typecheck": "tsc --project tsconfig.json",
+    "start": "node src/main.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.d.mts",
+      "import": "./src/index.mjs"
+    }
+  }
+}

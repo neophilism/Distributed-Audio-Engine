@@ -1,0 +1,49 @@
+{
+  "version": "2026-10-12-v1",
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "milestones": [
+    "DAE-04",
+    "DAE-08",
+    "DAE-23",
+    "DAE-26",
+    "DAE-34"
+  ],
+  "implementationScope": "Node TLS-only ciphertext relay and bounded endpoint client; no endpoint secrets or private media processing at relay",
+  "guide": "services/ciphertext-relay/README.md",
+  "source": [
+    "services/ciphertext-relay/src/records.mjs",
+    "services/ciphertext-relay/src/store.mjs",
+    "services/ciphertext-relay/src/server.mjs",
+    "services/ciphertext-relay/src/client.mjs",
+    "services/ciphertext-relay/src/main.mjs"
+  ],
+  "implemented": [
+    "Explicit expiring routing credentials distinct from endpoint membership",
+    "Atomic public one-time bundle take and persistent idempotent mailboxes with acknowledgment tombstones",
+    "Scoped immutable encrypted audio chunks with current recipient routing checks",
+    "TLS 1.3 with verification, bounded deadlines/headers/bodies/connections/rate, no redirects or plaintext fallback",
+    "Private POSIX SQLite state, expiry sweeper, quotas, monotonic time and explicit configured startup"
+  ],
+  "verification": {
+    "serviceTests": 24,
+    "realNetworkNativeCases": 8,
+    "cryptography": "Real pinned libsignal; no pre-shared media-key shortcut",
+    "nativeAudio": "Production C renderer; synthetic output route/clock",
+    "network": "Real local TLS sockets with ephemeral test certificate",
+    "hosted": "Exact-head Engine/Native/Signal/Relay/status-record checks required before merge"
+  },
+  "pending": [
+    "Deployed TLS identity and private routing provisioning",
+    "Endpoint inbox/outbox transaction journal and crash recovery",
+    "Mobile runtime/protocol clients and physical speaker/soak/drift validation",
+    "Deployed restore/retention/load drills and independent security review"
+  ],
+  "claims": {
+    "nodeTransportImplemented": true,
+    "deployed": false,
+    "mobileConsumerIntegrated": false,
+    "fieldValidated": false,
+    "stableReleased": false,
+    "independentlyReviewed": false
+  }
+}

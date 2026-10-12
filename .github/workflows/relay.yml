@@ -1,0 +1,53 @@
+name: Ciphertext relay integration
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ciphertext-relay-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  relay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.19.0'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            integrations/signal-parent/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npm ci --ignore-scripts --prefix integrations/signal-parent
+      - run: npm run typecheck --prefix services/ciphertext-relay
+      - name: TLS, persistence and launcher tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p relay-evidence
+          npm test --prefix services/ciphertext-relay | tee relay-evidence/service-tests.tap
+      - name: Actual TLS and Signal to native rendering
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh services/ciphertext-relay/test-network.sh | tee relay-evidence/network-tests.tap
+      - name: Bind results to source
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p relay-evidence
+          git rev-parse HEAD > relay-evidence/SOURCE_COMMIT
+          node --version > relay-evidence/NODE_VERSION
+          (cd relay-evidence && sha256sum *.tap SOURCE_COMMIT NODE_VERSION > SHA256SUMS)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: relay-evidence-${{ github.sha }}
+          path: relay-evidence/
+          retention-days: 7
+          if-no-files-found: error
