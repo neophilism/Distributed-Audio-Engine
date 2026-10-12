@@ -45,7 +45,7 @@ private final class SourceRenderer {
         }
         silence.pointee = true
         guard frames > 0, frames <= 8192, buffers.count == Int(kernel.channels),
-              timestamp.pointee.mFlags & kAudioTimeStampHostTimeValid != 0 else {
+              timestamp.pointee.mFlags.contains(.hostTimeValid) else {
             kernel.latchRenderFault(); return noErr
         }
         for buffer in buffers {
