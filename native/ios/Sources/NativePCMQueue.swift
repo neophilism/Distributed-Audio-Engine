@@ -40,7 +40,8 @@ public struct NativeQueueState {
 
 /// Dictionary mutations are control-thread locked; rendering touches only the C
 /// queue with try-lock semantics. Keep a strong reference throughout callbacks.
-public final class NativePCMQueue {
+// All mutable Swift state is under control; C state is mutex/atomic protected.
+public final class NativePCMQueue: @unchecked Sendable {
     private let queue: OpaquePointer
     private let control = NSLock()
     public let sampleRate: UInt32
