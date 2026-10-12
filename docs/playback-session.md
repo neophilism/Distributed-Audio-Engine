@@ -70,3 +70,8 @@ not actual mobile JS-runtime wiring, parent key distribution, speaker output,
 acoustic synchronization, hardware-protected checkpoints or independent review.
 The pinned upstream pairwise/group protocol must be integrated separately; no
 TLS-only, plaintext JSON, pre-shared-key or custom-ratchet fallback is added here.
+
+A separate [native integration harness](../native/integration/README.md) runs the
+same signed-control/encrypted-media session through the production C renderer in
+process. Its Node-API adapter is test-only. Its local fixture keys and synthetic
+routes do not replace the pending mobile runtime or authenticated parent protocol.

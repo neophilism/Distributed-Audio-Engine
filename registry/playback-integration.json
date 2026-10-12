@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-12-v1",
+  "version": "2026-10-12-v2",
   "repository": "neophilism/Distributed-Audio-Engine",
   "canonicalRoadmap": "registry/roadmap.json",
   "milestones": [
@@ -24,9 +24,12 @@
     "src/safety.ts"
   ],
   "tests": [
-    "tests/playback-session.test.ts"
+    "tests/playback-session.test.ts",
+    "native/integration/playback.test.mjs",
+    "native/integration/pcm_addon.c",
+    "native/integration/test.sh"
   ],
-  "evidenceScope": "21 session tests, using real signatures and encrypted media, native bridge and private-parent decoder doubles. Full portable suite 189 tests. Hosted checks required before merge; see PR checks for exact source binding.",
+  "evidenceScope": "189 portable tests including 21 session cases; 17 additional in-process JavaScript/production-C-kernel integration cases under UBSan. Real signed controls and AES-GCM media; temporary fixture-provisioned payload key, synthetic routes/clocks and local manifest resolver. Not an approved parent protocol, mobile JS runtime or physical audio evidence. Hosted checks required before merge; see PR checks for exact source binding.",
   "pending": [
     "Actual mobile JS runtime-to-native bridge",
     "Approved authenticated pairwise/group parent channel and identity provisioning",
@@ -41,5 +44,21 @@
     "deployed": false,
     "stableReleased": false,
     "independentlyReviewed": false
+  },
+  "mergedSessionPr": 49,
+  "nativeIntegration": {
+    "guide": "native/integration/README.md",
+    "productionKernel": "native/core/dae_pcm.c",
+    "testOnlyAdapter": "native/integration/pcm_addon.c",
+    "npmShipped": false,
+    "mobileDriverUsed": false,
+    "checks": [
+      "Native-owned PCM survives JavaScript temporary buffer wipe",
+      "Signed lease and authenticated media reach real C sample rendering",
+      "Native hard-stop and fade without JavaScript pumping",
+      "Contraction-only renewal, recipient expiry, revoked rights, emergency stop",
+      "Reconnect, stale generation and stale completion rejection",
+      "Malformed/shared/detached buffers and close lifetime rejection"
+    ]
   }
 }
