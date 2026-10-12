@@ -4,21 +4,6 @@ import AudioToolbox
 import UIKit
 import Darwin
 
-public struct NativeOutputRoute: Equatable {
-    public let endpointId: String
-    public let routeId: String
-    public let outputId: String
-    public let kind: String
-    public let generation: UInt64
-}
-
-public enum IOSHostEvent {
-    case routeActive(NativeOutputRoute, sampleRate: UInt32, maxChannels: UInt32)
-    case interrupted(String)
-    case disconnected
-    case completed(String)
-}
-
 /// Retained by the source node. Neither Swift dictionaries nor the control lock
 /// are touched from render. AVAudioEngine serializes this node's render calls.
 private final class SourceRenderer {
@@ -75,7 +60,7 @@ private final class SourceRenderer {
 /// Foreground-only iOS playback host. Start is explicit after a user action and
 /// subscription. Route changes, suspension and interruption require fresh start
 /// and timeline join; nothing is automatically replayed on recovery.
-@MainActor public final class IOSAudioHost {
+@MainActor public final class IOSAudioHost: EmbeddedAudioHost {
     private let endpointId = UUID().uuidString
     private var generation: UInt64 = 0
     private var listener: ((IOSHostEvent) -> Void)?
@@ -88,6 +73,7 @@ private final class SourceRenderer {
     private var closed = false
 
     public init() {}
+    public func currentHostTimeMs() -> Double { Self.nowHostTimeMs() }
     public nonisolated static func nowHostTimeMs() -> Double {
         AVAudioTime.seconds(forHostTime: mach_absolute_time()) * 1000
     }

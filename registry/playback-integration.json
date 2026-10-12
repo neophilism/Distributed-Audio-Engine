@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-12-v2",
+  "version": "2026-10-12-v3",
   "repository": "neophilism/Distributed-Audio-Engine",
   "canonicalRoadmap": "registry/roadmap.json",
   "milestones": [
@@ -21,17 +21,20 @@
     "src/android-audio.ts",
     "src/ios-audio.ts",
     "src/player.ts",
-    "src/safety.ts"
+    "src/safety.ts",
+    "native/ios/Sources/JavaScriptCoreAudioBridge.swift",
+    "native/ios/Sources/EmbeddedAudioHost.swift"
   ],
   "tests": [
     "tests/playback-session.test.ts",
     "native/integration/playback.test.mjs",
     "native/integration/pcm_addon.c",
-    "native/integration/test.sh"
+    "native/integration/test.sh",
+    "native/ios/Tests/JavaScriptCoreAudioBridgeTests.swift"
   ],
   "evidenceScope": "189 portable tests including 21 session cases; 17 additional in-process JavaScript/production-C-kernel integration cases under UBSan. Real signed controls and AES-GCM media; temporary fixture-provisioned payload key, synthetic routes/clocks and local manifest resolver. Not an approved parent protocol, mobile JS runtime or physical audio evidence. Hosted checks required before merge; see PR checks for exact source binding.",
   "pending": [
-    "Actual mobile JS runtime-to-native bridge",
+    "Android JS runtime bridge and configured iOS endpoint runtime (module loading, WebCrypto/web globals, parent channel)",
     "Approved authenticated pairwise/group parent channel and identity provisioning",
     "Hardware-protected replay/ratchet state",
     "Rate/channel/drift adapters",
@@ -60,5 +63,15 @@
       "Reconnect, stale generation and stale completion rejection",
       "Malformed/shared/detached buffers and close lifetime rejection"
     ]
+  },
+  "mergedNativeIntegrationPr": 50,
+  "iosRuntimeBridge": {
+    "implementation": "System JavaScriptCore synchronous audio bridge to IOSAudioHost; typed-array owned copies, native time, events and cleanup",
+    "guide": "native/ios/javascriptcore.md",
+    "runtimeTests": "10 macOS JavaScriptCore/Swift/C cases; synthetic host clock/routes. Hosted native CI must execute them before merge. Linux excludes this platform-specific module.",
+    "actualIOSHostBuild": "Unsigned iOS simulator compilation in hosted native CI",
+    "completeEndpointRuntime": false,
+    "parentChannelImplemented": false,
+    "hardwareValidated": false
   }
 }
