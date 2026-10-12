@@ -2,6 +2,13 @@
 
 ## Current checkpoint: October 12, 2026
 
+The [owned playback session](playback-session.md) now composes signed authority,
+encrypted delivery, and both portable native sinks. Native route/lifecycle
+changes revoke pending work and cached PCM; explicit signed rejoin is required.
+These tests use native bridge and parent decoder doubles. They do not complete
+mobile runtime wiring or the authenticated parent key channel. See
+[`registry/playback-integration.json`](../registry/playback-integration.json).
+
 The engine now includes real foreground Android and iOS playback host source,
 not only portable host interfaces. PR #44 added reproducible development
 artifacts; #45 added the shared native PCM kernel and six portable regressions;
@@ -9,7 +16,7 @@ artifacts; #45 added the shared native PCM kernel and six portable regressions;
 hosted checks are required before each merge. These changes close the missing
 native-host implementation layer, not the integrated production release.
 
-The portable suite has **168 tests**. Separate native verification has **13 C
+The portable suite has **189 tests**, including 21 owned-session integration cases. Separate native verification has **13 C
 contract cases** (plus 10,000 adversarial sequences and concurrency tests), **7
 Swift/C cases**, and **7 Java/JNI/C cases**. Hosted checks also build the actual
 iOS-only host for an unsigned simulator target and compile/lint the Android

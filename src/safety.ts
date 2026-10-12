@@ -30,7 +30,10 @@ export class PlaybackAuthority {
   }
   async emergencyStop(control:SignedControl,nowMs:number):Promise<void>{
     this.observeTime(nowMs);invariant(control.body.action==='emergency-stop','WRONG_CONTROL_ACTION');
-    await this.controls.accept(control,nowMs);this.operationGeneration++;this.lease=undefined;
+    const generation=this.operationGeneration;
+    await this.controls.accept(control,nowMs);
+    invariant(generation===this.operationGeneration,'AUTHORITY_CONTROL_SUPERSEDED');
+    this.operationGeneration++;this.lease=undefined;
   }
   setUserGain(gain:number):void{finite(gain,0,this.consentedGainCeiling);this.userGain=gain;}
   mute(muted=true):void{this.muted=muted;}

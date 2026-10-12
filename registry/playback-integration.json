@@ -1,0 +1,45 @@
+{
+  "version": "2026-10-12-v1",
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "canonicalRoadmap": "registry/roadmap.json",
+  "milestones": [
+    "DAE-08",
+    "DAE-09",
+    "DAE-10",
+    "DAE-23",
+    "DAE-27",
+    "DAE-34"
+  ],
+  "implementation": [
+    "Owned endpoint session joins signed authority, encrypted player and Android/iOS sink lifecycles",
+    "Output changes cancel delivery and pending leases, wipe PCM and require explicit rejoin",
+    "Rights checks also run while the queue is full; bounded pending control work",
+    "Late emergency verification cannot clear a superseding authority generation"
+  ],
+  "source": [
+    "src/playback-session.ts",
+    "src/android-audio.ts",
+    "src/ios-audio.ts",
+    "src/player.ts",
+    "src/safety.ts"
+  ],
+  "tests": [
+    "tests/playback-session.test.ts"
+  ],
+  "evidenceScope": "21 session tests, using real signatures and encrypted media, native bridge and private-parent decoder doubles. Full portable suite 189 tests. Hosted checks required before merge; see PR checks for exact source binding.",
+  "pending": [
+    "Actual mobile JS runtime-to-native bridge",
+    "Approved authenticated pairwise/group parent channel and identity provisioning",
+    "Hardware-protected replay/ratchet state",
+    "Rate/channel/drift adapters",
+    "Physical devices, six-hour soaks, operations and independent review"
+  ],
+  "claims": {
+    "mobileConsumerIntegrated": false,
+    "parentChannelImplemented": false,
+    "fieldValidated": false,
+    "deployed": false,
+    "stableReleased": false,
+    "independentlyReviewed": false
+  }
+}

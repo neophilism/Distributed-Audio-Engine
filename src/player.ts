@@ -88,9 +88,10 @@ export class EndpointProgramPlayer {
     let decoded: PcmAudio | undefined;
     try {
       const initialNow = this.now(); const initial = this.target(initialNow);
-      if (this.options.timeline.timeAtFrame(initial.absoluteFrame) >= initialNow + this.options.sink.horizonMs - 1) return { status: 'buffered' };
       const initialPermission = await this.options.authorizePlayback(initial.assetId, initialNow, abort.signal); this.check(generation, abort.signal);
       this.permissionUntil(initialPermission, this.now());
+      // Check revocation even when the native queue is already full.
+      if (this.options.timeline.timeAtFrame(initial.absoluteFrame) >= initialNow + this.options.sink.horizonMs - 1) return { status: 'buffered' };
       if (!this.cached || this.cached.descriptor.assetId !== initial.assetId || this.cached.descriptor.authorizationValidUntilMs <= initialNow + this.leadMs) {
         this.clearCache();
         const descriptor = structuredClone(await this.options.resolver.resolve(initial.assetId, this.options.scope, abort.signal)); this.check(generation, abort.signal);

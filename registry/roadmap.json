@@ -8,7 +8,8 @@
     ".exechub/project.yml",
     "docs/DEVELOPMENT_PLAN.md",
     "native/README.md",
-    "registry/native-implementation.json"
+    "registry/native-implementation.json",
+    "registry/playback-integration.json"
   ],
   "milestones": [
     {
