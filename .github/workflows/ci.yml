@@ -21,3 +21,20 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run check
       - run: npm audit --audit-level=moderate
+      - name: Assemble development artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          git archive --format=tar.gz --prefix=source/ HEAD > artifacts/source.tar.gz
+          npm pack --ignore-scripts --pack-destination artifacts
+          printf '%s\n' "$(git rev-parse HEAD)" > artifacts/SOURCE_COMMIT
+          node --version > artifacts/NODE_VERSION
+          (cd artifacts && sha256sum source.tar.gz *.tgz SOURCE_COMMIT NODE_VERSION > SHA256SUMS)
+      - name: Retain verified development artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: engine-development-${{ github.sha }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 7
