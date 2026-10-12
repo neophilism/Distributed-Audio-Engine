@@ -1,0 +1,42 @@
+name: Signal parent integration
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: signal-parent-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  signal-parent:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.19.0'
+      - name: Resolve pinned endpoint dependency for lockfile review
+        working-directory: integrations/signal-parent
+        run: npm install --ignore-scripts --no-fund
+      - name: Audit and verify native dependency loading
+        working-directory: integrations/signal-parent
+        run: |
+          npm audit --audit-level=moderate
+          node --input-type=module -e "import {PrivateKey} from '@signalapp/libsignal-client'; const key=PrivateKey.generate(); if(key.getPublicKey().serialize().length!==33) throw Error('invalid library'); console.log('Pinned native library loaded');"
+      - name: Retain reproducible endpoint development toolchain
+        working-directory: integrations/signal-parent
+        run: |
+          mkdir -p ../../signal-toolchain
+          cp package.json package-lock.json ../../signal-toolchain/
+          tar --exclude='*/prebuilds/darwin-*' --exclude='*/prebuilds/win32-*' --exclude='*/prebuilds/linux-arm64' -czf ../../signal-toolchain/dependencies-linux-x64.tar.gz node_modules
+          git rev-parse HEAD > ../../signal-toolchain/SOURCE_COMMIT
+          cd ../../signal-toolchain
+          sha256sum package.json package-lock.json dependencies-linux-x64.tar.gz SOURCE_COMMIT > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: signal-endpoint-toolchain-${{ github.sha }}
+          path: signal-toolchain/
+          retention-days: 7
+          if-no-files-found: error
