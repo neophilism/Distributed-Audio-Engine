@@ -34,8 +34,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          xcodebuild -scheme DistributedAudioHost \
+          xcodebuild -quiet -scheme DistributedAudioHost \
             -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath /tmp/dae-ios CODE_SIGNING_ALLOWED=NO build \
-            > /tmp/dae-ios-build.log 2>&1 || { tail -n 120 /tmp/dae-ios-build.log; exit 1; }
-          tail -n 10 /tmp/dae-ios-build.log
+            -derivedDataPath /tmp/dae-ios CODE_SIGNING_ALLOWED=NO build
