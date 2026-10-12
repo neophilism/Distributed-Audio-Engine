@@ -3,6 +3,9 @@
 #include <math.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdatomic.h>
+
+_Static_assert(ATOMIC_INT_LOCK_FREE == 2, "Render fault latch must be lock-free");
 #include <string.h>
 
 #define DAE_MAX_VOICES 64u
@@ -31,6 +34,7 @@ struct dae_pcm_queue {
   double rendered_until;
   int active;
   int timing_fault;
+  atomic_int render_fault;
 };
 
 static int valid_time(double value) {
@@ -72,6 +76,7 @@ dae_pcm_queue *dae_pcm_create(dae_pcm_config config) {
   dae_pcm_queue *q = (dae_pcm_queue *)calloc(1, sizeof(*q));
   if (!q) return NULL;
   q->config = config;
+  atomic_init(&q->render_fault, 0);
   if (pthread_mutex_init(&q->mutex, NULL) != 0) { free(q); return NULL; }
   return q;
 }
@@ -97,6 +102,7 @@ dae_pcm_status dae_pcm_activate(dae_pcm_queue *q, uint64_t generation, double no
   q->control_time = now_ms;
   q->rendered_until = now_ms;
   q->timing_fault = 0;
+  atomic_store_explicit(&q->render_fault, 0, memory_order_release);
   q->active = 1;
   pthread_mutex_unlock(&q->mutex);
   return DAE_PCM_OK;
@@ -130,7 +136,7 @@ dae_pcm_status dae_pcm_enqueue(dae_pcm_queue *q, const dae_pcm_request *r) {
   pthread_mutex_lock(&q->mutex);
   dae_pcm_status status = DAE_PCM_OK;
   dae_voice *slot = NULL;
-  if (!q->active) status = DAE_PCM_UNAVAILABLE;
+  if (!q->active || atomic_load_explicit(&q->render_fault, memory_order_acquire)) status = DAE_PCM_UNAVAILABLE;
   else if (r->generation != q->generation || r->now_ms < q->control_time ||
            r->starts_at_ms + 0.000001 < q->rendered_until) status = DAE_PCM_STALE;
   else if (r->sample_count > q->config.max_samples - q->samples) status = DAE_PCM_LIMIT;
@@ -173,7 +179,7 @@ dae_pcm_status dae_pcm_update(dae_pcm_queue *q, uint64_t generation, uint64_t to
       !valid_time(fade) || !valid_time(stop)) return DAE_PCM_INVALID;
   pthread_mutex_lock(&q->mutex);
   dae_pcm_status status = DAE_PCM_OK;
-  if (!q->active) status = DAE_PCM_UNAVAILABLE;
+  if (!q->active || atomic_load_explicit(&q->render_fault, memory_order_acquire)) status = DAE_PCM_UNAVAILABLE;
   else if (generation != q->generation) status = DAE_PCM_STALE;
   else {
     dae_voice *v = find_voice(q, token);
@@ -219,7 +225,7 @@ dae_pcm_status dae_pcm_render(dae_pcm_queue *q, uint64_t generation, double star
   const double end = start + (double)frames * period;
   if (!valid_time(end)) return DAE_PCM_INVALID;
   if (pthread_mutex_trylock(&q->mutex) != 0) return DAE_PCM_BUSY;
-  if (!q->active || generation != q->generation) {
+  if (!q->active || atomic_load_explicit(&q->render_fault, memory_order_acquire) || generation != q->generation) {
     pthread_mutex_unlock(&q->mutex); return DAE_PCM_UNAVAILABLE;
   }
   /* One quarter sample tolerates timestamp conversion roundoff, not replay. */
@@ -268,11 +274,16 @@ dae_pcm_snapshot dae_pcm_inspect(dae_pcm_queue *q) {
   pthread_mutex_lock(&q->mutex);
   result.generation = q->generation;
   result.queued_samples = q->samples;
-  result.active = q->active;
-  result.timing_fault = q->timing_fault;
+  const int fault = atomic_load_explicit(&q->render_fault, memory_order_acquire);
+  result.active = q->active && !fault;
+  result.timing_fault = q->timing_fault || fault;
   result.rendered_until_ms = q->rendered_until;
   for (uint32_t i = 0; i < q->config.max_voices; ++i)
     if (q->voices[i].token) ++result.occupied_voices;
   pthread_mutex_unlock(&q->mutex);
   return result;
+}
+
+void dae_pcm_latch_fault(dae_pcm_queue *q) {
+  if (q) atomic_store_explicit(&q->render_fault, 1, memory_order_release);
 }

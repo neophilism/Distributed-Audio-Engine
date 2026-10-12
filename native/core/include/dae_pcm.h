@@ -56,6 +56,8 @@ dae_pcm_queue *dae_pcm_create(dae_pcm_config config);
 void dae_pcm_destroy(dae_pcm_queue *queue);
 dae_pcm_status dae_pcm_activate(dae_pcm_queue *queue, uint64_t generation, double now_ms);
 void dae_pcm_deactivate(dae_pcm_queue *queue);
+/* Audio-callback-safe latch: no waiting or allocation. New activation is required. */
+void dae_pcm_latch_fault(dae_pcm_queue *queue);
 dae_pcm_status dae_pcm_enqueue(dae_pcm_queue *queue, const dae_pcm_request *request);
 /* Contraction only: no update can increase gain, postpone a fade, or extend output. */
 dae_pcm_status dae_pcm_update(dae_pcm_queue *queue, uint64_t generation, uint64_t token,
