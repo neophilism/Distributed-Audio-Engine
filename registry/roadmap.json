@@ -9,7 +9,8 @@
     "docs/DEVELOPMENT_PLAN.md",
     "native/README.md",
     "registry/native-implementation.json",
-    "registry/playback-integration.json"
+    "registry/playback-integration.json",
+    "registry/signal-parent-integration.json"
   ],
   "milestones": [
     {

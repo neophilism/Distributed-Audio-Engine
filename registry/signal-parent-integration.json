@@ -1,0 +1,65 @@
+{
+  "version": "2026-10-12-v1",
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "milestones": [
+    "DAE-03",
+    "DAE-08",
+    "DAE-23",
+    "DAE-34"
+  ],
+  "implementationScope": "Node recipient/creator endpoints only; not mobile runtime or a relay",
+  "upstream": {
+    "repository": "signalapp/libsignal",
+    "tag": "v0.105.0",
+    "npmPackage": "@signalapp/libsignal-client",
+    "version": "0.105.0",
+    "lockfile": "integrations/signal-parent/package-lock.json",
+    "candidateProfile": "pairwise-pqxdh-triple-ratchet@0.1.0",
+    "profileConformanceAssessed": false,
+    "thirdPartySupport": "explicitly unsupported upstream",
+    "license": "AGPL-3.0-only",
+    "sourceCommit": "4beb029d8a941f81e7d9c6d8af1ed25a677569a8"
+  },
+  "implemented": [
+    "Actual upstream prekey establishment and ratchet for private manifests and controls",
+    "Account-root-verified device identity binding; explicit per-kind, per-peer permissions",
+    "EC and KEM one-time consumption and atomic ratchet state before releasing output",
+    "Encrypted bounded POSIX vault with CAS, fsync/rename and independently supplied revision floor",
+    "Current membership checks for cached audio and signed emergencies; inner/outer control binding"
+  ],
+  "source": [
+    "integrations/signal-parent/src/channel.mjs",
+    "integrations/signal-parent/src/vault.mjs",
+    "integrations/signal-parent/src/playback.mjs",
+    "integrations/signal-parent/src/validation.mjs",
+    "integrations/signal-parent/src/index.mjs",
+    "integrations/signal-parent/src/index.d.mts"
+  ],
+  "guide": "integrations/signal-parent/README.md",
+  "tests": {
+    "endpointCases": 31,
+    "nativeIntegrationCases": 10,
+    "malformedNativeCiphertextSequences": 128,
+    "corePortableTestsUnchanged": 197,
+    "nativeDriver": "Production C kernel through a test-only Node adapter; synthetic routes and clocks",
+    "cryptography": "Real libsignal exchange, root signatures and AES-GCM encrypted state/media, no fake parent decoder",
+    "sourceBinding": "Exact-head GitHub Actions; no local or CI result is an independent certification"
+  },
+  "pending": [
+    "Android/iOS bindings and complete app runtime",
+    "Hardware-backed keys and rollback-resistant external revision floor",
+    "Group protocol or multi-device account recovery",
+    "Deployed transport, crash/restore drills and retention qualification",
+    "Physical output, drift/latency/soak tests and optional background playback",
+    "License/distribution review and independent protocol/profile/security review"
+  ],
+  "claims": {
+    "nodeParentChannelImplemented": true,
+    "mobileParentChannelImplemented": false,
+    "hardwareProtectedState": false,
+    "deployed": false,
+    "fieldValidated": false,
+    "stableReleased": false,
+    "independentlyReviewed": false
+  }
+}
