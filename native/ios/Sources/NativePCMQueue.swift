@@ -12,13 +12,16 @@ public enum NativeAudioError: Error, Equatable {
 public struct NativePCMRequest {
     public let id: String
     public let routeGeneration: UInt64
-    public let samples: [Float]
+    public private(set) var samples: [Float]
     public let sampleRate: UInt32
     public let channels: UInt32
     public let startAtHostTimeMs: Double
     public let fadeStartHostTimeMs: Double
     public let stopAtHostTimeMs: Double
     public let gainCeiling: Float
+
+    /// Best-effort cleanup of this owned handoff copy after a synchronous host call.
+    mutating func clearSamples() { samples.withUnsafeMutableBufferPointer { $0.initialize(repeating: 0) } }
 
     public init(id: String, routeGeneration: UInt64, samples: [Float], sampleRate: UInt32,
                 channels: UInt32, startAtHostTimeMs: Double, fadeStartHostTimeMs: Double,

@@ -65,3 +65,10 @@ key agreement, command authentication, media networking or billing.
 
 Primary API references: Apple AVAudioSourceNode, AVAudioSession.currentRoute,
 AVAudioTime.seconds(forHostTime:), AVAudioSession interruption/route notifications.
+
+## JavaScriptCore audio bridge
+
+[JavaScriptCoreAudioBridge](javascriptcore.md) now connects a trusted application
+JSContext synchronously to the actual iOS audio host. Its platform runtime tests
+are separate from Node integration tests. It does not provision the complete
+endpoint's WebCrypto/web globals, module loader or authenticated parent channel.
