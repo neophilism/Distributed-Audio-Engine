@@ -6,7 +6,18 @@ recipient endpoint. The portable engine still authenticates controls, checks
 rights, and decrypts protected media before handing bounded PCM to a host.
 No media key, private manifest or PCM is sent to a relay by these components.
 
-## Implementation order and acceptance
+## Current software implementation
+
+The shared C kernel and hardened TypeScript dispatch are in PR #45. The actual
+[Swift/iOS host](ios/README.md) is in PR #46 and the actual
+[Java/JNI/Android host](android/README.md) is in PR #47. Both hosts are
+foreground-only and require explicit restart/rejoin after interruption or app
+suspension. The current evidence and remaining gates are recorded in
+[`registry/native-implementation.json`](../registry/native-implementation.json).
+No device-support, acoustic, background-playback or production claim follows
+from these implementations or their build checks.
+
+## Implementation dependencies and remaining acceptance
 
 1. Shared native PCM kernel and hardened TypeScript dispatch identity: C11
    bounded storage, owned copies, route-generation checks, contraction-only
@@ -14,7 +25,7 @@ No media key, private manifest or PCM is sent to a relay by these components.
    skipping and control-thread plaintext cleanup. CI runs contract cases,
    adversarial sequences, concurrent control/render and ASan/UBSan. This is
    software evidence, not acoustic or platform evidence.
-2. Android host: buildable Android library with AudioTrack, actual routed-device
+2. Android host: Java/Kotlin-callable Android library with AudioTrack, actual routed-device
    observations, timestamp-based presentation estimates, audio-focus/noisy/app
    lifecycle invalidation, and a synchronous JNI handoff to the native kernel.
    Acceptance includes Android compilation plus JNI/host-boundary tests;

@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-12-v3",
+  "version": "2026-10-12-v4",
   "standardBasis": {
     "repository": "neophilism/End-To-End-Everywhere-Security-Architecture-Standard",
     "commit": "dea8f54cab9130da86a71f36de553766a978daf2",
@@ -65,7 +65,7 @@
       "relayMayDecrypt": false,
       "implemented": "challenged signed-decision validation and conservative interval evaluation",
       "pending": [
-        "native measurement/route adapters",
+        "consented native measurement and calibrated route/source attribution",
         "real E2EE decoder",
         "calibration/source/output attribution",
         "consent interface and hardware qualification"
@@ -142,12 +142,12 @@
         "same endpoint native PCM kernel and selected operating-system output"
       ],
       "relayMayDecrypt": false,
-      "implemented": "bounded volatile owned PCM, route-generation and opaque-dispatch binding, sample-timeline gain/fade/deadline contraction, control-thread plaintext wiping",
+      "implemented": "Foreground Android AudioTrack/JNI and iOS AVAudioEngine/Swift hosts with bounded volatile owned PCM, route-generation and opaque-dispatch binding, sample-timeline gain/fade/deadline contraction, lifecycle fault latching and plaintext cleanup.",
       "pending": [
-        "Android and iOS host integration",
-        "consumer bridge and authenticated parent channel",
+        "consumer runtime bridge and authenticated parent/control/key channel",
         "native protected state",
-        "physical output delay and synchronization qualification",
+        "physical output delay, drift and acoustic synchronization qualification",
+        "measured audible stop latency",
         "independent review"
       ],
       "excluded": [
@@ -169,18 +169,21 @@
     "scripts/check-package.mjs",
     "native/core/tests/pcm_test.c",
     "tests/android-audio.test.ts",
-    "tests/ios-audio.test.ts"
+    "tests/ios-audio.test.ts",
+    "native/ios/Tests/NativePCMQueueTests.swift",
+    "native/android/tests/NativePcmTest.java"
   ],
   "testAdapterLimitations": [
     "payment provider and raw-signature verifier are local test adapters",
     "measurement decisions, operations evidence verifiers and E2EE payload decoders are test adapters",
     "browser graph tests are not hardware interoperability",
     "operations unit evidence is not a deployed deletion/restore drill or independent review",
-    "Native kernel timestamps are synthetic software fixtures, not hardware or acoustic qualification"
+    "Native kernel timestamps are synthetic software fixtures, not hardware or acoustic qualification",
+    "Swift/JNI tests exercise real language-to-C handoffs, but native platform compilation is not physical device/route or consuming-app qualification."
   ],
   "dependentApplications": {
-    "SceneSignal": "planning",
-    "Distributed-Radio-Engine": "planning",
-    "TrackZero": "planning"
+    "SceneSignal": "not re-assessed in this native implementation round",
+    "Distributed-Radio-Engine": "not re-assessed in this native implementation round",
+    "TrackZero": "not re-assessed in this native implementation round"
   }
 }
