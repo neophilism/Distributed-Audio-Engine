@@ -1,6 +1,6 @@
 import { randomInt } from 'node:crypto';
 import * as signal from '@signalapp/libsignal-client';
-import { DeviceRegistry, signControl } from '../../../dist/src/index.js';
+import { DeviceRegistry, signControl, authenticateControl } from '../../../dist/src/index.js';
 import { journalFor, checkJournal, findOutgoing, saveOutgoing, deliveryView, findIncoming,
   saveIncoming, incomingView, markSent, completeIncoming } from './journal.mjs';
 import { PROTOCOL, MAX_MESSAGE_BYTES, MAX_WIRE_BYTES, MAX_LIFETIME_MS, jsonBytes,
@@ -311,7 +311,26 @@ export class SignalParentChannel {
    * Repeated ciphertext returns the same pending message or completed tombstone.
    */
   async receiveQueued(wire, expectedKind) { return this.#receive(wire, expectedKind, true); }
-  async #receive(wire, expectedKind, queued = false) {
+  /** Durable relay intake. Authenticates signed controls without consuming the
+   * separate execution checkpoint, then binds and saves the complete packet with
+   * receiving ratchet state. A stored command is NOT permission to execute it.
+   */
+  async receivePacket(packet, expectedSender) {
+    const copy = snapshot(packet);
+    invariant(jsonBytes(copy).length <= 70_000, 'PARENT_PACKET_LIMIT');
+    exact(copy, ['deliveryId', 'recordType', 'record', 'expiresAtMs']);
+    identifier(copy.deliveryId); integer(copy.expiresAtMs);
+    invariant(['signal', 'control'].includes(copy.recordType), 'PARENT_PACKET_TYPE');
+    let wire = copy.record;
+    if (copy.recordType === 'control') {
+      exact(copy.record, ['body', 'signatureHex']);
+      wire = parseCanonicalJson(new TextDecoder('utf-8', { fatal: true }).decode(
+        bytes64(copy.record.body.payloadCiphertextBase64, MAX_WIRE_BYTES)));
+    }
+    invariant(wire.from === expectedSender, 'PARENT_RELAY_SENDER_MISMATCH');
+    return this.#receive(wire, copy.recordType === 'control' ? 'control' : undefined, true, copy);
+  }
+  async #receive(wire, expectedKind, queued = false, packet) {
     const copy = snapshot(wire); invariant(jsonBytes(copy).length <= MAX_WIRE_BYTES, 'PARENT_WIRE_LIMIT');
     exact(copy, ['protocol', 'from', 'to', 'messageType', 'ciphertext']);
     invariant(copy.protocol === PROTOCOL && copy.to === this.#own.address, 'PARENT_WIRE_SCOPE_MISMATCH');
@@ -319,10 +338,30 @@ export class SignalParentChannel {
     const ciphertext = bytes64(copy.ciphertext, MAX_WIRE_BYTES);
     if (expectedKind !== undefined) invariant(KINDS.includes(expectedKind), 'PARENT_INVALID_KIND');
     return this.#work(copy.from, expectedKind, 'receive', async (state, peer, now) => {
+      if (packet) {
+        integer(packet.expiresAtMs, now + 1, now + MAX_LIFETIME_MS);
+        if (packet.recordType === 'control') {
+          const key = await crypto.subtle.importKey('raw', Buffer.from(peer.record.device.signing.publicKeyHex, 'hex'),
+            'Ed25519', false, ['verify']);
+          await authenticateControl(packet.record, { scope: this.#scope,
+            signers: new Map([[peer.record.device.signing.id, key]]), actions: new Set(['lease', 'emergency-stop']) }, now);
+        }
+      }
+      const bind = message => {
+        if (!packet) return;
+        invariant(message.messageId === packet.deliveryId && message.expiresAtMs === packet.expiresAtMs,
+          'PARENT_PACKET_BINDING');
+        if (packet.recordType === 'control') {
+          exact(message.payload, ['header', 'value']);
+          const { payloadCiphertextBase64: _wire, ...header } = packet.record.body;
+          invariant(canonicalJson(message.payload.header) === canonicalJson(header), 'PARENT_CONTROL_HEADER_MISMATCH');
+        } else invariant(message.kind !== 'control', 'PARENT_CONTROL_SIGNATURE_REQUIRED');
+      };
       const journal = queued ? journalFor(state, now) : undefined;
       if (journal) {
         const previous = findIncoming(journal, copy);
         if (previous) {
+          if (packet) invariant(previous.packetDigest === digest(packet), 'JOURNAL_PACKET_CONFLICT');
           this.#peer(copy.from, previous.kind, 'receive');
           invariant(!expectedKind || expectedKind === previous.kind, 'PARENT_KIND_MISMATCH');
           return incomingView(previous);
@@ -347,7 +386,8 @@ export class SignalParentChannel {
         invariant(KINDS.includes(envelope.kind) && (!expectedKind || envelope.kind === expectedKind), 'PARENT_KIND_MISMATCH');
         this.#peer(copy.from, envelope.kind, 'receive'); identifier(envelope.messageId);
         assertLifetime(envelope.issuedAtMs, envelope.expiresAtMs, this.#now());
-        return journal ? incomingView(saveIncoming(journal, copy, envelope)) : envelope;
+        bind(envelope);
+        return journal ? incomingView(saveIncoming(journal, copy, envelope, packet)) : envelope;
       } finally { plaintext?.fill(0); }
     }, (result, now) => invariant(result.expiresAtMs > now, 'PARENT_EXPIRED_OR_FUTURE'));
   }

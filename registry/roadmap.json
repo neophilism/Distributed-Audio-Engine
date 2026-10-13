@@ -12,7 +12,8 @@
     "registry/playback-integration.json",
     "registry/signal-parent-integration.json",
     "registry/relay-integration.json",
-    "registry/endpoint-journal.json"
+    "registry/endpoint-journal.json",
+    "registry/endpoint-recovery.json"
   ],
   "milestones": [
     {

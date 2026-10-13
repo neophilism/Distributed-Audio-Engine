@@ -1,0 +1,47 @@
+{
+  "version": "2026-10-13-v1",
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "branch": "dev/endpoint-relay-recovery",
+  "dependsOnPullRequest": 56,
+  "milestones": ["DAE-03", "DAE-08", "DAE-23", "DAE-26", "DAE-34"],
+  "guide": "docs/endpoint-relay-recovery.md",
+  "scope": "Explicit bounded Node relay intake and private manifest recovery; no automatic playback",
+  "implemented": [
+    "Signed packet authentication and complete packet retention in the atomic receiving journal",
+    "Relay acknowledgment only after durable encrypted intake; identical outbox retry after uncertain send",
+    "Cancelable, deadline-bounded, single-flight eight-packet flush and pull operations",
+    "Opt-in manifest rehydration and encrypted asset high-water marks against old-key resurrection",
+    "Separate intake authentication from replay-safe command execution; no checkpoint reset or automatic join"
+  ],
+  "tests": {
+    "newPortableCases": 3,
+    "newSignalCompositionCases": 12,
+    "newHighWaterModelCases": 4,
+    "newTlsNativeRestartCases": 2,
+    "portableTotal": 200,
+    "endpointTotal": 70,
+    "signalNativeTotal": 10,
+    "relayServiceTotal": 24,
+    "tlsNativeTotal": 10,
+    "verification": "Exact-head Engine, Native, Signal, Relay and status-record checks required before merge",
+    "faultModel": "Injected persistence/response failures, actual encrypted-vault reopen, real TLS/Signal/C; synthetic native clocks and routes"
+  },
+  "supersedes": "Missing Node relay acknowledgment ordering and volatile-only manifest recovery in the PR 56 checkpoint; all unrelated gates remain pending",
+  "pending": [
+    "Controller business-operation/epoch persistence and application-specific effect reconciliation",
+    "Mobile runtime/protocol bindings and hardware-protected state",
+    "Native rate/channel/drift adapters, physical route calibration and six-hour device soaks",
+    "Live provider/fulfillment adapters and deployed operational recovery drills",
+    "Independent security/profile/license review and release approval"
+  ],
+  "claims": {
+    "durableNodeRelayIntake": true,
+    "explicitManifestRecovery": true,
+    "automaticPlaybackRecovery": false,
+    "exactlyOnceEffects": false,
+    "deployed": false,
+    "fieldValidated": false,
+    "independentlyReviewed": false,
+    "stableReleased": false
+  }
+}

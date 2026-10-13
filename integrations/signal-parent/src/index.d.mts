@@ -34,7 +34,7 @@ export type DeliveryPacket =
   | { deliveryId: string; recordType: 'control'; record: SignedControl; expiresAtMs: number };
 export interface OutboundDelivery { recipient: string; kind: ParentKind; status: 'pending' | 'sent'; packet: DeliveryPacket }
 export interface InboxReceipt { messageKey: string; sender: string; kind: ParentKind; messageId: string; expiresAtMs: number }
-export interface PendingMessage extends InboxReceipt { status: 'pending'; message: ParentMessage }
+export interface PendingMessage extends InboxReceipt { status: 'pending'; message: ParentMessage; packet?: DeliveryPacket }
 export interface CompletedMessage extends InboxReceipt { status: 'completed' }
 export type InboxMessage = PendingMessage | CompletedMessage;
 export class SignalParentChannel {
@@ -55,6 +55,7 @@ export class SignalParentChannel {
     fields: { epoch: number; sequence: number; issuedAtMs: number; expiresAtMs: number; action: 'lease' | 'emergency-stop' },
     payload: unknown, options: { messageId: string }): Promise<OutboundDelivery>;
   receiveQueued(wire: SignalWire, expectedKind?: ParentKind): Promise<InboxMessage>;
+  receivePacket(packet: DeliveryPacket, expectedSender: string): Promise<InboxMessage>;
   pendingDeliveries(address: string): Promise<OutboundDelivery[]>;
   markDeliverySent(deliveryId: string): Promise<OutboundDelivery>;
   pendingMessages(address: string): Promise<PendingMessage[]>;
@@ -66,13 +67,28 @@ export function createSignalControl(channel: SignalParentChannel, recipient: str
   fields: { epoch: number; sequence: number; issuedAtMs: number; expiresAtMs: number; action: 'lease' | 'emergency-stop' },
   payload: unknown): Promise<SignedControl>;
 export class SignalPlaybackInbox {
-  constructor(options: { channel: SignalParentChannel; sender: string; nowUnixMs: () => number });
+  constructor(options: { channel: SignalParentChannel; sender: string; nowUnixMs: () => number } &
+    ({ durable: true; vault: EndpointVault } | { durable?: false; vault?: EndpointVault }));
   createVerifier(vault: EndpointVault): Promise<ControlVerifier>;
   sessionOptions(options: { vault: EndpointVault; timeline: ProgramTimeline; transport: CiphertextChunkTransport;
     authorizePlayback: ProgramPlayerOptions['authorizePlayback']; consentedGainCeiling: number }): Promise<PlaybackSessionOptions>;
   acceptManifest(wire: SignalWire): Promise<{ assetId: string; expiresAtMs: number }>;
+  restoreManifests(): Promise<Array<{ assetId: string; expiresAtMs: number }>>;
   readonly resolver: ProgramPlayerOptions['resolver'];
   readonly decodeControlPayload: (body: ControlBody) => Promise<unknown>;
   close(): void;
 }
 export const PROTOCOL: 'signal-libsignal-0.105.0';
+
+/** Trusted endpoint adapter: methods must honor AbortSignal and bounded work. */
+export interface EndpointRelayTransport {
+  send(recipient: string, packet: DeliveryPacket, signal?: AbortSignal): Promise<{ receiptId: string; status: 'stored' | 'acknowledged' }>;
+  poll(signal?: AbortSignal): Promise<Array<{ receiptId: string; sender: string; packet: DeliveryPacket }>>;
+  acknowledge(receiptIds: string[], signal?: AbortSignal): Promise<void>;
+}
+export class SignalRelayEndpoint {
+  constructor(options: { channel: SignalParentChannel; relay: EndpointRelayTransport; nowUnixMs: () => number; timeoutMs?: number });
+  flush(recipient: string, signal?: AbortSignal): Promise<{ sent: number }>;
+  pull(signal?: AbortSignal): Promise<InboxMessage[]>;
+  close(): void;
+}

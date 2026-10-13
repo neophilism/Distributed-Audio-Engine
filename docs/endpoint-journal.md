@@ -58,28 +58,28 @@ An uncertain application commit must be reconciled, not blindly replayed.
 
 Do not mix `receive` and `receiveQueued` for a durable flow: the old low-level API
 intentionally exposes no recoverable inbox. Likewise `seal` and
-`createSignalControl` retain their existing non-journal contracts. The current
-`SignalPlaybackInbox` is still volatile; connecting recoverable manifests and
-relay acknowledgment ordering to it is follow-on work. A signed-control replay
+`createSignalControl` retain their existing non-journal contracts. The [Node recovery composition](endpoint-relay-recovery.md) now supplies bounded
+relay acknowledgment ordering and opt-in durable `SignalPlaybackInbox` rehydration.
+Its default non-durable behavior remains available. A signed-control replay
 checkpoint is a distinct row: it must never be reset to resume an old lease.
 After an uncertain playback command, keep output stopped and obtain fresh signed
 control authority. Emergency handling and independent native hard stops remain
 unchanged.
 
-Relay polling/acknowledgment orchestration, automatic media-manifest rehydration,
-mobile runtime/protocol bindings, hardware-protected keys/floors, actual device
+Automatic playback resumption, mobile runtime/protocol bindings, hardware-protected keys/floors, actual device
 latency/soaks, deployment, operational recovery drills and independent security
 review remain open. No test here establishes exactly-once sound or device
 qualification.
 
 ## Verification
 
-The Signal suite adds 18 real-library journal/transaction cases and five pure
+The PR #56 journal checkpoint added 18 real-library journal/transaction cases and five pure
 journal-model cases. They cover reopen, simulated failure before and after a
 commit, duplicate/conflicting IDs, missing permissions after reopen, current
 membership, expiry during an asynchronous operation, quotas, racing instances,
 private-at-rest payloads, signed control integration and terminal tombstones.
-The original 31 endpoint tests and 10 Signal-to-C rendering cases remain active,
+The subsequent recovery composition brings the endpoint/model total to 70;
+10 Signal-to-C rendering cases remain active,
 as do Engine, Native, Relay and E2EESA status-record checks. All exact-head hosted
 checks must pass before merge. Local Node 22/TypeScript 5 checks are supplementary
 to the pinned hosted Node 24.19/TypeScript 7 runtime; record validation is not an

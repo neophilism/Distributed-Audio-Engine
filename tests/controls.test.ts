@@ -44,3 +44,41 @@ test('payload mutation invalidates signature and source mutation after signing i
   await assert.rejects(v.accept({...c,body:{...c.body,payloadCiphertextBase64:'ZWZnaA=='}},1500));
   await v.accept(c,1500);
 });
+
+test('durable intake authentication does not consume or bypass execution replay checkpoints', async () => {
+  const { authenticateControl } = await import('../src/index.js');
+  const keys = await createControlSigningKey(), store = new MemoryCheckpointStore();
+  const policy = { scope, signers: new Map([['key', keys.publicKey]]), actions: new Set(['fade']) };
+  const verifier = new ControlVerifier(scope, policy.signers, policy.actions, store);
+  const control = await signControl(body(), keys.privateKey);
+  await authenticateControl(control, policy, 1500); await authenticateControl(control, policy, 1500);
+  await verifier.accept(control, 1500);
+  await authenticateControl(control, policy, 1500);
+  await assert.rejects(verifier.accept(control, 1500), /REPLAY_OR_GAP/);
+  const gap = await signControl(body({ sequence: 9 }), keys.privateKey);
+  assert.equal((await authenticateControl(gap, policy, 1500)).sequence, 9);
+  await assert.rejects(verifier.accept(gap, 1500), /REPLAY_OR_GAP/);
+});
+
+test('standalone control authentication retains scope, signer, action and lifetime bounds', async () => {
+  const { authenticateControl } = await import('../src/index.js');
+  const keys = await createControlSigningKey(), wrong = await createControlSigningKey();
+  const policy = { scope, signers: new Map([['key', keys.publicKey]]), actions: new Set(['fade']) };
+  const control = await signControl(body(), keys.privateKey);
+  await assert.rejects(authenticateControl(control, { ...policy, maxLifetimeMs: 999 }, 1500));
+  await assert.rejects(authenticateControl(control, { ...policy, maxLifetimeMs: 300001 }, 1500));
+  await assert.rejects(authenticateControl(control, { ...policy, actions: new Set() }, 1500));
+  await assert.rejects(authenticateControl(control, { ...policy, signers: new Map([['key', wrong.publicKey]]) }, 1500));
+  await assert.rejects(authenticateControl(control, { ...policy, scope: { ...scope, sessionId: 'other' } }, 1500));
+  await assert.rejects(authenticateControl(control, policy, 2000));
+  await authenticateControl(control, policy, 1500);
+});
+
+test('standalone control authentication snapshots its envelope across asynchronous verification', async () => {
+  const { authenticateControl } = await import('../src/index.js');
+  const keys = await createControlSigningKey();
+  const control = await signControl(body(), keys.privateKey);
+  const pending = authenticateControl(control, { scope, signers: new Map([['key', keys.publicKey]]), actions: new Set(['fade']) }, 1500);
+  control.body.sequence = 91; control.signatureHex = '0'.repeat(128);
+  assert.equal((await pending).sequence, 1);
+});

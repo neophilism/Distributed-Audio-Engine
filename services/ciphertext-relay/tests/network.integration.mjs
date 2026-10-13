@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { packageRendition, ProgramTimeline, compileProgram, EndpointPlaybackSession } from '../../../dist/src/index.js';
-import { SignalPlaybackInbox, createSignalControl } from '../../../integrations/signal-parent/src/index.mjs';
+import { SignalPlaybackInbox, createSignalControl, SignalRelayEndpoint, SignalParentChannel, EncryptedFileVault } from '../../../integrations/signal-parent/src/index.mjs';
 import { fixture, scope } from '../../../integrations/signal-parent/tests/helpers.mjs';
 import { KernelBridge } from '../../../integrations/signal-parent/tests/kernel-bridge.mjs';
 import { relayFixture } from './helpers.mjs';
@@ -77,5 +77,73 @@ for (const platform of ['android', 'ios']) {
     const p = await networkFixture(t, platform); await p.session.join((await p.deliverControl(1)).packet.record); await p.session.pump();
     await p.f.rotate(p.f.alice); await p.receiver.poll(); // Relay still has valid routing credentials.
     await assert.rejects(p.session.pump(), /IDENTITY_CHANGED/); assert.equal(p.bridge.samplesQueued, 0);
+  });
+}
+
+for (const platform of ['android', 'ios']) {
+  test(`${platform}: durable TLS intake survives two endpoint restarts; only a fresh lease restarts production C output`, async t => {
+    const f = await fixture(); t.after(() => f.close());
+    const relay = await relayFixture(t, { addresses: [f.aliceId, f.bobId], clock: () => f.now });
+    const [sender, receiver] = relay.clients;
+    await receiver.publishBundle(await f.bob.channel.publicBundle());
+    await f.alice.channel.connect(f.bobId, await sender.takeBundle(f.bobId));
+    const tx = new SignalRelayEndpoint({ channel: f.alice.channel, relay: sender, nowUnixMs: () => f.now });
+    let rx, inbox, session, bridge;
+    t.after(() => { tx.close(); rx?.close(); session?.close(); inbox?.close(); bridge?.close(); });
+    const makeReceiver = () => new SignalRelayEndpoint({ channel: f.bob.channel, relay: receiver, nowUnixMs: () => f.now });
+    rx = makeReceiver();
+    const context = { tenantId: scope.tenantId, application: scope.application, parentMessageId: 'recover-manifest' };
+    const media = await packageRendition({ sampleRate: 8000, channels: 2,
+      samples: Float32Array.from({ length: 48000 }, (_, i) => i % 2 ? -0.5 : 0.5) }, 1, context, 'endpoint-only.wav');
+    for (let i = 0; i < media.ciphertextChunks.length; i++) await sender.uploadChunk({ tenantId: scope.tenantId,
+      application: scope.application, storageObjectId: media.privateManifest.storageObjectId, chunkIndex: i,
+      readers: [f.bobId], expiresAtMs: f.now + 30000, ciphertextBase64: Buffer.from(media.ciphertextChunks[i]).toString('base64') });
+    await f.alice.channel.queueMessage(f.bobId, 'manifest', { assetId: 'asset', context, manifest: media.privateManifest,
+      sampleRate: 8000, channels: 2, frames: 24000, authorizationValidUntilMs: f.now + 30000 },
+      { messageId: context.parentMessageId, expiresAtMs: f.now + 30000 });
+    await tx.flush(f.bobId); await rx.pull(); assert.equal((await receiver.poll()).length, 0);
+    const initial = f.now, nativeNow = () => 5000 + f.now - initial;
+    const timeline = new ProgramTimeline(initial, compileProgram('recovered', 8000,
+      [{ id: 'clip', assetId: 'asset', frames: 24000, markerAfter: null }]));
+    async function restart() {
+      session?.close(); inbox?.close(); bridge?.close(); rx.close();
+      const minimumRevision = f.bob.vault.revision; f.bob.channel.close(); f.bob.vault.close();
+      f.bob.vault = new EncryptedFileVault({ ...f.bob.options, minimumRevision });
+      f.bob.channel = new SignalParentChannel({ vault: f.bob.vault, scope, localRegistry: f.bob.registry, nowUnixMs: () => f.now });
+      f.authorize(f.bob, f.alice); rx = makeReceiver();
+      inbox = new SignalPlaybackInbox({ channel: f.bob.channel, sender: f.aliceId, nowUnixMs: () => f.now,
+        durable: true, vault: f.bob.vault });
+      assert.equal((await inbox.restoreManifests()).length, 1);
+      const options = await inbox.sessionOptions({ vault: f.bob.vault, timeline, consentedGainCeiling: 0.75,
+        transport: receiver.chunksFrom(f.aliceId, { application: scope.application, tenantId: scope.tenantId }),
+        authorizePlayback: async () => ({ allowed: true, validUntilMs: f.now + 30000 }) });
+      bridge = new KernelBridge(nativeNow);
+      session = platform === 'android' ? EndpointPlaybackSession.android({ ...options, bridge, native: { nowMonotonicMs: nativeNow } })
+        : EndpointPlaybackSession.ios({ ...options, bridge, native: { nowHostTimeMs: nativeNow } });
+      bridge.activate(1);
+      assert.equal(session.snapshot().phase, 'idle'); assert.equal(bridge.samplesQueued, 0);
+      assert.ok(bridge.render(nativeNow()).every(value => value === 0));
+    }
+    async function lease(sequence) {
+      await f.alice.channel.queueControl(f.bobId,
+        { epoch: 1, sequence, issuedAtMs: f.now, expiresAtMs: f.now + 2000, action: 'lease' },
+        { expiresAtMs: f.now + 500, stopAtMs: f.now + 500, fadeMs: 100, maxLinearGain: 0.5 }, { messageId: 'recovery-lease-' + sequence });
+      await tx.flush(f.bobId); const [message] = await rx.pull(); return message;
+    }
+    // Crash after relay acknowledgment, before any private manifest was installed.
+    await restart(); assert.equal(f.bob.vault.read('control-checkpoints'), undefined);
+    const first = await lease(1); assert.equal(f.bob.vault.read('control-checkpoints'), undefined);
+    await session.join(first.packet.record); await session.pump();
+    assert.equal(bridge.render(nativeNow() + 50)[0], 0.25);
+    await f.bob.channel.completeMessage(first.messageKey);
+    // A persisted playback checkpoint cannot be reset by cryptographic recovery.
+    f.setNow(f.now + 1); await restart();
+    await assert.rejects(session.join(first.packet.record), /REPLAY_OR_GAP/);
+    assert.equal(bridge.samplesQueued, 0);
+    const fresh = await lease(2); await session.join(fresh.packet.record); await session.pump();
+    assert.equal(bridge.render(nativeNow() + 50)[0], 0.25);
+    assert.ok(bridge.render(nativeNow() + 500).every(value => value === 0));
+    assert.ok(bridge.rawViews.every(view => view.every(sample => sample === 0)));
+    assert.equal((await receiver.poll()).length, 0);
   });
 }

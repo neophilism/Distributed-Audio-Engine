@@ -1,4 +1,4 @@
-import { SignalParentChannel, SignalPlaybackInbox, EncryptedFileVault, createSignalControl } from '../src/index.mjs';
+import { SignalParentChannel, SignalRelayEndpoint, SignalPlaybackInbox, EncryptedFileVault, createSignalControl } from '../src/index.mjs';
 import { EndpointPlaybackSession } from '../../../dist/src/index.js';
 import type { PlaybackSessionOptions, AndroidAudioBridge, Scope, DeviceRegistry } from '../../../dist/src/index.js';
 declare const vault: EncryptedFileVault, scope: Scope, registry: DeviceRegistry, sender: string, options: PlaybackSessionOptions, bridge: AndroidAudioBridge;
@@ -25,3 +25,13 @@ void channel.pendingDeliveries(sender); void channel.pendingMessages(sender);
 void channel.markDeliverySent('stable-id'); void channel.sweepJournal();
 // @ts-expect-error Durable queue requires an explicit stable ID.
 void channel.queueMessage(sender, 'ack', {}, { expiresAtMs: 1000 });
+
+const durableInbox = new SignalPlaybackInbox({ channel, sender, nowUnixMs: Date.now, durable: true, vault });
+void durableInbox.restoreManifests();
+// @ts-expect-error Durable manifest recovery requires its encrypted application store.
+new SignalPlaybackInbox({ channel, sender, nowUnixMs: Date.now, durable: true });
+import type { CiphertextRelayClient } from '../../../services/ciphertext-relay/src/index.mjs';
+declare const relay: CiphertextRelayClient;
+const pump = new SignalRelayEndpoint({ channel, relay, nowUnixMs: Date.now });
+void pump.flush(sender); void pump.pull(); pump.close();
+void channel.receivePacket(delivery.packet, sender);
