@@ -60,6 +60,34 @@ export async function signControl(body: ControlBody, privateKey: EndpointCryptoK
   const signature = new Uint8Array(await crypto.subtle.sign('Ed25519', privateKey, controlBytes(snapshot)));
   return { body: snapshot, signatureHex: Array.from(signature, b => b.toString(16).padStart(2,'0')).join('') };
 }
+/** Signature/scope/expiry authentication for durable intake only. This neither
+ * checks nor advances replay state and MUST NOT authorize execution or playback.
+ * Execute only through ControlVerifier.accept and the current application policy.
+ */
+export interface ControlAuthenticationPolicy {
+  scope: Scope;
+  signers: ReadonlyMap<string, EndpointCryptoKey>;
+  actions: ReadonlySet<string>;
+  maxLifetimeMs?: number;
+}
+export async function authenticateControl(control: SignedControl, policy: ControlAuthenticationPolicy, nowMs: number): Promise<ControlBody> {
+  const maxLifetimeMs = policy.maxLifetimeMs ?? 60_000;
+  integer(maxLifetimeMs, 1, 300_000);
+  integer(nowMs);
+  const envelope = structuredClone(control);
+  exactKeys(envelope, ['body','signatureHex']); validateBody(envelope.body);
+  const body = envelope.body;
+  invariant(canonicalJson(body.scope) === canonicalJson(policy.scope), 'CONTROL_SCOPE_MISMATCH');
+  invariant(policy.actions.has(body.action), 'ACTION_NOT_AUTHORIZED');
+  invariant(body.issuedAtMs <= nowMs && body.expiresAtMs > nowMs && body.expiresAtMs - body.issuedAtMs <= maxLifetimeMs, 'CONTROL_EXPIRED_OR_FUTURE');
+  const key = policy.signers.get(body.keyId);
+  invariant(key && key.type === 'public' && key.algorithm.name === 'Ed25519', 'UNKNOWN_CONTROL_SIGNER');
+  invariant(typeof envelope.signatureHex === 'string' && /^[0-9a-f]{128}$/.test(envelope.signatureHex), 'INVALID_SIGNATURE');
+  const signature = Uint8Array.from(envelope.signatureHex.match(/.{2}/g)!.map(x => parseInt(x,16)));
+  invariant(await crypto.subtle.verify('Ed25519', key, signature, controlBytes(body)), 'CONTROL_AUTHENTICATION_FAILED');
+  return body;
+}
+
 /** Verifies integrity/authority only. Never decrypt or execute a payload here. */
 export class ControlVerifier {
   private readonly scope: Scope;
@@ -72,18 +100,8 @@ export class ControlVerifier {
   }
   matchesScope(scope: Scope): boolean { return canonicalJson(scope) === canonicalJson(this.scope); }
   async accept(control: SignedControl, nowMs: number): Promise<ControlBody> {
-    integer(nowMs);
-    const envelope = structuredClone(control);
-    exactKeys(envelope, ['body','signatureHex']); validateBody(envelope.body);
-    const body = envelope.body;
-    invariant(canonicalJson(body.scope) === canonicalJson(this.scope), 'CONTROL_SCOPE_MISMATCH');
-    invariant(this.actions.has(body.action), 'ACTION_NOT_AUTHORIZED');
-    invariant(body.issuedAtMs <= nowMs && body.expiresAtMs > nowMs && body.expiresAtMs - body.issuedAtMs <= this.maxLifetimeMs, 'CONTROL_EXPIRED_OR_FUTURE');
-    const key = this.signers.get(body.keyId);
-    invariant(key && key.type === 'public' && key.algorithm.name === 'Ed25519', 'UNKNOWN_CONTROL_SIGNER');
-    invariant(typeof envelope.signatureHex === 'string' && /^[0-9a-f]{128}$/.test(envelope.signatureHex), 'INVALID_SIGNATURE');
-    const signature = Uint8Array.from(envelope.signatureHex.match(/.{2}/g)!.map(x => parseInt(x,16)));
-    invariant(await crypto.subtle.verify('Ed25519', key, signature, controlBytes(body)), 'CONTROL_AUTHENTICATION_FAILED');
+    const body = await authenticateControl(control, { scope: this.scope, signers: this.signers,
+      actions: this.actions, maxLifetimeMs: this.maxLifetimeMs }, nowMs);
     // No await between replay-state read and its atomic compare-and-set.
     const scopeKey = canonicalJson(this.scope);
     const previous = this.checkpoints.read(scopeKey);

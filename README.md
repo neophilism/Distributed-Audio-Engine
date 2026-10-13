@@ -8,7 +8,7 @@ Neutral TypeScript audio foundation for SceneSignal and Distributed Radio Engine
 
 The portable implementation includes encrypted range delivery, a current-position program player, bounded browser audio plus Android and iOS host-binding sinks, shared-clock estimation, signed local coordinator failover, ciphertext cache and durable SQLite replay/cache adapters. It also includes challenged output-evidence primitives, complete-product checkout, payment reconciliation and generic entitlements with private SQLite business stores. [Implementation/evidence status](docs/implementation-status.md) · [Developer guide](docs/developer-guide.md) · [Portable pipeline evidence](docs/portable-integration.md)
 
-Import portable APIs from `@neophilism/distributed-audio-engine`, Web Audio from `/browser`, the Android host binding from `/android`, the iOS host binding from `/ios` and SQLite adapters from `/node`; output evidence and lifecycle contracts have `/evidence` and `/output-lifecycle` entries. CI checks 197 TypeScript tests, separate Node/browser consumer types and an offline packed installation. This remains a development package. Foreground Android AudioTrack/JNI and iOS AVAudioEngine/Swift hosts now have separate native builds and tests; the system JavaScriptCore audio bridge is implemented for iOS. Complete mobile endpoint runtime wiring, acoustic qualification and mobile parent key-channel bindings remain pending.
+Import portable APIs from `@neophilism/distributed-audio-engine`, Web Audio from `/browser`, the Android host binding from `/android`, the iOS host binding from `/ios` and SQLite adapters from `/node`; output evidence and lifecycle contracts have `/evidence` and `/output-lifecycle` entries. CI checks 200 TypeScript tests, separate Node/browser consumer types and an offline packed installation. This remains a development package. Foreground Android AudioTrack/JNI and iOS AVAudioEngine/Swift hosts now have separate native builds and tests; the system JavaScriptCore audio bridge is implemented for iOS. Complete mobile endpoint runtime wiring, acoustic qualification and mobile parent key-channel bindings remain pending.
 
 Protected content is encrypted at authorized endpoints. Server-side transcoding, private-manifest indexing and relay-held media keys are prohibited. [Security boundary and release gates](docs/security.md).
 
@@ -29,5 +29,7 @@ The [TLS ciphertext relay](services/ciphertext-relay/README.md) provides persist
 The [atomic endpoint journal](docs/endpoint-journal.md) persists outbound ciphertext,
 signed encrypted controls and authenticated inbound envelopes together with Signal
 ratchet state. Stable IDs, current membership, bounded retention and completed
-tombstones support safe explicit retries after restart. Relay/playback recovery
-composition and exactly-once application effects are not supplied by this layer.
+tombstones support safe explicit retries after restart. The [relay recovery composition](docs/endpoint-relay-recovery.md) acknowledges only
+after durable intake and explicitly restores private manifests with persisted
+anti-rollback state. It never automatically starts playback or supplies exactly-once
+application effects.

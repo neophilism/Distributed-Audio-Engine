@@ -2,6 +2,7 @@
   "version": "2026-10-13-v1",
   "repository": "neophilism/Distributed-Audio-Engine",
   "pullRequest": 56,
+  "checkpointSupersededBy": "registry/endpoint-recovery.json",
   "milestones": ["DAE-03", "DAE-08", "DAE-23", "DAE-26", "DAE-34"],
   "scope": "Node endpoint delivery state only; no automatic playback or relay deployment",
   "guide": "docs/endpoint-journal.md",

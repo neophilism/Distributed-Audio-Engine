@@ -38,7 +38,14 @@ export function checkJournal(journal) {
   }
   for (const entry of journal.incoming) {
     const completed = entry.status === 'completed';
-    exact(entry, ['messageKey', 'wireDigest', 'sender', 'kind', 'messageId', 'expiresAtMs', 'status', ...completed ? [] : ['message']]);
+    const delivered = Object.hasOwn(entry, 'packetDigest');
+    exact(entry, ['messageKey', 'wireDigest', 'sender', 'kind', 'messageId', 'expiresAtMs', 'status',
+      ...completed ? [] : ['message'], ...delivered ? ['packetDigest', ...completed ? [] : ['packet']] : []]);
+    if (delivered) {
+      hash(entry.packetDigest);
+      if (!completed) invariant(digest(entry.packet) === entry.packetDigest &&
+        entry.packet.deliveryId === entry.messageId && entry.packet.expiresAtMs === entry.expiresAtMs, 'JOURNAL_PACKET_BINDING');
+    }
     hash(entry.messageKey); hash(entry.wireDigest); hash(entry.sender); kind(entry.kind); identifier(entry.messageId); integer(entry.expiresAtMs, 1);
     invariant(['pending', 'completed'].includes(entry.status) && !keys.has(entry.messageKey) && !wires.has(entry.wireDigest) &&
       entry.messageKey === messageKeyFor(entry.sender, entry.messageId), 'JOURNAL_INVALID_INCOMING');
@@ -72,18 +79,19 @@ export function findIncoming(journal, wire) {
   const wireDigest = digest(wire);
   return journal.incoming.find(entry => entry.wireDigest === wireDigest);
 }
-export function saveIncoming(journal, wire, message) {
+export function saveIncoming(journal, wire, message, packet) {
   const messageKey = messageKeyFor(message.from, message.messageId);
   invariant(!journal.incoming.some(entry => entry.messageKey === messageKey), 'JOURNAL_MESSAGE_ID_CONFLICT');
   const entry = { messageKey, wireDigest: digest(wire), sender: message.from, kind: message.kind,
     messageId: message.messageId, expiresAtMs: message.expiresAtMs, status: 'pending', message: snapshot(message) };
+  if (packet) { entry.packetDigest = digest(packet); entry.packet = snapshot(packet); }
   journal.incoming.push(entry); checkJournal(journal); return entry;
 }
 export function incomingView(entry) {
-  const { wireDigest: _digest, ...view } = entry; return snapshot(view);
+  const { wireDigest: _digest, packetDigest: _packetDigest, ...view } = entry; return snapshot(view);
 }
 export function completeIncoming(journal, messageKey) {
   hash(messageKey); const entry = journal.incoming.find(item => item.messageKey === messageKey);
   invariant(entry, 'JOURNAL_MESSAGE_UNAVAILABLE');
-  delete entry.message; entry.status = 'completed'; return incomingView(entry);
+  delete entry.message; delete entry.packet; entry.status = 'completed'; return incomingView(entry);
 }
