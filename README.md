@@ -25,3 +25,9 @@ Use [owned playback sessions](docs/playback-session.md) to coordinate signed aut
 A separate [Node Signal parent adapter](integrations/signal-parent/README.md) now delivers private manifests and controls with actual upstream key exchange, root-verified peers and encrypted atomic endpoint state. Its mobile bindings and independent profile review remain pending; the portable core gains no third-party runtime dependency.
 
 The [TLS ciphertext relay](services/ciphertext-relay/README.md) provides persistent public-key, private-message ciphertext and encrypted audio-chunk delivery for Node endpoints. Network integration tests now traverse real TLS sockets through to C rendering. It is a runnable service with explicit operator configuration, not an existing deployment or mobile release.
+
+The [atomic endpoint journal](docs/endpoint-journal.md) persists outbound ciphertext,
+signed encrypted controls and authenticated inbound envelopes together with Signal
+ratchet state. Stable IDs, current membership, bounded retention and completed
+tombstones support safe explicit retries after restart. Relay/playback recovery
+composition and exactly-once application effects are not supplied by this layer.

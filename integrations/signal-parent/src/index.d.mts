@@ -29,6 +29,14 @@ export interface SignalPublicBundle { body: { protocol: 'signal-libsignal-0.105.
 export function initializeSignalIdentity(vault: EndpointVault, options: { scope: Scope; identityId: string;
   deviceId: string; generation?: number; nowMs: number }): Promise<SignalIdentityDescriptor>;
 export function signalIdentityDescriptor(vault: EndpointVault): SignalIdentityDescriptor;
+export type DeliveryPacket =
+  | { deliveryId: string; recordType: 'signal'; record: SignalWire; expiresAtMs: number }
+  | { deliveryId: string; recordType: 'control'; record: SignedControl; expiresAtMs: number };
+export interface OutboundDelivery { recipient: string; kind: ParentKind; status: 'pending' | 'sent'; packet: DeliveryPacket }
+export interface InboxReceipt { messageKey: string; sender: string; kind: ParentKind; messageId: string; expiresAtMs: number }
+export interface PendingMessage extends InboxReceipt { status: 'pending'; message: ParentMessage }
+export interface CompletedMessage extends InboxReceipt { status: 'completed' }
+export type InboxMessage = PendingMessage | CompletedMessage;
 export class SignalParentChannel {
   constructor(options: { vault: EndpointVault; scope: Scope; localRegistry: DeviceRegistry; nowUnixMs: () => number });
   readonly publicIdentity: SignalIdentityDescriptor;
@@ -41,6 +49,17 @@ export class SignalParentChannel {
   connect(address: string, bundle: SignalPublicBundle): Promise<void>;
   seal(address: string, kind: ParentKind, payload: unknown, options: { messageId: string; expiresAtMs: number }): Promise<SignalWire>;
   receive(wire: SignalWire, expectedKind?: ParentKind): Promise<ParentMessage>;
+  queueMessage(address: string, kind: ParentKind, payload: unknown,
+    options: { messageId: string; expiresAtMs: number }): Promise<OutboundDelivery>;
+  queueControl(address: string,
+    fields: { epoch: number; sequence: number; issuedAtMs: number; expiresAtMs: number; action: 'lease' | 'emergency-stop' },
+    payload: unknown, options: { messageId: string }): Promise<OutboundDelivery>;
+  receiveQueued(wire: SignalWire, expectedKind?: ParentKind): Promise<InboxMessage>;
+  pendingDeliveries(address: string): Promise<OutboundDelivery[]>;
+  markDeliverySent(deliveryId: string): Promise<OutboundDelivery>;
+  pendingMessages(address: string): Promise<PendingMessage[]>;
+  completeMessage(messageKey: string): Promise<CompletedMessage>;
+  sweepJournal(): Promise<void>;
   close(): void;
 }
 export function createSignalControl(channel: SignalParentChannel, recipient: string,

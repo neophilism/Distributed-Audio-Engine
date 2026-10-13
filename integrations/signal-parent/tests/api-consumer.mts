@@ -10,3 +10,18 @@ void EndpointPlaybackSession.android({ ...configured, bridge, native: { nowMonot
 void createSignalControl(channel, sender, { epoch: 1, sequence: 1, issuedAtMs: 0, expiresAtMs: 1000, action: 'lease' }, {});
 // @ts-expect-error The API must reject implicit wildcard permissions.
 channel.authorizePeer(registry, 'device', { send: ['*'], receive: [], expiresAtMs: 1000 });
+
+const delivery = await channel.queueMessage(sender, 'manifest', { private: true }, { messageId: 'stable-id', expiresAtMs: 1000 });
+if (delivery.packet.recordType === 'signal') {
+  const received = await channel.receiveQueued(delivery.packet.record, 'manifest');
+  if (received.status === 'pending') { void received.message.payload; await channel.completeMessage(received.messageKey); }
+  else {
+    // @ts-expect-error Completed tombstones must not expose private payloads.
+    void received.message;
+  }
+}
+void channel.queueControl(sender, { epoch: 1, sequence: 1, issuedAtMs: 0, expiresAtMs: 1000, action: 'lease' }, {}, { messageId: 'stable-control-id' });
+void channel.pendingDeliveries(sender); void channel.pendingMessages(sender);
+void channel.markDeliverySent('stable-id'); void channel.sweepJournal();
+// @ts-expect-error Durable queue requires an explicit stable ID.
+void channel.queueMessage(sender, 'ack', {}, { expiresAtMs: 1000 });

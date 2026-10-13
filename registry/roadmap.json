@@ -11,7 +11,8 @@
     "registry/native-implementation.json",
     "registry/playback-integration.json",
     "registry/signal-parent-integration.json",
-    "registry/relay-integration.json"
+    "registry/relay-integration.json",
+    "registry/endpoint-journal.json"
   ],
   "milestones": [
     {

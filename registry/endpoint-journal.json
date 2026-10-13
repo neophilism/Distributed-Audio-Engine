@@ -1,0 +1,42 @@
+{
+  "version": "2026-10-13-v1",
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "pullRequest": 56,
+  "milestones": ["DAE-03", "DAE-08", "DAE-23", "DAE-26", "DAE-34"],
+  "scope": "Node endpoint delivery state only; no automatic playback or relay deployment",
+  "guide": "docs/endpoint-journal.md",
+  "source": ["integrations/signal-parent/src/channel.mjs", "integrations/signal-parent/src/journal.mjs", "integrations/signal-parent/src/index.d.mts"],
+  "implemented": [
+    "Ciphertext outbox and signed encrypted controls committed with the ratchet in one encrypted CAS row",
+    "Authenticated inbox envelope committed atomically with consumed prekeys and receiving ratchet",
+    "Stable request binding, identical retries, pending/sent state and payload-free completed tombstones",
+    "Current membership, expiry/rollback, schema, byte/count bounds and explicit logical expiry sweep"
+  ],
+  "tests": {
+    "newRealLibraryJournalCases": 18,
+    "newModelCases": 5,
+    "totalEndpointCases": 54,
+    "existingSignalNativeCases": 10,
+    "portableCoreCasesUnchanged": 197,
+    "faultModel": "Injected pre/post commit failures and actual encrypted-vault reopen; not power-loss or hardware evidence",
+    "verification": "Exact-head hosted Engine, Native, Signal, Relay and status-record checks required before merge"
+  },
+  "supersedes": "Only the missing Node endpoint journal descriptions and 31-test endpoint count in earlier checkpoint records; complete integration and production gates remain open",
+  "pending": [
+    "Relay polling/acknowledgment ordering and recoverable playback-manifest composition",
+    "Application effect deduplication/transaction recovery; no exactly-once playback claim",
+    "Mobile runtimes/protocol bindings and hardware-backed key/revision-floor custody",
+    "Physical routes, latency/drift/soaks and deployed restore/retention/deletion drills",
+    "Independent security/profile/license review and release approval"
+  ],
+  "claims": {
+    "nodeJournalImplemented": true,
+    "automaticPlaybackRecovery": false,
+    "exactlyOncePlayback": false,
+    "deployed": false,
+    "hardwareProtectedState": false,
+    "fieldValidated": false,
+    "independentlyReviewed": false,
+    "stableReleased": false
+  }
+}

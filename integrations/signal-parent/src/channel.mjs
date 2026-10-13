@@ -1,6 +1,8 @@
 import { randomInt } from 'node:crypto';
 import * as signal from '@signalapp/libsignal-client';
-import { DeviceRegistry } from '../../../dist/src/index.js';
+import { DeviceRegistry, signControl } from '../../../dist/src/index.js';
+import { journalFor, checkJournal, findOutgoing, saveOutgoing, deliveryView, findIncoming,
+  saveIncoming, incomingView, markSent, completeIncoming } from './journal.mjs';
 import { PROTOCOL, MAX_MESSAGE_BYTES, MAX_WIRE_BYTES, MAX_LIFETIME_MS, jsonBytes,
   digest, snapshot, exact, bytes64, scopeCheck, addressFor, publicDescriptor,
   assertLifetime, canonicalJson, parseCanonicalJson, identifier, integer, invariant } from './validation.mjs';
@@ -128,7 +130,7 @@ export class SignalParentChannel {
     const key = await signingKey(this.#vault.read(ROW).value);
     invariant(generation === this.#generation, 'PARENT_OPERATION_SUPERSEDED'); this.#checkOwn(); return key;
   }
-  async #work(address, kind, direction, callback) {
+  async #work(address, kind, direction, callback, validateResult) {
     this.#checkOwn(); invariant(!this.#busy, 'PARENT_OPERATION_BUSY');
     const peer = address ? this.#peer(address, kind, direction) : undefined;
     const generation = this.#generation; this.#busy = true;
@@ -144,6 +146,9 @@ export class SignalParentChannel {
       invariant(generation === this.#generation && !this.#closed, 'PARENT_OPERATION_SUPERSEDED');
       this.#checkOwn(); if (address) this.#peer(address, kind, direction);
       state.lastNowMs = this.#now();
+      if (Object.hasOwn(state, 'deliveryJournal')) checkJournal(journalFor(state, state.lastNowMs));
+      if (validateResult) validateResult(result, state.lastNowMs);
+      state.lastNowMs = this.#lastNow;
       invariant(Object.keys(state.sessions).length <= 32 && Object.keys(state.preKeys).length <= 64 &&
         Object.keys(state.kyberKeys).length <= 64, 'PARENT_STATE_LIMIT');
       invariant(this.#vault.compareAndSet(ROW, row.revision, state), 'PARENT_STATE_CONFLICT');
@@ -244,11 +249,40 @@ export class SignalParentChannel {
       assertLifetime(body.issuedAtMs, body.expiresAtMs, this.#now());
     });
   }
-  async seal(address, kind, payload, { messageId, expiresAtMs }) {
+  async seal(address, kind, payload, options) {
+    return this.#seal(address, kind, payload, options);
+  }
+  /** The caller must persist a stable request ID before initiating work. Retry
+   * identical requests after an uncertain result; never generate a new ID.
+   */
+  async queueMessage(address, kind, payload, options) {
+    const fields = snapshot(options); exact(fields, ['messageId', 'expiresAtMs']);
+    return this.#seal(address, kind, payload, fields, true);
+  }
+  async queueControl(address, fields, payload, options) {
+    const copy = snapshot(fields), ids = snapshot(options);
+    exact(ids, ['messageId']); exact(copy, ['epoch', 'sequence', 'issuedAtMs', 'expiresAtMs', 'action']);
+    invariant(['lease', 'emergency-stop'].includes(copy.action), 'PARENT_UNSUPPORTED_CONTROL');
+    integer(copy.epoch, 1); integer(copy.sequence, 1); integer(copy.issuedAtMs);
+    integer(copy.expiresAtMs, copy.issuedAtMs + 1, copy.issuedAtMs + 60_000);
+    const body = { version: '1.0.0', scope: this.#scope, keyId: this.#own.device.signing.id,
+      algorithm: 'ALG-ED25519', ...copy };
+    return this.#seal(address, 'control', { header: body, value: snapshot(payload) },
+      { messageId: ids.messageId, expiresAtMs: copy.expiresAtMs }, true, body);
+  }
+  async #seal(address, kind, payload, { messageId, expiresAtMs }, queued = false, controlHeader) {
     identifier(messageId); invariant(KINDS.includes(kind), 'PARENT_INVALID_KIND');
     const copy = snapshot(payload);
+    const request = queued ? { address, kind, messageId, expiresAtMs, payload: copy,
+      recordType: controlHeader ? 'control' : 'signal' } : undefined;
+    const requestDigest = queued ? digest(request) : undefined;
     return this.#work(address, kind, 'send', async (state, peer, now) => {
       assertLifetime(now, expiresAtMs, now); invariant(expiresAtMs <= peer.expiresAtMs, 'PARENT_PERMISSION_TOO_SHORT');
+      const journal = queued ? journalFor(state, now) : undefined;
+      if (journal) {
+        const previous = findOutgoing(journal, messageId, requestDigest);
+        if (previous) return deliveryView(previous);
+      }
       invariant(state.sessions[address], 'SIGNAL_SESSION_MISSING');
       const envelope = { domain: 'DAE-SIGNAL-PARENT-v1', protocol: PROTOCOL, scope: this.#scope,
         from: state.address, to: address, kind, messageId, issuedAtMs: now, expiresAtMs, payload: copy };
@@ -261,17 +295,39 @@ export class SignalParentChannel {
         ciphertext = encrypted.serialize();
         const wire = { protocol: PROTOCOL, from: state.address, to: address, messageType: encrypted.type(), ciphertext: b64(ciphertext) };
         invariant(jsonBytes(wire).length <= MAX_WIRE_BYTES, 'PARENT_WIRE_LIMIT');
-        assertLifetime(now, expiresAtMs, this.#now()); return wire;
+        let record = wire;
+        if (controlHeader) {
+          assertLifetime(controlHeader.issuedAtMs, controlHeader.expiresAtMs, this.#now());
+          record = await signControl({ ...controlHeader, payloadCiphertextBase64: jsonBytes(wire).toString('base64') },
+            await signingKey(state));
+        }
+        assertLifetime(now, expiresAtMs, this.#now());
+        return journal ? deliveryView(saveOutgoing(journal, request, requestDigest, request.recordType, record)) : wire;
       } finally { plaintext.fill(0); ciphertext?.fill(0); }
-    });
+    }, (_result, now) => invariant(expiresAtMs > now, 'PARENT_EXPIRED_OR_FUTURE'));
   }
-  async receive(wire, expectedKind) {
+  async receive(wire, expectedKind) { return this.#receive(wire, expectedKind); }
+  /** Persist authenticated plaintext with consumed ratchet state, before release.
+   * Repeated ciphertext returns the same pending message or completed tombstone.
+   */
+  async receiveQueued(wire, expectedKind) { return this.#receive(wire, expectedKind, true); }
+  async #receive(wire, expectedKind, queued = false) {
     const copy = snapshot(wire); invariant(jsonBytes(copy).length <= MAX_WIRE_BYTES, 'PARENT_WIRE_LIMIT');
     exact(copy, ['protocol', 'from', 'to', 'messageType', 'ciphertext']);
     invariant(copy.protocol === PROTOCOL && copy.to === this.#own.address, 'PARENT_WIRE_SCOPE_MISMATCH');
     invariant([signal.CiphertextMessageType.PreKey, signal.CiphertextMessageType.Whisper].includes(copy.messageType), 'PARENT_MESSAGE_TYPE_REJECTED');
     const ciphertext = bytes64(copy.ciphertext, MAX_WIRE_BYTES);
+    if (expectedKind !== undefined) invariant(KINDS.includes(expectedKind), 'PARENT_INVALID_KIND');
     return this.#work(copy.from, expectedKind, 'receive', async (state, peer, now) => {
+      const journal = queued ? journalFor(state, now) : undefined;
+      if (journal) {
+        const previous = findIncoming(journal, copy);
+        if (previous) {
+          this.#peer(copy.from, previous.kind, 'receive');
+          invariant(!expectedKind || expectedKind === previous.kind, 'PARENT_KIND_MISMATCH');
+          return incomingView(previous);
+        }
+      }
       const stores = this.#stores(state, peer, copy.from, now);
       const remote = signal.ProtocolAddress.new(copy.from, ADDRESS_DEVICE), local = signal.ProtocolAddress.new(state.address, ADDRESS_DEVICE);
       let plaintext;
@@ -291,8 +347,47 @@ export class SignalParentChannel {
         invariant(KINDS.includes(envelope.kind) && (!expectedKind || envelope.kind === expectedKind), 'PARENT_KIND_MISMATCH');
         this.#peer(copy.from, envelope.kind, 'receive'); identifier(envelope.messageId);
         assertLifetime(envelope.issuedAtMs, envelope.expiresAtMs, this.#now());
-        return envelope;
+        return journal ? incomingView(saveIncoming(journal, copy, envelope)) : envelope;
       } finally { plaintext?.fill(0); }
+    }, (result, now) => invariant(result.expiresAtMs > now, 'PARENT_EXPIRED_OR_FUTURE'));
+  }
+  async pendingDeliveries(address) {
+    this.#peer(address, null, null);
+    return this.#work(address, null, null, async (state, _peer, now) => {
+      const entries = journalFor(state, now).outgoing.filter(entry => entry.recipient === address && entry.status === 'pending');
+      for (const entry of entries) this.#peer(address, entry.kind, 'send');
+      return entries.map(deliveryView);
+    }, (entries, now) => invariant(entries.every(entry => entry.packet.expiresAtMs > now), 'PARENT_EXPIRED_OR_FUTURE'));
+  }
+  async markDeliverySent(deliveryId) {
+    identifier(deliveryId);
+    return this.#work(null, null, null, async (state, _peer, now) => {
+      const journal = journalFor(state, now), entry = journal.outgoing.find(item => item.deliveryId === deliveryId);
+      invariant(entry, 'JOURNAL_DELIVERY_UNAVAILABLE'); this.#peer(entry.recipient, entry.kind, 'send');
+      return markSent(journal, deliveryId);
+    }, (entry, now) => { this.#peer(entry.recipient, entry.kind, 'send');
+      invariant(entry.packet.expiresAtMs > this.#lastNow, 'PARENT_EXPIRED_OR_FUTURE'); });
+  }
+  async pendingMessages(address) {
+    this.#peer(address, null, null);
+    return this.#work(address, null, null, async (state, _peer, now) => {
+      const entries = journalFor(state, now).incoming.filter(entry => entry.sender === address && entry.status === 'pending');
+      for (const entry of entries) this.#peer(address, entry.kind, 'receive');
+      return entries.map(incomingView);
+    }, (entries, now) => invariant(entries.every(entry => entry.expiresAtMs > now), 'PARENT_EXPIRED_OR_FUTURE'));
+  }
+  async completeMessage(messageKey) {
+    return this.#work(null, null, null, async (state, _peer, now) => {
+      const journal = journalFor(state, now), entry = journal.incoming.find(item => item.messageKey === messageKey);
+      invariant(entry, 'JOURNAL_MESSAGE_UNAVAILABLE'); this.#peer(entry.sender, entry.kind, 'receive');
+      return completeIncoming(journal, messageKey);
+    }, (entry, now) => { this.#peer(entry.sender, entry.kind, 'receive');
+      invariant(entry.expiresAtMs > this.#lastNow, 'PARENT_EXPIRED_OR_FUTURE'); });
+  }
+  /** Expiry maintenance only. It never authorizes, renders or resumes playback. */
+  async sweepJournal() {
+    return this.#work(null, null, null, async (state, _peer, now) => {
+      journalFor(state, now);
     });
   }
   close() { this.#closed = true; this.#generation++; this.#peers.clear(); }
