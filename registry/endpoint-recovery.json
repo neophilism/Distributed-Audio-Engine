@@ -2,6 +2,7 @@
   "version": "2026-10-13-v1",
   "repository": "neophilism/Distributed-Audio-Engine",
   "branch": "dev/endpoint-relay-recovery",
+  "pullRequest": 57,
   "dependsOnPullRequest": 56,
   "milestones": ["DAE-03", "DAE-08", "DAE-23", "DAE-26", "DAE-34"],
   "guide": "docs/endpoint-relay-recovery.md",
@@ -32,7 +33,7 @@
     "Mobile runtime/protocol bindings and hardware-protected state",
     "Native rate/channel/drift adapters, physical route calibration and six-hour device soaks",
     "Live provider/fulfillment adapters and deployed operational recovery drills",
-    "Independent security/profile/license review and release approval"
+    "Deferred independent expert review (not a merge/release prerequisite under owner policy); source-bound AI security review and tests remain required"
   ],
   "claims": {
     "durableNodeRelayIntake": true,

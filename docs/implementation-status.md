@@ -4,7 +4,7 @@
 
 PR #56 merged the [atomic endpoint delivery journal](endpoint-journal.md), with all
 five exact-head hosted workflows passing. The [relay recovery composition](endpoint-relay-recovery.md)
-now builds on that journal with bounded intake, acknowledgment ordering and
+in PR #57 builds on that journal with bounded intake, acknowledgment ordering and
 explicit private-manifest rehydration.
 Outbound ciphertext, signed encrypted controls and inbound authenticated envelopes
 commit with their Signal ratchet state in one encrypted compare-and-set row.
@@ -44,7 +44,7 @@ consumer checks remain separate gates.
 
 | Area | Implemented software | Remaining gates |
 |---|---|---|
-| Endpoint encryption | Pinned real libsignal parent channel, root-verified peer membership, encrypted atomic vault and bounded delivery journal | Mobile protocol bindings, protected keys/revision floors, account recovery and independent protocol/profile/license review |
+| Endpoint encryption | Pinned real libsignal parent channel, root-verified peer membership, encrypted atomic vault and bounded delivery journal | Mobile protocol bindings, protected keys/revision floors, account recovery and resolved concrete security/license findings |
 | Audio delivery | Endpoint AES-GCM packaging, authenticated ranges, immutable ciphertext relay chunks, signed controls and current rights checks | Application effect reconciliation, deployed transport, codec/loudness/native format integration |
 | Native playback | Shared C kernel, foreground Android AudioTrack/JNI and iOS AVAudioEngine/Swift hosts; actual system JavaScriptCore audio bridge | Android runtime bridge, full endpoint bootstrap/web-crypto/module loading, explicit rate/channel/drift adapters and consuming apps |
 | Timing/output evidence | Monotonic timeline checks, challenge-bound conservative intervals, native fades/hard stops and route invalidation | Physical calibration/attribution, audible stop latency, Bluetooth/wired delays, supported-device matrix and six-hour soaks |
@@ -73,6 +73,8 @@ Other unpassed gates are unchanged.
 Continue with controller/application-specific effect reconciliation, Android
 runtime bridging and complete endpoint bootstrap/mobile protocol bindings. Integrate protected native state and explicit rate/channel/drift
 adapters. Qualify physical routes/interruptions/rejoin and six-hour soaks. Complete
-provider/fulfillment and deployed operational drills before artifact-bound
-independent review and release. See the [development plan](DEVELOPMENT_PLAN.md),
+provider/fulfillment and deployed operational drills with artifact-bound
+AI security review and testing before release. Independent expert review remains
+deferred follow-up, not a merge/release prerequisite under the October 13 owner
+policy in `AGENTS.md`. No independent audit or certification is claimed. See the [development plan](DEVELOPMENT_PLAN.md),
 [native plan](../native/README.md) and [canonical roadmap](../registry/roadmap.json).

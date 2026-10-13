@@ -67,8 +67,9 @@ control authority. Emergency handling and independent native hard stops remain
 unchanged.
 
 Automatic playback resumption, mobile runtime/protocol bindings, hardware-protected keys/floors, actual device
-latency/soaks, deployment, operational recovery drills and independent security
-review remain open. No test here establishes exactly-once sound or device
+latency/soaks, deployment and operational recovery drills remain open. Independent
+expert review is deferred follow-up, not a prerequisite under the owner policy in
+`AGENTS.md`; source-bound AI review and passing tests remain required. No test here establishes exactly-once sound or device
 qualification.
 
 ## Verification

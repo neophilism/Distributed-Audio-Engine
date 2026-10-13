@@ -120,8 +120,11 @@ for (const platform of ['android', 'ios']) {
       bridge = new KernelBridge(nativeNow);
       session = platform === 'android' ? EndpointPlaybackSession.android({ ...options, bridge, native: { nowMonotonicMs: nativeNow } })
         : EndpointPlaybackSession.ios({ ...options, bridge, native: { nowHostTimeMs: nativeNow } });
+      assert.equal(session.snapshot().phase, 'idle');
       bridge.activate(1);
-      assert.equal(session.snapshot().phase, 'idle'); assert.equal(bridge.samplesQueued, 0);
+      assert.equal(session.snapshot().phase, 'stopped');
+      assert.equal(session.snapshot().stopReason, 'output-changed');
+      assert.equal(bridge.samplesQueued, 0);
       assert.ok(bridge.render(nativeNow()).every(value => value === 0));
     }
     async function lease(sequence) {

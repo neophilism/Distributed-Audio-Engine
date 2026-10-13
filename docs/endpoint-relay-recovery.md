@@ -3,7 +3,9 @@
 This composes the atomic journal from PR #56 with the ciphertext relay and the
 owned playback session. It remains endpoint-only: no media key, private manifest,
 private control payload or clear audio is sent to the relay. Physical devices,
-mobile runtimes, deployment and independent review remain separate gates.
+mobile runtimes and deployment remain separate gates. External expert review is
+deferred follow-up, not a merge/release prerequisite under the October 13 owner
+policy in `AGENTS.md`; source-bound AI security review and tests remain required.
 
 ## Intake versus execution
 
