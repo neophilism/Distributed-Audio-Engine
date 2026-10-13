@@ -1,9 +1,21 @@
 {
-  "schemaVersion": 1,
   "repository": "neophilism/Distributed-Audio-Engine",
-  "roadmapVersion": 1,
+  "title": "Distributed-Audio-Engine",
   "planVerified": true,
   "plannedPrCount": 34,
+  "sourceFiles": [
+    ".exechub/project.yml",
+    "docs/DEVELOPMENT_PLAN.md",
+    "native/README.md",
+    "registry/native-implementation.json",
+    "registry/playback-integration.json",
+    "registry/signal-parent-integration.json",
+    "registry/relay-integration.json",
+    "registry/endpoint-journal.json",
+    "registry/endpoint-recovery.json"
+  ],
+  "schemaVersion": 1,
+  "roadmapVersion": 1,
   "observedAt": "2026-10-11T17:40:51.271Z",
   "units": [
     {
@@ -12,7 +24,10 @@
       "origin": "original",
       "prs": [
         1
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-02",
@@ -20,7 +35,10 @@
       "origin": "original",
       "prs": [
         4
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-03",
@@ -28,7 +46,10 @@
       "origin": "original",
       "prs": [
         5
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-04",
@@ -36,7 +57,10 @@
       "origin": "original",
       "prs": [
         6
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-05",
@@ -44,7 +68,10 @@
       "origin": "original",
       "prs": [
         7
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-06",
@@ -52,7 +79,10 @@
       "origin": "original",
       "prs": [
         8
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-07",
@@ -60,13 +90,19 @@
       "origin": "original",
       "prs": [
         9
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-08",
       "title": "Encrypted delivery and broad-compatibility adapter",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-09",
@@ -74,7 +110,10 @@
       "origin": "original",
       "prs": [
         36
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-10",
@@ -82,7 +121,10 @@
       "origin": "original",
       "prs": [
         37
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-11",
@@ -90,31 +132,46 @@
       "origin": "original",
       "prs": [
         21
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-12",
       "title": "Device profiles and route evidence",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-13",
       "title": "Opt-in acoustic evidence adapters",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-14",
       "title": "Qualifying-window and level evaluator",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-15",
       "title": "Neutral contribution-policy primitives",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-16",
@@ -122,7 +179,10 @@
       "origin": "original",
       "prs": [
         30
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-17",
@@ -130,7 +190,10 @@
       "origin": "original",
       "prs": [
         27
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-18",
@@ -138,7 +201,10 @@
       "origin": "original",
       "prs": [
         28
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-19",
@@ -146,13 +212,19 @@
       "origin": "original",
       "prs": [
         32
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-20",
       "title": "Anti-abuse and signed evidence",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-21",
@@ -160,13 +232,19 @@
       "origin": "original",
       "prs": [
         34
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-22",
       "title": "Security, privacy and operations baseline",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-23",
@@ -174,7 +252,10 @@
       "origin": "original",
       "prs": [
         42
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-24",
@@ -182,7 +263,10 @@
       "origin": "original",
       "prs": [
         10
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-25",
@@ -190,13 +274,19 @@
       "origin": "original",
       "prs": [
         11
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-26",
       "title": "Local coordinator and edge caching",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-27",
@@ -204,7 +294,10 @@
       "origin": "original",
       "prs": [
         12
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-28",
@@ -212,31 +305,46 @@
       "origin": "original",
       "prs": [
         13
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-29",
       "title": "Optional live-input transport",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-30",
       "title": "Optional advanced hardware adapters",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-31",
       "title": "Scale, resilience and contract qualification",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-32",
       "title": "Engine stable release and maintainer kit",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-33",
@@ -244,13 +352,19 @@
       "origin": "original",
       "prs": [
         2
-      ]
+      ],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     },
     {
       "id": "DAE-34",
       "title": "Authenticated controls and replay-safe authority",
       "origin": "original",
-      "prs": []
+      "prs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": []
     }
   ],
   "pullRequests": [
