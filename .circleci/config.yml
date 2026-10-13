@@ -1,0 +1,117 @@
+version: 2.1
+
+# Native CircleCI alternative to ci.yml, native.yml, and e2eesa-status.yml.
+# Linux, Swift/iOS, Android JNI and sanitizer checks are independent gates.
+jobs:
+  node-contracts-and-integration:
+    docker:
+      - image: cimg/node:24.19.0
+    resource_class: medium
+    steps:
+      - checkout
+      - run: npm ci --ignore-scripts
+      - run:
+          name: TypeScript, roadmap, native boundary and portability tests
+          command: npm run check
+      - run:
+          name: Dependency audit (moderate or greater)
+          command: npm audit --audit-level=moderate
+      - run:
+          name: Signed endpoint-to-native integration
+          command: sh native/integration/test.sh
+      - run:
+          name: Package tracked source and engine with SHA-256 digests
+          command: |
+            mkdir -p artifacts
+            git archive --format=tar.gz --prefix=source/ HEAD > artifacts/source.tar.gz
+            npm pack --ignore-scripts --pack-destination artifacts
+            git rev-parse HEAD > artifacts/SOURCE_COMMIT
+            node --version > artifacts/NODE_VERSION
+            (cd artifacts && sha256sum source.tar.gz *.tgz SOURCE_COMMIT NODE_VERSION > SHA256SUMS)
+      - store_artifacts:
+          path: artifacts
+
+  native-core-sanitizers:
+    docker:
+      - image: cimg/base:current
+    resource_class: medium
+    environment:
+      ASAN_OPTIONS: detect_leaks=1
+    steps:
+      - checkout
+      - run:
+          name: Install compilers and native test tools
+          command: sudo apt-get update && sudo apt-get install -y cmake clang build-essential
+      - run:
+          name: Compile address/undefined-behavior sanitized C code
+          command: |
+            cmake -S native/core -B /tmp/dae-native -DCMAKE_BUILD_TYPE=Debug '-DCMAKE_C_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer'
+            cmake --build /tmp/dae-native --parallel 2
+      - run:
+          name: Native contract and adversarial tests
+          command: ctest --test-dir /tmp/dae-native --output-on-failure --verbose
+
+  android-jni-and-build:
+    docker:
+      - image: cimg/android:2026.08-ndk
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Enforce JDK 17 and Android SDK availability
+          command: |
+            java -version
+            test -n "$ANDROID_HOME"
+            command -v sdkmanager
+      - run:
+          name: JNI contract and lifetime tests
+          command: sh native/android/test-jni.sh
+      - run:
+          name: Install original Android platform, NDK, build tools and CMake versions
+          command: |
+            sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'ndk;27.0.12077973' 'cmake;3.22.1'
+      - run:
+          name: Compile native Android ABIs and lint host
+          command: sh native/android/build.sh
+      - run:
+          name: Bind built Android AAR to source and checksum
+          command: |
+            mkdir -p android-artifacts
+            cp native/android/library/build/outputs/aar/library-debug.aar android-artifacts/
+            git rev-parse HEAD > android-artifacts/SOURCE_COMMIT
+            (cd android-artifacts && sha256sum library-debug.aar SOURCE_COMMIT > SHA256SUMS)
+      - store_artifacts:
+          path: android-artifacts
+
+  swift-ios-host:
+    macos:
+      xcode: 26.3.0
+    resource_class: m4pro.medium
+    steps:
+      - checkout
+      - run:
+          name: Swift C interop contract and package tests
+          command: swift test
+      - run:
+          name: Compile unsigned real iOS audio host
+          command: |
+            xcodebuild -quiet -scheme DistributedAudioHost -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/dae-ios CODE_SIGNING_ALLOWED=NO build
+
+  security-status-record:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: E2EESA status integrity (not independent certification)
+          command: python3 scripts/validate_e2eesa_status.py
+
+workflows:
+  full-native-ci:
+    jobs:
+      - node-contracts-and-integration
+      - native-core-sanitizers
+      - android-jni-and-build
+      - swift-ios-host
+      - security-status-record
