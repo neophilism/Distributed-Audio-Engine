@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fixture, scope } from './helpers.mjs';
+import { snapshot } from '../src/validation.mjs';
 import { SignalParentChannel, EncryptedFileVault, SignalPlaybackInbox } from '../src/index.mjs';
 
 function reopen(f, who, peer) {
@@ -159,10 +160,10 @@ test('journal: expiry prunes payloads and packets; a consumed old wire is never 
   assert.deepEqual(await f.bob.channel.pendingMessages(f.aliceId), []);
   await assert.rejects(f.bob.channel.receiveQueued(out.packet.record), /AUTHENTICATION_OR_REPLAY/);
   await assert.rejects(f.alice.channel.markDeliverySent(options.messageId), /UNAVAILABLE/);
-  assert.deepEqual(f.bob.vault.read('signal-state').value.deliveryJournal, { version: 1, outgoing: [], incoming: [] });
+  assert.deepEqual(f.bob.vault.read('signal-state').value.deliveryJournal, snapshot({ version: 1, outgoing: [], incoming: [] }));
 });
 
-test('journal: expiry or revocation during the asynchronous commit boundary releases nothing', async t => {
+test('journal: expiry during the asynchronous commit boundary releases nothing', async t => {
   for (const operation of ['list', 'redelivery', 'complete', 'sent']) {
     const f = await fixture(); t.after(() => f.close()); await f.connect(); const options = f.messageOptions();
     const out = await f.alice.channel.queueMessage(f.bobId, 'ack', {}, options);
@@ -220,7 +221,7 @@ test('journal: signed control, encrypted payload and ratchet commit atomically a
   const inbox = new SignalPlaybackInbox({ channel: f.bob.channel, sender: f.aliceId, nowUnixMs: () => f.now }); t.after(() => inbox.close());
   const verifier = await inbox.createVerifier(f.bob.vault);
   const body = await verifier.accept(packet.packet.record, f.now);
-  assert.deepEqual(await inbox.decodeControlPayload(body), payload);
+  assert.deepEqual(await inbox.decodeControlPayload(body), snapshot(payload));
   await assert.rejects(verifier.accept(packet.packet.record, f.now));
 });
 
