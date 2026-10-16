@@ -42,10 +42,18 @@ function bytes(value: string, length: number): Uint8Array<ArrayBuffer> {
   invariant(typeof value === 'string' && value.length === length * 2 && /^[0-9a-f]+$/.test(value), 'INVALID_HEX');
   return Uint8Array.from(value.match(/.{2}/g)!.map(pair => parseInt(pair, 16)));
 }
+async function importAttachmentKey(value: string, usage: 'encrypt' | 'decrypt'): Promise<EndpointCryptoKey> {
+  const raw = bytes(value, 32);
+  try { return await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, [usage]); }
+  finally { raw.fill(0); }
+}
 async function digest(value: Uint8Array<ArrayBuffer>): Promise<string> {
   return hex(new Uint8Array(await crypto.subtle.digest('SHA-256', value)));
 }
-function randomHex(length: number): string { return hex(crypto.getRandomValues(new Uint8Array(length))); }
+function randomHex(length: number): string {
+  const random = new Uint8Array(length);
+  try { crypto.getRandomValues(random); return hex(random); } finally { random.fill(0); }
+}
 function nonce(prefix: string, index: number): Uint8Array<ArrayBuffer> {
   integer(index);
   const result = new Uint8Array(12);
@@ -73,7 +81,7 @@ function validateContext(context: AttachmentContext): void {
   identifier(context.tenantId); identifier(context.parentMessageId);
   invariant(context.application === 'scenesignal' || context.application === 'distributed-radio', 'INVALID_APPLICATION');
 }
-export async function validateManifest(manifest: PrivateManifest, expected: AttachmentContext, maxPlaintextBytes = DEFAULT_OBJECT_LIMIT): Promise<void> {
+function validateManifestFields(manifest: PrivateManifest, expected: AttachmentContext, maxPlaintextBytes: number): void {
   invariant(manifest && typeof manifest === 'object', 'INVALID_MANIFEST');
   const allowed = ['tenantId', 'application', 'parentMessageId', 'profile', 'attachmentId', 'keyId', 'attachmentKeyHex', 'aead', 'hash', 'noncePrefixHex', 'chunkSizeBytes', 'chunkCount', 'plaintextSizeBytes', 'filename', 'mediaType', 'plaintextHashHex', 'storageObjectId', 'manifestContextDigestHex'].sort();
   invariant(canonicalJson(Object.keys(manifest).sort()) === canonicalJson(allowed), 'UNKNOWN_MANIFEST_FIELDS');
@@ -87,8 +95,11 @@ export async function validateManifest(manifest: PrivateManifest, expected: Atta
   invariant(manifest.chunkCount === Math.max(1, Math.ceil(manifest.plaintextSizeBytes / manifest.chunkSizeBytes)), 'CHUNK_COUNT_MISMATCH');
   invariant(typeof manifest.filename === 'string' && manifest.filename.length <= 1024 && !/[\x00-\x1f]/.test(manifest.filename), 'INVALID_FILENAME');
   invariant(typeof manifest.mediaType === 'string' && manifest.mediaType.length > 0 && manifest.mediaType.length <= 256 && !/[\x00-\x1f]/.test(manifest.mediaType), 'INVALID_MEDIA_TYPE');
-  bytes(manifest.attachmentKeyHex, 32); bytes(manifest.noncePrefixHex, 4);
+  const raw = bytes(manifest.attachmentKeyHex, 32); raw.fill(0); bytes(manifest.noncePrefixHex, 4);
   bytes(manifest.plaintextHashHex, 32); bytes(manifest.manifestContextDigestHex, 32);
+}
+export async function validateManifest(manifest: PrivateManifest, expected: AttachmentContext, maxPlaintextBytes = DEFAULT_OBJECT_LIMIT): Promise<void> {
+  validateManifestFields(manifest, expected, maxPlaintextBytes);
   invariant(await manifestDigest(manifest) === manifest.manifestContextDigestHex, 'MANIFEST_DIGEST_MISMATCH');
 }
 /** Runs at an authorized endpoint. Every call creates a fresh key and object ID. */
@@ -97,73 +108,88 @@ export async function encryptAttachment(
   options: AttachmentContext & { filename: string; mediaType: string; chunkSizeBytes?: number; maxPlaintextBytes?: number },
 ): Promise<EncryptedAttachment> {
   validateContext(options);
+  invariant(plaintext instanceof Uint8Array && plaintext.buffer instanceof ArrayBuffer, 'INVALID_PLAINTEXT_BUFFER');
   const chunkSizeBytes = options.chunkSizeBytes ?? MIN_CHUNK_SIZE;
   integer(chunkSizeBytes, MIN_CHUNK_SIZE, MAX_CHUNK_SIZE);
   const maxPlaintextBytes = options.maxPlaintextBytes ?? DEFAULT_OBJECT_LIMIT;
   integer(maxPlaintextBytes, 0, 1024 * 1024 * 1024); integer(plaintext.byteLength, 0, maxPlaintextBytes);
-  // Copy caller-owned buffers so asynchronous hashing/encryption cannot race mutation.
+  // The entire owned snapshot is wiped even if hashing, validation or crypto rejects.
   const input = Uint8Array.from(plaintext);
-  const privateManifest: PrivateManifest = {
-    tenantId: options.tenantId, application: options.application, parentMessageId: options.parentMessageId,
-    profile: PROFILE, attachmentId: randomHex(16), keyId: randomHex(16), attachmentKeyHex: randomHex(32),
-    aead: 'ALG-AES-256-GCM', hash: 'ALG-SHA256', noncePrefixHex: randomHex(4), chunkSizeBytes,
-    chunkCount: Math.max(1, Math.ceil(input.length / chunkSizeBytes)), plaintextSizeBytes: input.length,
-    filename: options.filename, mediaType: options.mediaType, plaintextHashHex: await digest(input),
-    storageObjectId: randomHex(16), manifestContextDigestHex: '',
-  };
-  privateManifest.manifestContextDigestHex = await manifestDigest(privateManifest);
-  await validateManifest(privateManifest, options, maxPlaintextBytes);
-  const key = await crypto.subtle.importKey('raw', bytes(privateManifest.attachmentKeyHex, 32), 'AES-GCM', false, ['encrypt']);
-  const ciphertextChunks: Uint8Array[] = [];
-  for (let index = 0; index < privateManifest.chunkCount; index++) {
-    const chunk = input.slice(index * chunkSizeBytes, (index + 1) * chunkSizeBytes);
-    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce(privateManifest.noncePrefixHex, index), additionalData: associatedData(privateManifest, index), tagLength: 128 }, key, chunk);
-    ciphertextChunks.push(new Uint8Array(ciphertext));
+  let privateManifest: PrivateManifest | undefined; let completed = false;
+  try {
+    privateManifest = {
+      tenantId: options.tenantId, application: options.application, parentMessageId: options.parentMessageId,
+      profile: PROFILE, attachmentId: randomHex(16), keyId: randomHex(16), attachmentKeyHex: randomHex(32),
+      aead: 'ALG-AES-256-GCM', hash: 'ALG-SHA256', noncePrefixHex: randomHex(4), chunkSizeBytes,
+      chunkCount: Math.max(1, Math.ceil(input.length / chunkSizeBytes)), plaintextSizeBytes: input.length,
+      filename: options.filename, mediaType: options.mediaType, plaintextHashHex: '',
+      storageObjectId: randomHex(16), manifestContextDigestHex: '',
+    };
+    validateManifestFields({ ...privateManifest, plaintextHashHex: '0'.repeat(64), manifestContextDigestHex: '0'.repeat(64) }, options, maxPlaintextBytes);
+    privateManifest.plaintextHashHex = await digest(input);
+    privateManifest.manifestContextDigestHex = await manifestDigest(privateManifest);
+    await validateManifest(privateManifest, options, maxPlaintextBytes);
+    const key = await importAttachmentKey(privateManifest.attachmentKeyHex, 'encrypt');
+    const ciphertextChunks: Uint8Array[] = [];
+    for (let index = 0; index < privateManifest.chunkCount; index++) {
+      const chunk = input.slice(index * chunkSizeBytes, (index + 1) * chunkSizeBytes);
+      try {
+        const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce(privateManifest.noncePrefixHex, index), additionalData: associatedData(privateManifest, index), tagLength: 128 }, key, chunk);
+        ciphertextChunks.push(new Uint8Array(ciphertext));
+      } finally { chunk.fill(0); }
+    }
+    completed = true;
+    return { privateManifest, ciphertextChunks };
+  } finally {
+    input.fill(0);
+    // The successful caller owns its private key-bearing manifest. Failure retains none here.
+    if (!completed && privateManifest) privateManifest.attachmentKeyHex = '';
   }
-  input.fill(0);
-  return { privateManifest, ciphertextChunks };
 }
 /** Caller must first authenticate the manifest's containing E2EE parent channel. */
 export async function decryptAttachment(
   manifest: PrivateManifest, chunks: readonly Uint8Array[], expected: AttachmentContext, maxPlaintextBytes = DEFAULT_OBJECT_LIMIT,
 ): Promise<Uint8Array> {
-  // Snapshot untrusted/caller-owned state before any asynchronous operation.
-  const localManifest = structuredClone(manifest);
-  integer(maxPlaintextBytes, 0, 1024 * 1024 * 1024);
-  integer(localManifest.plaintextSizeBytes, 0, maxPlaintextBytes);
-  invariant(chunks.length === localManifest.chunkCount, 'MISSING_CHUNKS');
-  // Reject inconsistent public lengths before copying or allocating plaintext.
-  for (let index = 0; index < chunks.length; index++) invariant(chunks[index]!.length === plaintextLength(localManifest, index) + 16, 'CIPHERTEXT_LENGTH_MISMATCH');
-  const localChunks = chunks.map(chunk => Uint8Array.from(chunk));
-  await validateManifest(localManifest, expected, maxPlaintextBytes);
-  invariant(localChunks.length === localManifest.chunkCount, 'MISSING_CHUNKS');
-  const key = await crypto.subtle.importKey('raw', bytes(localManifest.attachmentKeyHex, 32), 'AES-GCM', false, ['decrypt']);
-  const plaintext = new Uint8Array(localManifest.plaintextSizeBytes);
+  // Check resource geometry before copying ciphertext or allocating plaintext.
+  const localManifest = structuredClone(manifest), localExpected = { ...expected };
+  let plaintext: Uint8Array<ArrayBuffer> | undefined; let completed = false;
   try {
+    validateManifestFields(localManifest, localExpected, maxPlaintextBytes);
+    invariant(chunks.length === localManifest.chunkCount, 'MISSING_CHUNKS');
+    for (let index = 0; index < chunks.length; index++) invariant(chunks[index]!.length === plaintextLength(localManifest, index) + 16, 'CIPHERTEXT_LENGTH_MISMATCH');
+    const localChunks = chunks.map(chunk => Uint8Array.from(chunk));
+    await validateManifest(localManifest, localExpected, maxPlaintextBytes);
+    const key = await importAttachmentKey(localManifest.attachmentKeyHex, 'decrypt');
+    localManifest.attachmentKeyHex = '';
+    plaintext = new Uint8Array(localManifest.plaintextSizeBytes);
     for (let index = 0; index < localChunks.length; index++) {
       const chunk = localChunks[index]!;
       invariant(chunk.length === plaintextLength(localManifest, index) + 16, 'CIPHERTEXT_LENGTH_MISMATCH');
-      const decoded = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce(localManifest.noncePrefixHex, index), additionalData: associatedData(localManifest, index), tagLength: 128 }, key, chunk);
-      plaintext.set(new Uint8Array(decoded), index * localManifest.chunkSizeBytes);
+      const decoded = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce(localManifest.noncePrefixHex, index), additionalData: associatedData(localManifest, index), tagLength: 128 }, key, chunk));
+      try { plaintext.set(decoded, index * localManifest.chunkSizeBytes); }
+      finally { decoded.fill(0); }
     }
     invariant(await digest(plaintext) === localManifest.plaintextHashHex, 'FILE_HASH_MISMATCH');
-    return plaintext;
-  } catch (error) { plaintext.fill(0); throw error; }
+    completed = true; return plaintext;
+  } finally {
+    if (localManifest && typeof localManifest === 'object') localManifest.attachmentKeyHex = '';
+    if (!completed) plaintext?.fill(0);
+  }
 }
 
 /** Endpoint range primitive. The manifest must arrive in an authenticated E2EE parent. */
 export class EndpointAttachmentReader {
   private closed = false;
-  private constructor(private readonly manifest: PrivateManifest, private readonly key: EndpointCryptoKey) {}
+  private constructor(private readonly manifest: PrivateManifest, private key: EndpointCryptoKey | undefined) {}
 
   static async open(manifest: PrivateManifest, expected: AttachmentContext, maxPlaintextBytes = DEFAULT_OBJECT_LIMIT): Promise<EndpointAttachmentReader> {
     const local = structuredClone(manifest);
     const context = { ...expected };
-    await validateManifest(local, context, maxPlaintextBytes);
-    const key = await crypto.subtle.importKey('raw', bytes(local.attachmentKeyHex, 32), 'AES-GCM', false, ['decrypt']);
-    // Keep the non-extractable CryptoKey; do not retain the copied raw key string.
-    local.attachmentKeyHex = '';
-    return new EndpointAttachmentReader(local, key);
+    try {
+      await validateManifest(local, context, maxPlaintextBytes);
+      const key = await importAttachmentKey(local.attachmentKeyHex, 'decrypt');
+      return new EndpointAttachmentReader(local, key);
+    } finally { if (local && typeof local === 'object') local.attachmentKeyHex = ''; }
   }
 
   get sizeBytes(): number { return this.manifest.plaintextSizeBytes; }
@@ -181,9 +207,10 @@ export class EndpointAttachmentReader {
 
   async decryptChunk(index: number, ciphertext: Uint8Array): Promise<Uint8Array> {
     this.check(index);
+    const key = this.key; invariant(key, 'ATTACHMENT_READER_CLOSED');
     invariant(ciphertext.length === this.ciphertextLength(index), 'CIPHERTEXT_LENGTH_MISMATCH');
     const local = Uint8Array.from(ciphertext);
-    const plaintext = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce(this.manifest.noncePrefixHex, index), additionalData: associatedData(this.manifest, index), tagLength: 128 }, this.key, local));
+    const plaintext = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce(this.manifest.noncePrefixHex, index), additionalData: associatedData(this.manifest, index), tagLength: 128 }, key, local));
     if (this.closed) { plaintext.fill(0); invariant(false, 'ATTACHMENT_READER_CLOSED'); }
     return plaintext;
   }
@@ -198,5 +225,5 @@ export class EndpointAttachmentReader {
       invariant(actual === this.manifest.plaintextHashHex, 'FILE_HASH_MISMATCH');
     } finally { local.fill(0); }
   }
-  close(): void { this.closed = true; }
+  close(): void { this.closed = true; this.key = undefined; }
 }
