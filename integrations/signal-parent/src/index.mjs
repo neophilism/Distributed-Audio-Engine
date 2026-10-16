@@ -3,3 +3,5 @@ export { EncryptedFileVault, EncryptedCheckpointStore } from './vault.mjs';
 export { SignalPlaybackInbox, createSignalControl } from './playback.mjs';
 export { PROTOCOL } from './validation.mjs';
 export { SignalRelayEndpoint } from './relay-endpoint.mjs';
+
+export { DurableSignalController } from './controller.mjs';

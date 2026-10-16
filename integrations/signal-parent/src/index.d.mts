@@ -92,3 +92,18 @@ export class SignalRelayEndpoint {
   pull(signal?: AbortSignal): Promise<InboxMessage[]>;
   close(): void;
 }
+
+export type ControllerRequest = {
+  operationId: string; recipient: string; expiresAtMs: number;
+} & ({ action: 'lease'; payload: { expiresAtMs: number; stopAtMs: number; fadeMs: number; maxLinearGain: number } } |
+  { action: 'emergency-stop'; payload: null });
+export class DurableSignalController {
+  constructor(options: { vault: EndpointVault; channel: SignalParentChannel; nowUnixMs: () => number });
+  issue(request: ControllerRequest): Promise<OutboundDelivery>;
+  resume(operationId: string): Promise<OutboundDelivery>;
+  advanceEpoch(recipient: string, expectedEpoch: number): { epoch: number; sequence: number };
+  streamState(recipient: string): { recipient: string; epoch: number; sequence: number; reservationId: string | null };
+  pending(): Array<{ operationId: string; recipient: string; epoch: number; sequence: number;
+    action: 'lease' | 'emergency-stop'; expiresAtMs: number; expired: boolean }>;
+  close(): void;
+}
