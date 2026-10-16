@@ -15,13 +15,15 @@ try {
   await run('npm', ['install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', join(dir, packed.filename)], { cwd: consumer, maxBuffer: 1024 * 1024 });
   await writeFile(join(consumer, 'smoke.mjs'), `
     import assert from 'node:assert/strict';
-    import { EndpointPlaybackSession, compileProgram, ProgramTimeline, encryptAttachment, EndpointAttachmentReader, readAttachmentRange, canonicalJson, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance } from '@neophilism/distributed-audio-engine';
+    import { EndpointPlaybackSession, compileProgram, ProgramTimeline, encryptAttachment, EndpointAttachmentReader, readAttachmentRange, canonicalJson, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, convertPcmFormat, packageNormalizedRendition } from '@neophilism/distributed-audio-engine';
     import { BrowserAudioSink } from '@neophilism/distributed-audio-engine/browser';
     import { AndroidAudioSink } from '@neophilism/distributed-audio-engine/android';
     import { IOSAudioSink } from '@neophilism/distributed-audio-engine/ios';
     import { SqliteCheckpointStore, SqliteCommerceStore, SqliteAccountingStore, SqliteEntitlementStore } from '@neophilism/distributed-audio-engine/node';
     import { OutputEvidenceEndpoint } from '@neophilism/distributed-audio-engine/evidence';
     import { OutputLifecycle } from '@neophilism/distributed-audio-engine/output-lifecycle';
+    const normalized = await convertPcmFormat({ sampleRate: 8000, channels: 1, samples: new Float32Array([0.25, 0.25]) }, { sampleRate: 16000, channels: 2 });
+    assert.equal(normalized.audio.samples.length, 8); assert.equal(typeof packageNormalizedRendition, 'function');
     const context = { tenantId: 'tenant', application: 'distributed-radio', parentMessageId: 'parent' };
     const encrypted = await encryptAttachment(new Uint8Array([1, 2, 3]), { ...context, filename: 'fixture.wav', mediaType: 'audio/wav' });
     const reader = await EndpointAttachmentReader.open(encrypted.privateManifest, context);

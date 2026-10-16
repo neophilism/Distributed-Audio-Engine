@@ -30,3 +30,5 @@ export * from './android-audio.js';
 export * from './ios-audio.js';
 
 export * from './playback-session.js';
+
+export * from './pcm-format.js';
