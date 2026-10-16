@@ -4,6 +4,7 @@ import type { AttachmentContext } from './attachments.js';
 export interface PcmAudio { sampleRate:number;channels:number;samples:Float32Array }
 const MAX_MEDIA_BYTES=64*1024*1024;
 function validateAudio(audio:PcmAudio):void{
+  invariant(audio && audio.samples instanceof Float32Array && audio.samples.buffer instanceof ArrayBuffer,'INVALID_PCM_BUFFER');
   integer(audio.sampleRate,8000,192000);integer(audio.channels,1,8);
   invariant(audio.samples.length>0&&audio.samples.length%audio.channels===0&&audio.samples.byteLength<=MAX_MEDIA_BYTES,'INVALID_PCM_SHAPE');
   for(const sample of audio.samples)finite(sample,-1,1);
@@ -20,6 +21,7 @@ export function analyzePcm(audio:PcmAudio){
 function fourcc(view:DataView,offset:number):string{return String.fromCharCode(...[0,1,2,3].map(i=>view.getUint8(offset+i)));}
 /** Endpoint-only RIFF/WAVE parser; compressed/extended formats use future codec adapters. */
 export function decodeWave(input:Uint8Array):PcmAudio{
+  invariant(input instanceof Uint8Array&&input.buffer instanceof ArrayBuffer,'INVALID_WAVE_BUFFER');
   invariant(input.byteLength>=44&&input.byteLength<=MAX_MEDIA_BYTES,'INVALID_WAVE_SIZE');
   const view=new DataView(input.buffer,input.byteOffset,input.byteLength);
   invariant(fourcc(view,0)==='RIFF'&&fourcc(view,8)==='WAVE'&&view.getUint32(4,true)===input.byteLength-8,'INVALID_WAVE_HEADER');
@@ -40,8 +42,10 @@ export function decodeWave(input:Uint8Array):PcmAudio{
     offset=start+length+(length%2);invariant(offset<=input.byteLength,'MISSING_WAVE_PADDING');
   }
   invariant(fmt&&data&&data.length>0&&data.length%fmt.blockAlign===0,'MISSING_OR_MISALIGNED_WAVE_DATA');
-  const width=fmt.bits/8;const samples=new Float32Array(data.length/width);
-  invariant(samples.byteLength<=MAX_MEDIA_BYTES,'PCM_EXPANSION_LIMIT');
+  const width=fmt.bits/8;
+  invariant((data.length/width)*4<=MAX_MEDIA_BYTES,'PCM_EXPANSION_LIMIT');
+  const samples=new Float32Array(data.length/width);
+  try {
   for(let i=0;i<samples.length;i++){
     const at=data.offset+i*width;let sample:number;
     if(fmt.format===3)sample=view.getFloat32(at,true);
@@ -51,6 +55,7 @@ export function decodeWave(input:Uint8Array):PcmAudio{
     finite(sample,-1,1);samples[i]=sample;
   }
   return{sampleRate:fmt.sampleRate,channels:fmt.channels,samples};
+  } catch(error) { samples.fill(0); throw error; }
 }
 export function encodePcm16(audio:PcmAudio):Uint8Array{
   validateAudio(audio);const dataBytes=audio.samples.length*2;const out=new Uint8Array(44+dataBytes);const v=new DataView(out.buffer);
@@ -67,6 +72,11 @@ export function validateStemAlignment(stems:readonly PcmAudio[]):void{
 export async function packageRendition(audio:PcmAudio,gain:number,context:AttachmentContext,filename:string){
   validateAudio(audio);finite(gain,0,1);
   const derived:PcmAudio={sampleRate:audio.sampleRate,channels:audio.channels,samples:Float32Array.from(audio.samples,x=>x*gain)};
-  const encoded=encodePcm16(derived);const encrypted=await encryptAttachment(encoded,{...context,filename,mediaType:'audio/wav'});
-  return{privateMetadata:analyzePcm(decodeWave(encoded)),...encrypted};
+  let encoded:Uint8Array|undefined,decoded:PcmAudio|undefined;
+  try {
+    encoded=encodePcm16(derived); decoded=decodeWave(encoded);
+    const privateMetadata=analyzePcm(decoded);
+    const encrypted=await encryptAttachment(encoded,{...context,filename,mediaType:'audio/wav'});
+    return{privateMetadata,...encrypted};
+  } finally { derived.samples.fill(0); encoded?.fill(0); decoded?.samples.fill(0); }
 }
