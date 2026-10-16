@@ -1,4 +1,5 @@
-import { createServer } from 'node:https';
+import { createServer as createHttpsServer } from 'node:https';
+import { createServer as createHttpServer } from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
 import { SqliteCiphertextMailbox } from './store.mjs';
 import { address, clone, decode, encode, exact, hash, integer, invariant, MAX_BODY_BYTES, MAX_RESPONSE_BYTES, MAX_CHUNK_BODY_BYTES } from './records.mjs';
@@ -29,6 +30,7 @@ export class RelayAccessPolicy {
     Object.freeze(grant.allowedRecipients);
     this.#grants.set(grant.tokenSha256, Object.freeze(grant));
   }
+  activeCount(now) { integer(now); return [...this.#grants.values()].filter(grant => grant.expiresAtMs > now).length; }
   revoke(tokenSha256) { address(tokenSha256); this.#grants.delete(tokenSha256); this.#budgets.delete(tokenSha256); }
   authenticate(header, now) {
     reject(typeof header === 'string' && /^Bearer [A-Za-z0-9_-]{43}$/.test(header), 401);
@@ -76,22 +78,48 @@ async function body(req, maximum = MAX_BODY_BYTES) {
   return decode(Buffer.concat(chunks, length));
 }
 
-/** Creates, but does not listen or deploy, an HTTP/1.1 TLS-only ciphertext relay.
- * No configurable plaintext mode or authentication bypass. Timers bound request
- * work and retention; endpoints must still authenticate every received record.
+/** Creates a standalone HTTP/1.1 TLS-only ciphertext relay. This entry point
+ * never accepts plaintext, forwarded-header trust or an insecure fallback.
  */
-export function createCiphertextRelay({ store, access, key, cert, nowUnixMs = Date.now,
-  requestDeadlineMs = 5000, sweepIntervalMs = 1000 }) {
-  invariant(store instanceof SqliteCiphertextMailbox && access instanceof RelayAccessPolicy, 'RELAY_CONFIGURATION_REQUIRED');
-  invariant(key && cert && typeof nowUnixMs === 'function', 'RELAY_TLS_REQUIRED');
+export function createCiphertextRelay({ key, cert, ...options }) {
+  invariant(key && cert, 'RELAY_TLS_REQUIRED');
+  return createRelayServer(options,
+    (limits, listener) => createHttpsServer({ ...limits, key, cert, minVersion: 'TLSv1.3',
+      handshakeTimeout: limits.requestTimeout }, listener),
+    req => reject(req.socket.encrypted === true));
+}
+
+/** Explicit staging-only managed-edge deployment, NOT a standalone HTTP relay.
+ * Render terminates public HTTPS and forwards HTTP to a non-public service port.
+ * Forwarded headers are trusted only within that declared platform boundary.
+ * Endpoint media/manifest/control encryption and client TLS remain mandatory.
+ */
+export function createRenderEdgeCiphertextRelay({ publicOrigin, sourceCommit, ...options }) {
+  invariant(typeof publicOrigin === 'string' && /^https:\/\/[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com$/.test(publicOrigin),
+    'RELAY_RENDER_ORIGIN_REQUIRED');
+  invariant(typeof sourceCommit === 'string' && /^[0-9a-f]{40}$/.test(sourceCommit), 'RELAY_SOURCE_COMMIT_REQUIRED');
+  const host = new URL(publicOrigin).host;
+  const health = now => ({ status: 'ready', protocol: 1, environment: 'staging',
+    transport: 'render-managed-tls-edge', storage: 'ephemeral-sqlite', sourceCommit,
+    routingConfigured: options.access.activeCount(now) > 0, productionReady: false });
+  return createRelayServer(options, createHttpServer, req => {
+    // Render's internal health probes need no credential or forwarded scheme.
+    if (req.method === 'GET' && req.url === '/healthz') return;
+    reject(req.headers.host === host && req.headers['x-forwarded-proto'] === 'https', 403);
+  }, health);
+}
+
+function createRelayServer({ store, access, nowUnixMs = Date.now, requestDeadlineMs = 5000,
+  sweepIntervalMs = 1000 }, makeServer, admitTransport, health = () => ({ status: 'ready', protocol: 1 })) {
+  invariant(store instanceof SqliteCiphertextMailbox && access instanceof RelayAccessPolicy &&
+    typeof nowUnixMs === 'function', 'RELAY_CONFIGURATION_REQUIRED');
   integer(requestDeadlineMs, 100, 30000); integer(sweepIntervalMs, 100, 30000);
   let healthy = true, closed = false, lastObserved = 0;
   const observe = () => {
     try { const now = nowUnixMs(); integer(now, lastObserved); lastObserved = now; return now; }
     catch { healthy = false; throw new RequestFailure(503); }
   };
-  const server = createServer({ key, cert, minVersion: 'TLSv1.3', maxHeaderSize: 8192,
-    handshakeTimeout: requestDeadlineMs, requestTimeout: requestDeadlineMs,
+  const server = makeServer({ maxHeaderSize: 8192, requestTimeout: requestDeadlineMs,
     headersTimeout: requestDeadlineMs, connectionsCheckingInterval: 100,
     keepAliveTimeout: 1000, insecureHTTPParser: false }, (req, res) => {
     const deadline = setTimeout(() => { req.destroy(); res.destroy(); }, requestDeadlineMs);
@@ -99,7 +127,8 @@ export function createCiphertextRelay({ store, access, key, cert, nowUnixMs = Da
     // No logger receives URLs, credentials, message bodies or SQL errors.
     void (async () => {
       reject(!closed && healthy, 503);
-      reject(req.socket.encrypted === true && req.httpVersionMajor === 1);
+      reject(req.httpVersionMajor === 1);
+      admitTransport(req);
       reject(req.headers.origin === undefined && req.headers.cookie === undefined, 403);
       reject(req.url && req.url.length < 256 && !/[?#%\\]/.test(req.url));
       const counts = new Map();
@@ -110,7 +139,9 @@ export function createCiphertextRelay({ store, access, key, cert, nowUnixMs = Da
       const now = observe();
       if (req.method === 'GET' && req.url === '/healthz') {
         reject(req.headers['transfer-encoding'] === undefined && !Number(req.headers['content-length'] ?? 0));
-        respond(res, 200, { status: 'ready', protocol: 1 }); return;
+        // Probe the real store: listener availability alone is not readiness.
+        try { store.stats(now); } catch { healthy = false; throw new RequestFailure(503); }
+        respond(res, 200, health(now)); return;
       }
       const grant = access.authenticate(req.headers.authorization, now); access.admit(grant, now);
       if (req.method === 'GET' && req.url === '/v1/mailbox') {
