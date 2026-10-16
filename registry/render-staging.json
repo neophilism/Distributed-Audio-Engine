@@ -1,0 +1,20 @@
+{
+  "version": "2026-10-16-v1",
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "canonicalPlan": "registry/prs.json",
+  "milestones": ["DAE-04", "DAE-08", "DAE-22", "DAE-23"],
+  "scope": "Explicit managed-edge ciphertext relay test deployment; no production or milestone-completion promotion",
+  "guide": "docs/render-relay-staging.md",
+  "securityInventory": "docs/render-relay-flow.json",
+  "configuration": "render.yaml",
+  "tests": {
+    "relayServiceCases": 35,
+    "newManagedEdgeCases": 11,
+    "networkNativeCases": 12,
+    "newManagedEdgeNetworkNativeCases": 2,
+    "hostedVerification": "Exact-head workflow results required before merge; see the owning PR"
+  },
+  "claims": { "deployed": false, "liveCloudRehearsalPassed": false, "durableStorage": false,
+    "mobileConsumerIntegrated": false, "fieldValidated": false, "stableReleased": false, "independentlyReviewed": false },
+  "spending": "Free test service configuration only; no paid plan, disk, worker, scheduler or keepalive loop"
+}

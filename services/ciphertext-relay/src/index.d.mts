@@ -1,4 +1,5 @@
 import type { Server } from 'node:https';
+import type { Server as HttpServer } from 'node:http';
 import type { SignalPublicBundle, SignalWire } from '../../../integrations/signal-parent/src/index.mjs';
 import type { SignedControl, ChunkRequest, CiphertextChunkTransport } from '../../../dist/src/index.js';
 export interface RelayGrant { tokenSha256: string; address: string; expiresAtMs: number; allowedRecipients: string[] }
@@ -24,10 +25,13 @@ export class SqliteCiphertextMailbox {
 export class RelayAccessPolicy {
   constructor(grants: RelayGrant[]);
   set(grant: RelayGrant): void;
+  activeCount(now: number): number;
   revoke(tokenSha256: string): void;
 }
 export function createCiphertextRelay(options: { store: SqliteCiphertextMailbox; access: RelayAccessPolicy;
   key: string | Buffer; cert: string | Buffer; nowUnixMs?: () => number; requestDeadlineMs?: number; sweepIntervalMs?: number }): Server;
+export function createRenderEdgeCiphertextRelay(options: { store: SqliteCiphertextMailbox; access: RelayAccessPolicy;
+  publicOrigin: string; sourceCommit: string; nowUnixMs?: () => number; requestDeadlineMs?: number; sweepIntervalMs?: number }): HttpServer;
 export class CiphertextRelayClient {
   constructor(options: { origin: string; token: string; ca?: string | Buffer; timeoutMs?: number });
   publishBundle(bundle: SignalPublicBundle, signal?: AbortSignal): Promise<{ bundleId: string; status: 'available' | 'taken' }>;

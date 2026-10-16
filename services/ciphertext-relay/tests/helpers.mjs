@@ -3,8 +3,9 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
-import { request } from 'node:https';
-import { SqliteCiphertextMailbox, RelayAccessPolicy, createCiphertextRelay, CiphertextRelayClient } from '../src/index.mjs';
+import { request, createServer as createTlsServer } from 'node:https';
+import { request as internalRequest } from 'node:http';
+import { SqliteCiphertextMailbox, RelayAccessPolicy, createCiphertextRelay, createRenderEdgeCiphertextRelay, CiphertextRelayClient } from '../src/index.mjs';
 import { hash } from '../src/records.mjs';
 let material;
 export function tlsMaterial() {
@@ -39,17 +40,32 @@ export async function stop(server) {
   const promise = new Promise(resolve => server.close(resolve));
   server.closeAllConnections(); await promise;
 }
-export async function relayFixture(t, { addresses = [ALICE, BOB, EVE], clock, limits, deadline = 1000 } = {}) {
+export async function relayFixture(t, { addresses = [ALICE, BOB, EVE], clock, limits, deadline = 1000, managedEdge = false } = {}) {
   let now = 1000; const getNow = clock ?? (() => now);
   const tokens = addresses.map(() => randomBytes(32).toString('base64url'));
   const grants = addresses.map((address, i) => ({ address, tokenSha256: hash(tokens[i]), expiresAtMs: getNow() + 300000,
     allowedRecipients: i === 2 ? [] : [addresses[1 - i]] }));
   const access = new RelayAccessPolicy(grants), store = new SqliteCiphertextMailbox(':memory:', limits);
   const tls = tlsMaterial();
-  const server = createCiphertextRelay({ store, access, ...tls, nowUnixMs: getNow, requestDeadlineMs: deadline });
+  let server, backend;
+  if (managedEdge) {
+    // A test-only, real TLS proxy models Render's documented internal HTTP hop.
+    // It is not a public-network deployment or a substitute for a cloud rehearsal.
+    backend = createRenderEdgeCiphertextRelay({ store, access, publicOrigin: 'https://relay-test.onrender.com',
+      sourceCommit: 'c'.repeat(40), nowUnixMs: getNow, requestDeadlineMs: deadline });
+    await listen(backend);
+    server = createTlsServer({ ...tls, minVersion: 'TLSv1.3' }, (req, res) => {
+      const upstream = internalRequest({ hostname: '127.0.0.1', port: backend.address().port, path: req.url,
+        method: req.method, agent: false, headers: { ...req.headers, host: 'relay-test.onrender.com',
+          'x-forwarded-proto': 'https' } }, response => {
+        res.writeHead(response.statusCode, response.headers); response.pipe(res);
+      });
+      upstream.on('error', () => res.destroy()); req.pipe(upstream);
+    });
+  } else server = createCiphertextRelay({ store, access, ...tls, nowUnixMs: getNow, requestDeadlineMs: deadline });
   const origin = await listen(server);
   const clients = tokens.map(token => new CiphertextRelayClient({ origin, token, ca: tls.cert, timeoutMs: 1500 }));
-  t.after(async () => { clients.forEach(c => c.close()); await stop(server); store.close(); });
+  t.after(async () => { clients.forEach(c => c.close()); await stop(server); if (backend) await stop(backend); store.close(); });
   return { store, server, clients, tokens, grants, access, origin, tls, get now() { return getNow(); }, setNow(value) { now = value; } };
 }
 export function raw(origin, { method = 'GET', path = '/v1/mailbox', token, headers = {}, payload, ca = tlsMaterial().cert, delay = 0 } = {}) {

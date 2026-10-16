@@ -8,3 +8,9 @@ void createCiphertextRelay({ store: new SqliteCiphertextMailbox(':memory:'), acc
 new CiphertextRelayClient({ origin: 'https://localhost', token: 'token', rejectUnauthorized: false });
 // @ts-expect-error Private manifests must not be accepted as upload fields.
 client.uploadChunk({ attachmentKeyHex: 'secret' });
+
+import { createRenderEdgeCiphertextRelay } from '../src/index.mjs';
+declare const testStore: SqliteCiphertextMailbox, testAccess: RelayAccessPolicy;
+void createRenderEdgeCiphertextRelay({ store: testStore, access: testAccess,
+  publicOrigin: 'https://relay-test.onrender.com', sourceCommit: 'c'.repeat(40) });
+void testAccess.activeCount(Date.now());

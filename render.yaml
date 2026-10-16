@@ -1,0 +1,19 @@
+# Explicit test service. This is not the production/durable relay profile.
+services:
+  - type: web
+    name: distributed-audio-engine-relay-staging
+    runtime: node
+    plan: free
+    region: virginia
+    branch: main
+    autoDeployTrigger: off
+    buildCommand: npm ci --ignore-scripts --include=dev && npm run build && npm test --prefix services/ciphertext-relay
+    startCommand: node services/ciphertext-relay/src/render-main.mjs
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 24.19.0
+      - key: DAE_RELAY_MODE
+        value: render-staging
+      - key: DAE_RELAY_GRANTS_JSON
+        sync: false

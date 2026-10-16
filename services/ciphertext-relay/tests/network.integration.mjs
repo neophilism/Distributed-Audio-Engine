@@ -6,10 +6,10 @@ import { fixture, scope } from '../../../integrations/signal-parent/tests/helper
 import { KernelBridge } from '../../../integrations/signal-parent/tests/kernel-bridge.mjs';
 import { relayFixture } from './helpers.mjs';
 
-async function networkFixture(t, platform, { corruptAudio = false } = {}) {
+async function networkFixture(t, platform, { corruptAudio = false, managedEdge = false } = {}) {
   const f = await fixture(); t.after(() => f.close());
   // No f.connect(): recipient prekeys really traverse the TLS public directory.
-  const relay = await relayFixture(t, { addresses: [f.aliceId, f.bobId, f.eve.descriptor.address], clock: () => f.now });
+  const relay = await relayFixture(t, { addresses: [f.aliceId, f.bobId, f.eve.descriptor.address], clock: () => f.now, managedEdge });
   const [sender, receiver] = relay.clients;
   await receiver.publishBundle(await f.bob.channel.publicBundle());
   const publicKeys = await sender.takeBundle(f.bobId); await f.alice.channel.connect(f.bobId, publicKeys);
@@ -151,5 +151,19 @@ for (const platform of ['android', 'ios']) {
     assert.ok(bridge.render(nativeNow() + 500).every(value => value === 0));
     assert.ok(bridge.rawViews.every(view => view.every(sample => sample === 0)));
     assert.equal((await receiver.poll()).length, 0);
+  });
+}
+
+for (const platform of ['android', 'ios']) {
+  test(`${platform}: real Signal and production C interoperate through the explicit managed TLS edge`, async t => {
+    const p = await networkFixture(t, platform, { managedEdge: true });
+    const row = await p.deliverControl(1);
+    await p.session.join(row.packet.record); await p.receiver.acknowledge([row.receiptId]);
+    await p.session.pump();
+    const samples = p.bridge.render(p.nativeNow() + 50);
+    assert.equal(samples[0], 0.25); assert.equal(samples[1], -0.25);
+    assert.ok(p.bridge.rawViews.every(view => view.every(value => value === 0)));
+    p.deny(); await assert.rejects(p.session.pump(), /RIGHTS_DENIED/);
+    assert.equal(p.bridge.samplesQueued, 0);
   });
 }

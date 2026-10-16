@@ -1,0 +1,19 @@
+{
+  "version": "2026-10-16-v1",
+  "parentInventory": "docs/security-flow-inventory.json",
+  "component": "render-staging-ciphertext-relay",
+  "standardCommit": "dea8f54cab9130da86a71f36de553766a978daf2",
+  "deploymentEnvironment": "staging",
+  "clientToEdge": "Verified HTTPS; endpoint client requires TLS 1.3 and rejects redirects",
+  "edgeToService": "Render-managed internal HTTP to non-public service port; explicit trusted ingress, not encrypted on this hop",
+  "edgeVisible": ["routing bearer token", "opaque routing and retention metadata", "public prekey bundles", "encrypted packets and audio chunks"],
+  "serviceConfiguration": ["routing token hashes", "public endpoint addresses", "routing recipient allowlists", "grant expiry"],
+  "serviceMayDecryptProtectedContent": false,
+  "prohibited": ["media keys", "private manifests", "endpoint ratchet state", "decoded audio", "private control payloads"],
+  "storage": "Owner-private, bounded, ephemeral SQLite; loses relay data on restart/redeploy/spin-down",
+  "recoveryAuthority": "Persistent endpoint journals and receiver replay checkpoints; relay receipts never prove exactly-once effects",
+  "source": ["services/ciphertext-relay/src/server.mjs", "services/ciphertext-relay/src/render-main.mjs"],
+  "guide": "docs/render-relay-staging.md",
+  "claims": { "productionReady": false, "physicalOutputQualified": false, "independentlyReviewed": false },
+  "pendingEvidence": ["Actual cloud rehearsal", "Durable production storage and deployed operational qualification", "Physical/mobile clients"]
+}
