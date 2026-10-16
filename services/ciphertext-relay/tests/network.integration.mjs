@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { packageRendition, ProgramTimeline, compileProgram, EndpointPlaybackSession } from '../../../dist/src/index.js';
-import { SignalPlaybackInbox, createSignalControl, SignalRelayEndpoint, SignalParentChannel, EncryptedFileVault } from '../../../integrations/signal-parent/src/index.mjs';
+import { SignalPlaybackInbox, DurableSignalController, SignalRelayEndpoint, SignalParentChannel, EncryptedFileVault } from '../../../integrations/signal-parent/src/index.mjs';
 import { fixture, scope } from '../../../integrations/signal-parent/tests/helpers.mjs';
 import { KernelBridge } from '../../../integrations/signal-parent/tests/kernel-bridge.mjs';
 import { relayFixture } from './helpers.mjs';
@@ -41,11 +41,14 @@ async function networkFixture(t, platform, { corruptAudio = false } = {}) {
     : EndpointPlaybackSession.ios({ ...options, bridge, native: { nowHostTimeMs: nativeNow } });
   bridge.activate(1);
   t.after(() => { session.close(); bridge.close(); inbox.close(); });
+  const controller = new DurableSignalController({ vault: f.alice.vault, channel: f.alice.channel, nowUnixMs: () => f.now });
+  t.after(() => controller.close());
   async function deliverControl(sequence, action = 'lease') {
-    const record = await createSignalControl(f.alice.channel, f.bobId,
-      { epoch: 1, sequence, action, issuedAtMs: f.now, expiresAtMs: f.now + 2000 },
-      { expiresAtMs: f.now + 500, stopAtMs: f.now + 500, fadeMs: 100, maxLinearGain: 0.5 });
-    await sender.send(f.bobId, { deliveryId: 'control-' + sequence, recordType: 'control', record, expiresAtMs: f.now + 2000 });
+    const delivery = await controller.issue({ operationId: 'control-' + sequence, recipient: f.bobId,
+      action, expiresAtMs: f.now + 2000, payload: action === 'emergency-stop' ? null :
+        { expiresAtMs: f.now + 500, stopAtMs: f.now + 500, fadeMs: 100, maxLinearGain: 0.5 } });
+    assert.equal(delivery.packet.record.body.sequence, sequence);
+    await sender.send(f.bobId, delivery.packet);
     const rows = await receiver.poll(); assert.equal(rows.length, 1);
     return rows[0];
   }

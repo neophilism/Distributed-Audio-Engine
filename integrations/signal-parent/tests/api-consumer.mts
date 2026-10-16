@@ -35,3 +35,12 @@ declare const relay: CiphertextRelayClient;
 const pump = new SignalRelayEndpoint({ channel, relay, nowUnixMs: Date.now });
 void pump.flush(sender); void pump.pull(); pump.close();
 void channel.receivePacket(delivery.packet, sender);
+
+import { DurableSignalController } from '../src/index.mjs';
+const issuer = new DurableSignalController({ vault, channel, nowUnixMs: Date.now });
+void issuer.issue({ operationId: 'durable-emergency', recipient: sender, action: 'emergency-stop',
+  payload: null, expiresAtMs: 1000 });
+void issuer.resume('durable-emergency'); void issuer.pending();
+void issuer.advanceEpoch(sender, issuer.streamState(sender).epoch); issuer.close();
+// @ts-expect-error An emergency control cannot carry a replacement playback payload.
+void issuer.issue({ operationId: 'wrong', recipient: sender, action: 'emergency-stop', payload: {}, expiresAtMs: 1000 });

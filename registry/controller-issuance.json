@@ -1,0 +1,27 @@
+{
+  "version": "2026-10-16-v1",
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "canonicalPlan": "registry/prs.json",
+  "branch": "dev/durable-controller-20261016",
+  "milestones": ["DAE-08", "DAE-23", "DAE-27", "DAE-34"],
+  "scope": "Endpoint controller decisions persisted before Signal queue/signing; no new milestone or production promotion",
+  "source": "integrations/signal-parent/src/controller.mjs",
+  "guide": "docs/controller-recovery.md",
+  "tests": {
+    "controllerModelCases": 19,
+    "actualSignalCases": 5,
+    "existingTLSNativeCasesNowUsingController": 8,
+    "hostedVerification": "Exact-head workflow results required before merge; see owning PR and GitHub Actions"
+  },
+  "claims": {
+    "controllerSourceImplemented": true,
+    "automaticPlaybackRecovery": false,
+    "exactlyOnceApplicationEffects": false,
+    "hardwareRollbackProtection": false,
+    "mobileBindingsComplete": false,
+    "deployed": false,
+    "fieldValidated": false,
+    "independentlyReviewed": false
+  },
+  "remaining": ["Application-specific effect reconciliation", "Protected endpoint key/revision-floor provisioning", "Mobile runtime/protocol bindings", "Physical output and deployed operations qualification"]
+}
