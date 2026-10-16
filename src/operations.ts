@@ -1,6 +1,6 @@
 import { canonicalJson, identifier, integer, invariant } from './validation.js';
 
-export type OperationsEvidenceKind = 'retention-policy' | 'deletion-drill' | 'restore-drill' | 'independent-security-review';
+export type OperationsEvidenceKind = 'retention-policy' | 'deletion-drill' | 'restore-drill' | 'ai-security-review' | 'independent-security-review';
 export type OperationsEnvironment = 'development' | 'staging' | 'production';
 export interface OperationsScope { tenantId: string; application: 'distributed-audio-engine'; componentId: string }
 export interface OperationsEvidenceRecord {
@@ -19,7 +19,9 @@ export interface OperationsEvidenceVerifier {
 declare const acceptedOperationsEvidence: unique symbol;
 export type AcceptedOperationsEvidence = Readonly<OperationsEvidenceRecord> & { readonly [acceptedOperationsEvidence]: true };
 const accepted = new WeakSet<object>();
-const requiredKinds: readonly OperationsEvidenceKind[] = ['retention-policy', 'deletion-drill', 'restore-drill', 'independent-security-review'];
+const operationalKinds: readonly OperationsEvidenceKind[] = ['retention-policy', 'deletion-drill', 'restore-drill'];
+const reviewKinds: readonly OperationsEvidenceKind[] = ['ai-security-review', 'independent-security-review'];
+const evidenceKinds = [...operationalKinds, ...reviewKinds];
 const environments = new Set<OperationsEnvironment>(['development', 'staging', 'production']);
 const results = new Set<OperationsEvidenceRecord['result']>(['passed', 'failed']);
 const digest = /^sha256:[0-9a-f]{64}$/;
@@ -43,7 +45,7 @@ function validateRecord(value: OperationsEvidenceRecord): void {
   exact(value, 'version,evidenceId,kind,scope,subjectArtifactDigest,evidenceDigest,standardCommit,environment,observedAtMs,expiresAtMs,subjectId,verifierId,result', 'INVALID_OPERATIONS_EVIDENCE_FIELDS');
   invariant(value.version === '1.0.0', 'INVALID_OPERATIONS_EVIDENCE_VERSION');
   identifier(value.evidenceId); identifier(value.subjectId); identifier(value.verifierId); validateScope(value.scope);
-  invariant(requiredKinds.includes(value.kind), 'INVALID_OPERATIONS_EVIDENCE_KIND');
+  invariant(evidenceKinds.includes(value.kind), 'INVALID_OPERATIONS_EVIDENCE_KIND');
   invariant(environments.has(value.environment), 'INVALID_OPERATIONS_ENVIRONMENT');
   invariant(results.has(value.result), 'INVALID_OPERATIONS_RESULT');
   invariant(digest.test(value.subjectArtifactDigest) && digest.test(value.evidenceDigest), 'INVALID_OPERATIONS_EVIDENCE_DIGEST');
@@ -52,7 +54,7 @@ function validateRecord(value: OperationsEvidenceRecord): void {
   if (value.kind === 'independent-security-review') invariant(value.verifierId !== value.subjectId, 'SELF_REVIEW_IS_NOT_INDEPENDENT');
 }
 
-/** Accepts only externally verified, exact-scope evidence; this class does not manufacture deployment evidence. */
+/** Accepts only adapter-verified, exact-scope evidence; this class does not manufacture deployment evidence. */
 export class OperationsEvidenceAcceptor {
   private readonly binding: OperationsEvidenceBinding;
   private readonly evidenceIds = new Set<string>();
@@ -74,7 +76,7 @@ export class OperationsEvidenceAcceptor {
     this.evidenceIds.add(value.evidenceId); this.evidenceDigests.add(value.evidenceDigest);
     Object.freeze(value.scope); Object.freeze(value);
     try {
-      invariant(await this.verifier.verify(value), 'UNVERIFIED_OPERATIONS_EVIDENCE');
+      invariant(await this.verifier.verify(value) === true, 'UNVERIFIED_OPERATIONS_EVIDENCE');
     } catch (error) {
       this.evidenceIds.delete(value.evidenceId); this.evidenceDigests.delete(value.evidenceDigest); throw error;
     }
@@ -84,6 +86,10 @@ export class OperationsEvidenceAcceptor {
 
 export interface OperationsAssurance {
   operationsReady: boolean;
+  environment: OperationsEnvironment;
+  aiReview: 'pending' | 'passed' | 'failed';
+  independentReview: 'pending' | 'passed' | 'failed';
+  reviewPolicy: 'ai-or-independent-review';
   satisfied: OperationsEvidenceKind[];
   missing: OperationsEvidenceKind[];
   failed: OperationsEvidenceKind[];
@@ -93,9 +99,12 @@ export interface OperationsAssurance {
   released: false;
 }
 
-/** Production evidence must satisfy every gate. This result is not full-product release or field evidence. */
-export function assessOperationsAssurance(records: readonly AcceptedOperationsEvidence[], binding: Omit<OperationsEvidenceBinding, 'maximumAgeMs'>, nowMs: number): OperationsAssurance {
+/** Test environments must be requested explicitly; they never qualify production.
+ * Owner policy permits substantive AI review/testing without an external audit.
+ * An actual failed review is not waived. This is not release or field evidence. */
+export function assessOperationsAssurance(records: readonly AcceptedOperationsEvidence[], binding: Omit<OperationsEvidenceBinding, 'maximumAgeMs'>, nowMs: number, environment: OperationsEnvironment = 'production'): OperationsAssurance {
   integer(nowMs); validateScope(binding.scope);
+  invariant(environments.has(environment), 'INVALID_OPERATIONS_ENVIRONMENT');
   invariant(digest.test(binding.subjectArtifactDigest), 'INVALID_OPERATIONS_ARTIFACT_DIGEST');
   invariant(commit.test(binding.standardCommit), 'INVALID_OPERATIONS_STANDARD_COMMIT');
   invariant(records.length <= 128, 'OPERATIONS_EVIDENCE_LIMIT');
@@ -105,19 +114,32 @@ export function assessOperationsAssurance(records: readonly AcceptedOperationsEv
     invariant(canonicalJson(record.scope) === canonicalJson(binding.scope), 'OPERATIONS_SCOPE_MISMATCH');
     invariant(record.subjectArtifactDigest === binding.subjectArtifactDigest, 'OPERATIONS_ARTIFACT_MISMATCH');
     invariant(record.standardCommit === binding.standardCommit, 'OPERATIONS_STANDARD_MISMATCH');
-    if (record.environment !== 'production' || record.expiresAtMs <= nowMs || record.observedAtMs > nowMs) continue;
+    if (record.environment !== environment || record.expiresAtMs <= nowMs || record.observedAtMs > nowMs) continue;
     const rows = current.get(record.kind) ?? []; rows.push(record); current.set(record.kind, rows);
   }
-  const satisfied: OperationsEvidenceKind[] = [], missing: OperationsEvidenceKind[] = [], failed: OperationsEvidenceKind[] = [];
-  for (const kind of requiredKinds) {
+  const state = (kind: OperationsEvidenceKind): 'pending' | 'passed' | 'failed' => {
     const rows = current.get(kind) ?? [];
-    if (rows.length === 0) { missing.push(kind); continue; }
+    if (rows.length === 0) return 'pending';
     const newest = Math.max(...rows.map(row => row.observedAtMs));
-    if (rows.filter(row => row.observedAtMs === newest).every(row => row.result === 'passed')) satisfied.push(kind);
+    return rows.filter(row => row.observedAtMs === newest).every(row => row.result === 'passed') ? 'passed' : 'failed';
+  };
+  const satisfied: OperationsEvidenceKind[] = [], missing: OperationsEvidenceKind[] = [], failed: OperationsEvidenceKind[] = [];
+  for (const kind of operationalKinds) {
+    const status = state(kind);
+    if (status === 'pending') missing.push(kind);
+    else if (status === 'passed') satisfied.push(kind);
     else failed.push(kind);
   }
+  const aiReview = state('ai-security-review'), independentReview = state('independent-security-review');
+  for (const kind of reviewKinds) {
+    if (state(kind) === 'passed') satisfied.push(kind);
+    else if (state(kind) === 'failed') failed.push(kind);
+  }
+  // One verified review path is required, not both. Never call AI work independent.
+  if (aiReview === 'pending' && independentReview === 'pending') missing.push('ai-security-review');
   return Object.freeze({
-    operationsReady: satisfied.length === requiredKinds.length,
+    operationsReady: missing.length === 0 && failed.length === 0,
+    environment, aiReview, independentReview, reviewPolicy: 'ai-or-independent-review' as const,
     satisfied, missing, failed,
     subjectArtifactDigest: binding.subjectArtifactDigest,
     standardCommit: binding.standardCommit,
