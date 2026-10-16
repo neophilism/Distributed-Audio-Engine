@@ -1,5 +1,7 @@
 # Distributed Audio Engine
 
+**Run the integrated software rehearsal:** [docs/rehearsal.md](docs/rehearsal.md). After installing the two locked dependency sets on Linux, `npm run rehearsal` runs core, Signal, TLS relay, crash recovery and production-C rendering tests together and writes a checksummed report. No API key is needed for the isolated rehearsal. This is not a mobile app or a deployed service.
+
 **Development and handoff plan:** [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md).
 
 Neutral TypeScript audio foundation for SceneSignal and Distributed Radio Engine. TrackZero is a consumer of the radio engine. [Architecture](docs/architecture.md) · [Development plan](docs/distributed-audio-engine-development-plan.md) · [Four-project roadmap](docs/roadmap.json)

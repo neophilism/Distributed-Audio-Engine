@@ -12,4 +12,4 @@ ${CC:-cc} -std=c11 -Wall -Wextra -Werror -fPIC -shared -pthread \
   -I"$include" -I"$root/native/core/include" \
   "$root/native/integration/pcm_addon.c" "$root/native/core/dae_pcm.c" \
   -lm -o "$build/dae_pcm.node"
-DAE_TEST_ADDON="$build/dae_pcm.node" node --test "$root/native/integration/playback.test.mjs"
+DAE_TEST_ADDON="$build/dae_pcm.node" node --test --test-reporter=tap "$root/native/integration/playback.test.mjs"
