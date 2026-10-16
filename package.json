@@ -60,7 +60,11 @@
     "roadmap:check": "node scripts/check-roadmap.mjs",
     "portability:check": "tsc --project tests/types/tsconfig.core.json && tsc --project tests/types/tsconfig.browser.json",
     "package:check": "node scripts/check-package.mjs",
-    "check": "npm run typecheck && npm run lint && npm run roadmap:check && npm test && npm run portability:check && npm run package:check"
+    "check": "npm run typecheck && npm run lint && npm run roadmap:check && npm test && npm run portability:check && npm run package:check",
+    "rehearsal": "node scripts/rehearsal.mjs",
+    "rehearsal:runner-test": "node --test scripts/rehearsal/runner.test.mjs",
+    "relay:start": "node services/ciphertext-relay/src/main.mjs",
+    "relay:staging": "node services/ciphertext-relay/src/render-main.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
