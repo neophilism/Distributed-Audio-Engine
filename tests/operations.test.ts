@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { OperationsEvidenceAcceptor, assessOperationsAssurance } from '../src/operations.js';
-import type { OperationsEvidenceBinding, OperationsEvidenceKind, OperationsEvidenceRecord } from '../src/operations.js';
+import type { AcceptedOperationsEvidence, OperationsEvidenceBinding, OperationsEvidenceKind, OperationsEvidenceRecord } from '../src/operations.js';
 
 const now = 2_000;
 const scope = { tenantId: 'tenant', application: 'distributed-audio-engine' as const, componentId: 'portable-core' };
@@ -11,7 +11,7 @@ const binding: OperationsEvidenceBinding = { scope, subjectArtifactDigest, stand
 const verified = new Set<string>();
 const verifier = { async verify(record: Readonly<OperationsEvidenceRecord>) { return verified.has(record.evidenceDigest); } };
 function evidence(kind: OperationsEvidenceKind, changes: Partial<OperationsEvidenceRecord> = {}): OperationsEvidenceRecord {
-  const index = ['retention-policy', 'deletion-drill', 'restore-drill', 'independent-security-review'].indexOf(kind) + 1;
+  const index = ['retention-policy', 'deletion-drill', 'restore-drill', 'independent-security-review', 'ai-security-review'].indexOf(kind) + 1;
   const value: OperationsEvidenceRecord = {
     version: '1.0.0', evidenceId: `evidence-${index}`, kind, scope,
     subjectArtifactDigest, evidenceDigest: 'sha256:' + String(index).repeat(64), standardCommit,
@@ -25,7 +25,7 @@ const assessmentBinding = { scope, subjectArtifactDigest, standardCommit };
 
 test('exact verified production evidence satisfies only the operations gate', async () => {
   const acceptor = new OperationsEvidenceAcceptor(binding, verifier);
-  const records = [];
+  const records: AcceptedOperationsEvidence[] = [];
   for (const kind of ['retention-policy', 'deletion-drill', 'restore-drill', 'independent-security-review'] as const) records.push(await acceptor.accept(evidence(kind), now));
   const result = assessOperationsAssurance(records, assessmentBinding, now);
   assert.equal(result.operationsReady, true); assert.deepEqual(result.missing, []); assert.deepEqual(result.failed, []);
@@ -40,7 +40,7 @@ test('missing, staging and latest failed evidence remain explicit release blocke
   const result = assessOperationsAssurance([retained, stagingDeletion, failedRestore], assessmentBinding, now);
   assert.equal(result.operationsReady, false);
   assert.deepEqual(result.satisfied, ['retention-policy']);
-  assert.deepEqual(result.missing, ['deletion-drill', 'independent-security-review']);
+  assert.deepEqual(result.missing, ['deletion-drill', 'ai-security-review']);
   assert.deepEqual(result.failed, ['restore-drill']);
 });
 
@@ -90,4 +90,56 @@ test('copied or expired accepted records cannot become release evidence', async 
   assert.throws(() => assessOperationsAssurance([{ ...record }], assessmentBinding, now), /UNAUTHENTICATED_OPERATIONS_EVIDENCE/);
   const later = assessOperationsAssurance([record], assessmentBinding, record.expiresAtMs);
   assert.deepEqual(later.satisfied, []); assert.ok(later.missing.includes('retention-policy'));
+});
+
+
+test('verified AI source review and tests permit readiness with human review still pending', async () => {
+  const acceptor = new OperationsEvidenceAcceptor(binding, verifier);
+  const records: AcceptedOperationsEvidence[] = [];
+  for (const kind of ['retention-policy', 'deletion-drill', 'restore-drill', 'ai-security-review'] as const)
+    records.push(await acceptor.accept(evidence(kind, { subjectId: 'ai-author', verifierId: 'ai-author' }), now));
+  const result = assessOperationsAssurance(records, assessmentBinding, now);
+  assert.equal(result.operationsReady, true);
+  assert.equal(result.aiReview, 'passed'); assert.equal(result.independentReview, 'pending');
+  assert.equal(result.reviewPolicy, 'ai-or-independent-review');
+  assert.equal(result.released, false); assert.equal(result.fieldValidated, false);
+  assert.ok(!result.satisfied.includes('independent-security-review'));
+});
+
+test('test-environment readiness is explicit and cannot promote evidence to production', async () => {
+  const acceptor = new OperationsEvidenceAcceptor(binding, verifier);
+  const records: AcceptedOperationsEvidence[] = [];
+  for (const kind of ['retention-policy', 'deletion-drill', 'restore-drill', 'ai-security-review'] as const)
+    records.push(await acceptor.accept(evidence(kind, { environment: 'staging' }), now));
+  const staging = assessOperationsAssurance(records, assessmentBinding, now, 'staging');
+  assert.equal(staging.operationsReady, true); assert.equal(staging.environment, 'staging');
+  const production = assessOperationsAssurance(records, assessmentBinding, now);
+  assert.equal(production.operationsReady, false); assert.equal(production.environment, 'production');
+  assert.equal(production.aiReview, 'pending');
+  assert.throws(() => assessOperationsAssurance(records, assessmentBinding, now, 'invalid' as 'staging'), /INVALID_OPERATIONS_ENVIRONMENT/);
+});
+
+test('AI policy does not waive a failed review or a failed deployed drill', async () => {
+  for (const failedKind of ['ai-security-review', 'independent-security-review', 'restore-drill'] as const) {
+    const acceptor = new OperationsEvidenceAcceptor(binding, verifier);
+    const records: AcceptedOperationsEvidence[] = [];
+    for (const kind of ['retention-policy', 'deletion-drill', 'restore-drill', 'ai-security-review', 'independent-security-review'] as const)
+      records.push(await acceptor.accept(evidence(kind, { result: kind === failedKind ? 'failed' : 'passed' }), now));
+    const result = assessOperationsAssurance(records, assessmentBinding, now);
+    assert.equal(result.operationsReady, false); assert.deepEqual(result.failed, [failedKind]);
+  }
+});
+
+test('an equal-time failed report wins; a newer verified same-kind report resolves it', async () => {
+  const acceptor = new OperationsEvidenceAcceptor(binding, verifier);
+  const passed = await acceptor.accept(evidence('ai-security-review'), now);
+  const failed = await acceptor.accept(evidence('ai-security-review', { evidenceId: 'failed-ai', evidenceDigest: 'sha256:' + '6'.repeat(64), result: 'failed' }), now);
+  assert.equal(assessOperationsAssurance([passed, failed], assessmentBinding, now).aiReview, 'failed');
+  const resolved = await acceptor.accept(evidence('ai-security-review', { evidenceId: 'resolved-ai', evidenceDigest: 'sha256:' + '7'.repeat(64), observedAtMs: 1_600 }), now);
+  assert.equal(assessOperationsAssurance([passed, failed, resolved], assessmentBinding, now).aiReview, 'passed');
+});
+
+test('truthy non-boolean verification cannot authenticate AI review evidence', async () => {
+  const acceptor = new OperationsEvidenceAcceptor(binding, { async verify() { return 'passed' as unknown as boolean; } });
+  await assert.rejects(acceptor.accept(evidence('ai-security-review'), now), /UNVERIFIED_OPERATIONS_EVIDENCE/);
 });
