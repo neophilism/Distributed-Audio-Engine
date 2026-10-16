@@ -1,0 +1,27 @@
+{
+  "version": "2026-10-16-v1",
+  "repository": "neophilism/Distributed-Audio-Engine",
+  "canonicalPlan": "registry/prs.json",
+  "milestones": ["DAE-06", "DAE-09", "DAE-10", "DAE-23"],
+  "scope": "Explicit endpoint-side offline format preparation before encryption; no milestone-completion promotion",
+  "source": "src/pcm-format.ts",
+  "guide": "docs/pcm-format.md",
+  "tests": {
+    "formatCases": 19,
+    "coreTotal": 236,
+    "addedSignedNativeCases": 2,
+    "signedNativeTotal": 19,
+    "addedSignalTLSNativeCases": 2,
+    "signalTLSNativeTotal": 14,
+    "hostedVerification": "Exact-head CI and integrated-rehearsal results required before merge; see owning PR"
+  },
+  "claims": {
+    "offlineSourceConversionImplemented": true,
+    "liveDriftCorrectionImplemented": false,
+    "continuousStreamConversionImplemented": false,
+    "physicalOutputQualified": false,
+    "mobileRuntimeComplete": false,
+    "deployed": false,
+    "independentlyReviewed": false
+  }
+}
