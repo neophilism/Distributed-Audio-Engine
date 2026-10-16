@@ -108,3 +108,15 @@ test('rehearsal: isolated npm config actually runs scripts without inherited cre
     { ...f, directory: f.output, env: rehearsalEnvironment(process.env, f.output), timeoutMs: 3000 });
   assert.equal(result.status, 'passed');
 });
+
+// The pinned Node runtime does not promise TAP as its default reporter.
+test('rehearsal: explicit reporter produces parseable evidence from an actual node test run', async t => {
+  const f = fixture(t); mkdirSync(f.output);
+  writeFileSync(join(f.root, 'test.mjs'), "import test from 'node:test'; test('probe', () => {});\n");
+  const result = await executeStep({ id: 'explicit-tap', command: 'node',
+    args: ['--test', '--test-reporter=tap', 'test.mjs'], tap: true },
+    { ...f, directory: f.output, env: rehearsalEnvironment(), timeoutMs: 3000 });
+  assert.equal(result.status, 'passed'); assert.equal(result.counts.tests, 1);
+  assert.ok(REHEARSAL_STEPS.filter(step => step.command === 'node' && step.tap)
+    .every(step => step.args.includes('--test-reporter=tap')));
+});

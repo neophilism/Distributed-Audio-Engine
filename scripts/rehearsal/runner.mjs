@@ -6,7 +6,7 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { createRequire } from 'node:module';
 
 export const REHEARSAL_STEPS = Object.freeze([
-  { id: 'runner', command: 'node', args: ['--test', 'scripts/rehearsal/runner.test.mjs'], tap: true, requires: [] },
+  { id: 'runner', command: 'node', args: ['--test', '--test-reporter=tap', 'scripts/rehearsal/runner.test.mjs'], tap: true, requires: [] },
   { id: 'portable', command: 'npm', args: ['run', 'check'], tap: true, requires: [] },
   { id: 'signal-types', command: 'npm', args: ['run', 'typecheck', '--prefix', 'integrations/signal-parent'], requires: ['portable'] },
   { id: 'relay-types', command: 'npm', args: ['run', 'typecheck', '--prefix', 'services/ciphertext-relay'], requires: ['portable'] },
@@ -16,7 +16,7 @@ export const REHEARSAL_STEPS = Object.freeze([
   { id: 'signal-native', command: 'sh', args: ['integrations/signal-parent/test-native.sh'], tap: true, requires: ['portable', 'signal'] },
   { id: 'network-native', command: 'sh', args: ['services/ciphertext-relay/test-network.sh'], tap: true, requires: ['portable', 'signal', 'relay'] },
   { id: 'plan', command: 'node', args: ['scripts/validate-pr-registry.mjs'], requires: [] },
-  { id: 'plan-tests', command: 'node', args: ['--test', 'registry/pr-contract.test.mjs'], tap: true, requires: [] },
+  { id: 'plan-tests', command: 'node', args: ['--test', '--test-reporter=tap', 'registry/pr-contract.test.mjs'], tap: true, requires: [] },
   { id: 'status-record', command: 'python3', args: ['scripts/validate_e2eesa_status.py'], requires: [] },
 ].map(step => Object.freeze({ ...step, args: Object.freeze(step.args), requires: Object.freeze(step.requires) })));
 const MAX_LOG_BYTES = 16 * 1024 * 1024;
