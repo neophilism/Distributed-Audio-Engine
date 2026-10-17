@@ -24,7 +24,7 @@ const packaged = await packageNormalizedRendition(
 Use `packaged.privateMetadata.sampleRate`, `channels` and `frames` for the private
 asset descriptor and the matching program timeline. Do not reuse the original
 source frame count after conversion. All clips in one existing `ProgramTimeline`
-still use its canonical rate. The native sink retains its explicit rate/layout
+still use its canonical rate. The shipped Android and iOS native hosts require the encoded PCM rate **and exact channel count** of their active queue; the `maxChannels` route-event field describes that queue count, not an implicit mono/stereo adapter. Prepare alternate renditions explicitly before distribution and use the private descriptor's updated geometry. The native sink retains its explicit rate/layout
 checks; this helper is not an automatic fallback or a new playback authorization.
 Different renditions receive fresh keys and storage identities. The source audio
 and target channel map are snapshotted before the first asynchronous yield.

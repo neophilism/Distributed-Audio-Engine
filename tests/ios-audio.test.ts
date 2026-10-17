@@ -43,7 +43,7 @@ test('unavailable routes, incompatible formats, overlaps and queue limits fail b
   f.emit({ type: 'route-active', route, sampleRate: 16000, maxChannels: 1 });
   assert.throws(() => f.sink.schedule('rate', audio, 1000), /RATE_ADAPTER/);
   f.emit({ type: 'route-active', route: { ...route, generation: 2 }, sampleRate: 8000, maxChannels: 1 });
-  assert.throws(() => f.sink.schedule('channels', audio, 1000), /CHANNEL_LAYOUT/);
+  assert.throws(() => f.sink.schedule('channels', audio, 1000), /CHANNEL_ADAPTER/);
   f.emit({ type: 'route-active', route: { ...route, generation: 3 }, sampleRate: 8000, maxChannels: 2 });
   f.sink.schedule('one', audio, 1100, 0, 800); assert.throws(() => f.sink.schedule('two', audio, 1150, 0, 800), /OVERLAPPING/);
   const tiny = await fixture(); tiny.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
@@ -78,6 +78,39 @@ test('duplicate route events are idempotent while clock rollback and closure fai
   f.sink.close(); f.sink.close(); assert.equal(f.bridge.listener, undefined); assert.throws(() => f.sink.schedule('b', audio, 1100), /CLOSED/);
 });
 
+test('iOS fixed-format native graph rejects implicit mono-to-stereo delivery', async () => {
+  const f = await fixture();
+  const mono = { sampleRate: 8000, channels: 1, samples: new Float32Array(8000).fill(0.25) };
+  f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
+  assert.throws(() => f.sink.schedule('mono', mono, 1100), /IOS_CHANNEL_ADAPTER_REQUIRED/);
+  assert.equal(f.sink.pending, 0);
+  assert.equal(f.bridge.raw.length, 0);
+  const accepted = f.sink.schedule('stereo', audio, 1100, 0, 800);
+  assert.equal(accepted.frames, 800);
+  assert.equal(f.bridge.copied[0]!.channels, 2);
+});
+test('malformed iOS native events revoke authority and cancel queued PCM', async () => {
+  const f = await fixture();
+  f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
+  f.sink.schedule('clip', audio, 1100, 0, 800);
+  const attempts = f.bridge.cancelAllCalls;
+  assert.throws(() => f.emit({ type: 'route-active', route: { ...route, outputId: 'changed' }, sampleRate: 8000, maxChannels: 2 }));
+  assert.equal(f.sink.pending, 0);
+  assert.equal(f.sink.outputState().state, 'interrupted');
+  assert.ok(f.bridge.cancelAllCalls > attempts);
+  assert.equal(f.authority.envelopeAt(1100), null);
+  assert.throws(() => f.sink.schedule('after-invalid', audio, 1100), /UNAVAILABLE/);
+});
+test('invalid iOS completion fails closed even if native cancellation fails', async () => {
+  const f = await fixture();
+  f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
+  f.sink.schedule('clip', audio, 1100, 0, 800);
+  f.bridge.cancelAll = () => { throw new Error('NATIVE_CANCEL_FAILED'); };
+  assert.throws(() => f.emit({ type: 'completed', id: 123 } as unknown as IOSAudioEvent));
+  assert.equal(f.sink.pending, 0);
+  assert.equal(f.sink.outputState().state, 'interrupted');
+  assert.equal(f.authority.envelopeAt(1100), null);
+});
 test('ios native completions cannot retire a reused logical clip', async () => {
   const f = await fixture(); f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
   f.sink.schedule('clip', audio, 1100, 0, 800);

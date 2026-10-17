@@ -83,7 +83,19 @@ export class AndroidAudioSink {
     this.lifecycle = new OutputLifecycle(() => {
       try { this.stopAll(); } finally { options.onInvalidated?.(); }
     });
-    this.unsubscribe = bridge.subscribe(event => this.onEvent(event));
+    this.unsubscribe = bridge.subscribe(event => {
+      try { this.onEvent(event); }
+      catch (error) {
+        // An invalid native callback must not leave previously authorized PCM queued.
+        // The host may already be faulted; revoke JavaScript authority regardless of
+        // whether its best-effort native cancellation throws.
+        this.format = undefined;
+        this.authority.leave();
+        try { this.lifecycle.interrupt(); } catch { /* Local lifecycle state is interrupted before callbacks. */ }
+        try { this.bridge.cancelAll(); } catch { /* Native driver may be unavailable. */ }
+        throw error;
+      }
+    });
     invariant(typeof this.unsubscribe === 'function', 'INVALID_ANDROID_SUBSCRIPTION');
   }
 
@@ -152,7 +164,9 @@ export class AndroidAudioSink {
     this.lifecycle.requireCurrent(format.route);
     const metadata = analyzePcm(audio);
     invariant(metadata.sampleRate === format.sampleRate, 'ANDROID_RATE_ADAPTER_REQUIRED');
-    invariant(metadata.channels <= format.maxChannels, 'ANDROID_CHANNEL_LAYOUT_UNSUPPORTED');
+    // The shipped AudioTrack/JNI host owns a queue with exactly the announced
+    // channel count; a smaller count is not an implicit native upmix.
+    invariant(metadata.channels === format.maxChannels, 'ANDROID_CHANNEL_ADAPTER_REQUIRED');
     integer(offsetFrames, 0, metadata.frames - 1); integer(requestedFrames, 1, metadata.frames - offsetFrames);
     invariant(!this.voices.has(id) && this.voices.size < 64, 'ANDROID_AUDIO_QUEUE_CONFLICT');
     const envelope = this.authority.envelopeAt(nowMs); invariant(envelope, 'NO_PLAYBACK_AUTHORITY');
