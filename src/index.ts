@@ -32,3 +32,4 @@ export * from './ios-audio.js';
 export * from './playback-session.js';
 
 export * from './pcm-format.js';
+export * from './live-input.js';
