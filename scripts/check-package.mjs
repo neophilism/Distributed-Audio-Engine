@@ -10,7 +10,7 @@ try {
   const [packed] = JSON.parse(stdout);
   const paths = new Set(packed.files.map(file => file.path));
   for (const path of paths) if (/(^|\/)(?:node_modules|tests|\.env(?:\..*)?|\.git)(\/|$)|\.(?:sqlite|tgz)$/.test(path)) throw new Error(`Unexpected package file: ${path}`);
-  for (const path of ['dist/src/index.js', 'dist/src/index.d.ts', 'dist/src/browser/index.js', 'dist/src/browser/index.d.ts', 'dist/src/android/index.js', 'dist/src/android/index.d.ts', 'dist/src/ios/index.js', 'dist/src/ios/index.d.ts', 'dist/src/node/index.js', 'dist/src/node/index.d.ts', 'src/index.ts', 'docs/security-baseline.json']) if (!paths.has(path)) throw new Error(`Missing package file: ${path}`);
+  for (const path of ['dist/src/index.js', 'dist/src/index.d.ts', 'dist/src/browser/index.js', 'dist/src/browser/index.d.ts', 'dist/src/android/index.js', 'dist/src/android/index.d.ts', 'dist/src/ios/index.js', 'dist/src/ios/index.d.ts', 'dist/src/node/index.js', 'dist/src/node/index.d.ts', 'src/index.ts', 'dist/src/live-input.js', 'dist/src/live-input.d.ts', 'docs/live-input.md', 'docs/security-baseline.json']) if (!paths.has(path)) throw new Error(`Missing package file: ${path}`);
   const consumer = join(dir, 'consumer'); await mkdir(consumer); await writeFile(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
   await run('npm', ['install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', join(dir, packed.filename)], { cwd: consumer, maxBuffer: 1024 * 1024 });
   await writeFile(join(consumer, 'smoke.mjs'), `
