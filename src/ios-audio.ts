@@ -163,7 +163,9 @@ export class IOSAudioSink {
     this.lifecycle.requireCurrent(format.route);
     const metadata = analyzePcm(audio);
     invariant(metadata.sampleRate === format.sampleRate, 'IOS_RATE_ADAPTER_REQUIRED');
-    invariant(metadata.channels <= format.maxChannels, 'IOS_CHANNEL_LAYOUT_UNSUPPORTED');
+    // AVAudioEngine's production C queue is fixed to the announced native
+    // graph layout; smaller channel counts cannot be passed through as-is.
+    invariant(metadata.channels === format.maxChannels, 'IOS_CHANNEL_ADAPTER_REQUIRED');
     integer(offsetFrames, 0, metadata.frames - 1); integer(requestedFrames, 1, metadata.frames - offsetFrames);
     invariant(!this.voices.has(id) && this.voices.size < 64, 'IOS_AUDIO_QUEUE_CONFLICT');
     const envelope = this.authority.envelopeAt(nowMs); invariant(envelope, 'NO_PLAYBACK_AUTHORITY');
