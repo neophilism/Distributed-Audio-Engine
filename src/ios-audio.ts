@@ -83,7 +83,18 @@ export class IOSAudioSink {
     this.lifecycle = new OutputLifecycle(() => {
       try { this.stopAll(); } finally { options.onInvalidated?.(); }
     });
-    this.unsubscribe = bridge.subscribe(event => this.onEvent(event));
+    this.unsubscribe = bridge.subscribe(event => {
+      try { this.onEvent(event); }
+      catch (error) {
+        // A malformed bridge callback or route generation is a terminal trust
+        // failure for this playback authority, not an ignorable telemetry event.
+        this.format = undefined;
+        this.authority.leave();
+        try { this.lifecycle.interrupt(); } catch { /* Native stop can already have failed. */ }
+        try { this.bridge.cancelAll(); } catch { /* Best effort after authority revocation. */ }
+        throw error;
+      }
+    });
     invariant(typeof this.unsubscribe === 'function', 'INVALID_IOS_SUBSCRIPTION');
   }
 
