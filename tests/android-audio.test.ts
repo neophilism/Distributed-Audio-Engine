@@ -43,7 +43,7 @@ test('unavailable routes, incompatible formats, overlaps and queue limits fail b
   f.emit({ type: 'route-active', route, sampleRate: 16000, maxChannels: 1 });
   assert.throws(() => f.sink.schedule('rate', audio, 1000), /RATE_ADAPTER/);
   f.emit({ type: 'route-active', route: { ...route, generation: 2 }, sampleRate: 8000, maxChannels: 1 });
-  assert.throws(() => f.sink.schedule('channels', audio, 1000), /CHANNEL_LAYOUT/);
+  assert.throws(() => f.sink.schedule('channels', audio, 1000), /CHANNEL_ADAPTER/);
   f.emit({ type: 'route-active', route: { ...route, generation: 3 }, sampleRate: 8000, maxChannels: 2 });
   f.sink.schedule('one', audio, 1100, 0, 800); assert.throws(() => f.sink.schedule('two', audio, 1150, 0, 800), /OVERLAPPING/);
   const tiny = await fixture(); tiny.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
