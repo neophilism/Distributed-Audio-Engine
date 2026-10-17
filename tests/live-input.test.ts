@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { EncryptedLivePcmSegmenter, EndpointAttachmentReader, readAttachmentRange, decodeWave } from '../src/index.js';
 
-const scope = { tenantId: 'tenant', application: 'distributed-radio', sessionId: 'live-session' };
+const scope = { tenantId: 'tenant', application: 'distributed-radio' as const, sessionId: 'live-session' };
 const options = { scope, streamId: 'local-live', sampleRate: 8000, channels: 1, segmentFrames: 4, gain: 0.5 };
 async function readSegment(segment) {
   const context = { tenantId: scope.tenantId, application: scope.application,
