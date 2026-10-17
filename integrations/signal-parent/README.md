@@ -13,6 +13,31 @@ relay. Its Node library is not an Android or iOS executable. Mobile bindings to
 the same upstream protocol, hardware-backed state, independent profile review,
 physical outputs and production operations remain separate gates.
 
+## Authenticated clock responses (Node endpoints)
+
+The existing endpoint Signal channel now accepts `clock-response` as an
+Ed25519-signed, libsignal-encrypted control with a **durable controller intent**
+and identical-ciphertext retry. The recipient uses
+`SignalPlaybackInbox.createClockVerifier(vault)` and
+`DisciplinedClock` (portable engine) with
+`inbox.decodeControlPayload`. Clock and playback verifiers share one encrypted
+scope checkpoint; process controls in exactly the issued epoch/sequence order.
+A missing control cannot be skipped without explicit epoch reconciliation.
+
+The response contains a fresh 64-character lowercase hex probe nonce,
+bounded receive/send Unix timestamps, and stated reference uncertainty. The
+issue-to-expiry window is at most five seconds, and timestamps must be recent
+and monotonic. Authentication proves sender identity, **not** clock accuracy,
+audible output, device calibration or field synchronization. The client still
+owns the trusted clock reference, local monotonic probe capture, challenge
+delivery, hardware state, network operation and native app integration.
+The ciphertext relay never receives a response's private timestamps or nonce.
+
+`tests/clock-response.test.mjs` exercises the actual signed/ratcheted,
+crash-resumable Node path through `DisciplinedClock`, shared replay checkpoints,
+malformed controls and revoked membership. This is integration software
+evidence, not a phone or speaker test.
+
 ## Build and verification
 
 From the repository root, with the pinned Node runtime:
