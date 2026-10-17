@@ -78,6 +78,28 @@ test('duplicate route events are idempotent while clock rollback and closure fai
   f.sink.close(); f.sink.close(); assert.equal(f.bridge.listener, undefined); assert.throws(() => f.sink.schedule('b', audio, 1100), /CLOSED/);
 });
 
+test('malformed iOS native events revoke authority and cancel queued PCM', async () => {
+  const f = await fixture();
+  f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
+  f.sink.schedule('clip', audio, 1100, 0, 800);
+  const attempts = f.bridge.cancelAllCalls;
+  assert.throws(() => f.emit({ type: 'route-active', route: { ...route, outputId: 'changed' }, sampleRate: 8000, maxChannels: 2 }));
+  assert.equal(f.sink.pending, 0);
+  assert.equal(f.sink.outputState().state, 'interrupted');
+  assert.ok(f.bridge.cancelAllCalls > attempts);
+  assert.equal(f.authority.envelopeAt(1100), null);
+  assert.throws(() => f.sink.schedule('after-invalid', audio, 1100), /UNAVAILABLE/);
+});
+test('invalid iOS completion fails closed even if native cancellation fails', async () => {
+  const f = await fixture();
+  f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
+  f.sink.schedule('clip', audio, 1100, 0, 800);
+  f.bridge.cancelAll = () => { throw new Error('NATIVE_CANCEL_FAILED'); };
+  assert.throws(() => f.emit({ type: 'completed', id: 123 } as unknown as IOSAudioEvent));
+  assert.equal(f.sink.pending, 0);
+  assert.equal(f.sink.outputState().state, 'interrupted');
+  assert.equal(f.authority.envelopeAt(1100), null);
+});
 test('ios native completions cannot retire a reused logical clip', async () => {
   const f = await fixture(); f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
   f.sink.schedule('clip', audio, 1100, 0, 800);
