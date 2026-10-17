@@ -83,7 +83,19 @@ export class AndroidAudioSink {
     this.lifecycle = new OutputLifecycle(() => {
       try { this.stopAll(); } finally { options.onInvalidated?.(); }
     });
-    this.unsubscribe = bridge.subscribe(event => this.onEvent(event));
+    this.unsubscribe = bridge.subscribe(event => {
+      try { this.onEvent(event); }
+      catch (error) {
+        // An invalid native callback must not leave previously authorized PCM queued.
+        // The host may already be faulted; revoke JavaScript authority regardless of
+        // whether its best-effort native cancellation throws.
+        this.format = undefined;
+        this.authority.leave();
+        try { this.lifecycle.interrupt(); } catch { /* Local lifecycle state is interrupted before callbacks. */ }
+        try { this.bridge.cancelAll(); } catch { /* Native driver may be unavailable. */ }
+        throw error;
+      }
+    });
     invariant(typeof this.unsubscribe === 'function', 'INVALID_ANDROID_SUBSCRIPTION');
   }
 
