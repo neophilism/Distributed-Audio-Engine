@@ -78,6 +78,17 @@ test('duplicate route events are idempotent while clock rollback and closure fai
   f.sink.close(); f.sink.close(); assert.equal(f.bridge.listener, undefined); assert.throws(() => f.sink.schedule('b', audio, 1100), /CLOSED/);
 });
 
+test('Android fixed-format native host rejects implicit mono-to-stereo delivery', async () => {
+  const f = await fixture();
+  const mono = { sampleRate: 8000, channels: 1, samples: new Float32Array(8000).fill(0.25) };
+  f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
+  assert.throws(() => f.sink.schedule('mono', mono, 1100), /ANDROID_CHANNEL_ADAPTER_REQUIRED/);
+  assert.equal(f.sink.pending, 0);
+  assert.equal(f.bridge.raw.length, 0);
+  const accepted = f.sink.schedule('stereo', audio, 1100, 0, 800);
+  assert.equal(accepted.frames, 800);
+  assert.equal(f.bridge.copied[0]!.channels, 2);
+});
 test('malformed Android native events revoke authority and cancel queued PCM', async () => {
   const f = await fixture();
   f.emit({ type: 'route-active', route, sampleRate: 8000, maxChannels: 2 });
