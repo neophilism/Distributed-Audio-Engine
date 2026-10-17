@@ -89,11 +89,11 @@ export class EncryptedLivePcmSegmenter {
     notAborted(signal);
     const packaged = await packageRendition(audio, this.gain, context, `segment-${segmentIndex}.wav`);
     const result = { segmentIndex, startFrame, frames, ...packaged };
-    try { notAborted(signal); return result; }
+    try { invariant(!this.closed, 'LIVE_INPUT_CLOSED'); notAborted(signal); return result; }
     catch (error) { this.wipeResult(result); throw error; }
   }
   /** Frame index is an exact bigint source cursor; gaps, repeats and format changes
-   * require a new stream rather than hidden silence or replayed PCM. */
+   * are rejected instead of inserting hidden silence or replayed PCM. */
   async push(frameStart: bigint, samples: Float32Array, signal?: AbortSignal): Promise<EncryptedLivePcmSegment[]> {
     this.assertReady(); notAborted(signal);
     invariant(typeof frameStart === 'bigint' && frameStart === this.nextFrame, 'LIVE_INPUT_FRAME_DISCONTINUITY');
