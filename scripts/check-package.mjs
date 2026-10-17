@@ -15,7 +15,7 @@ try {
   await run('npm', ['install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', join(dir, packed.filename)], { cwd: consumer, maxBuffer: 1024 * 1024 });
   await writeFile(join(consumer, 'smoke.mjs'), `
     import assert from 'node:assert/strict';
-    import { EndpointPlaybackSession, compileProgram, ProgramTimeline, encryptAttachment, EndpointAttachmentReader, readAttachmentRange, canonicalJson, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, convertPcmFormat, packageNormalizedRendition } from '@neophilism/distributed-audio-engine';
+    import { EndpointPlaybackSession, compileProgram, ProgramTimeline, encryptAttachment, EndpointAttachmentReader, readAttachmentRange, canonicalJson, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, convertPcmFormat, packageNormalizedRendition, EncryptedLivePcmSegmenter } from '@neophilism/distributed-audio-engine';
     import { BrowserAudioSink } from '@neophilism/distributed-audio-engine/browser';
     import { AndroidAudioSink } from '@neophilism/distributed-audio-engine/android';
     import { IOSAudioSink } from '@neophilism/distributed-audio-engine/ios';
