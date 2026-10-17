@@ -24,6 +24,9 @@ try {
     import { OutputLifecycle } from '@neophilism/distributed-audio-engine/output-lifecycle';
     const normalized = await convertPcmFormat({ sampleRate: 8000, channels: 1, samples: new Float32Array([0.25, 0.25]) }, { sampleRate: 16000, channels: 2 });
     assert.equal(normalized.audio.samples.length, 8); assert.equal(typeof packageNormalizedRendition, 'function');
+    const live = new EncryptedLivePcmSegmenter({ scope: { tenantId: 'tenant', application: 'distributed-radio', sessionId: 'live' }, streamId: 'capture', sampleRate: 8000, channels: 1, segmentFrames: 2 });
+    const [first] = await live.push(0n, new Float32Array([0.25, -0.25]));
+    assert.equal(first.frames, 2); assert.equal(first.startFrame, 0n); live.close();
     const context = { tenantId: 'tenant', application: 'distributed-radio', parentMessageId: 'parent' };
     const encrypted = await encryptAttachment(new Uint8Array([1, 2, 3]), { ...context, filename: 'fixture.wav', mediaType: 'audio/wav' });
     const reader = await EndpointAttachmentReader.open(encrypted.privateManifest, context);
