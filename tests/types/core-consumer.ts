@@ -15,5 +15,12 @@ declare const sourcePcm: PcmAudio, formatTarget: PcmFormatTarget, conversionOpti
 void convertPcmFormat(sourcePcm, formatTarget, conversionOptions);
 void packageNormalizedRendition(sourcePcm, formatTarget, 0.5,
   { tenantId: 'tenant', application: 'distributed-radio', parentMessageId: 'parent' }, 'normalized.wav');
+const live = new EncryptedLivePcmSegmenter({
+  scope: { tenantId: 'tenant', application: 'distributed-radio', sessionId: 'live' },
+  streamId: 'publisher', sampleRate: 8000, channels: 1, segmentFrames: 800, gain: 0.5,
+});
+void live.push(0n, new Float32Array(800)); void live.flush();
+// @ts-expect-error The source frame cursor must be a bigint, not a guessed number.
+void live.push(0, new Float32Array(800));
 // @ts-expect-error Implicit string formats are not accepted by the converter.
 void convertPcmFormat(sourcePcm, 'stereo');
