@@ -9,7 +9,7 @@ const timeline = new ProgramTimeline(0, compileProgram('program', 8000, [{ id: '
 declare const transport: CiphertextChunkTransport;
 void [EndpointPlaybackSession, timeline, transport, EndpointProgramPlayer, SqliteCheckpointStore, SqliteEntitlementStore, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, OutputEvidenceEndpoint, OutputLifecycle, AndroidAudioSink, IOSAudioSink];
 
-import { convertPcmFormat, packageNormalizedRendition } from '@neophilism/distributed-audio-engine';
+import { convertPcmFormat, packageNormalizedRendition, EncryptedLivePcmSegmenter } from '@neophilism/distributed-audio-engine';
 import type { PcmAudio, PcmFormatTarget, PcmConversionOptions } from '@neophilism/distributed-audio-engine';
 declare const sourcePcm: PcmAudio, formatTarget: PcmFormatTarget, conversionOptions: PcmConversionOptions;
 void convertPcmFormat(sourcePcm, formatTarget, conversionOptions);
