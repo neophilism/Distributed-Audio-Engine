@@ -1,5 +1,5 @@
 import type { Scope, DeviceRegistry, DeviceRecord, ControlBody, SignedControl, ControlVerifier,
-  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey, ClockResponse } from '../../../dist/src/index.js';
+  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey, ClockResponse, ClockProbe, DisciplinedClock } from '../../../dist/src/index.js';
 export type ParentKind = 'manifest' | 'control' | 'ack';
 export interface VaultRow<T = unknown> { revision: number; value: T }
 export interface EndpointVault {
@@ -79,6 +79,17 @@ export class SignalPlaybackInbox {
   readonly decodeControlPayload: (body: ControlBody) => Promise<unknown>;
   close(): void;
 }
+/** The probe is encrypted on the existing authorized 'ack' channel. */
+export function queueSignalClockProbe(options: {
+  channel: SignalParentChannel; recipient: string; clock: DisciplinedClock;
+  messageId: string; expiresAtMs: number;
+}): Promise<{ probe: ClockProbe; delivery: OutboundDelivery }>;
+/** Requires an already-authenticated pending inbox receipt and sampled reference uncertainty. */
+export function respondSignalClockProbe(options: {
+  channel: SignalParentChannel; controller: DurableSignalController; receipt: PendingMessage;
+  receivedUnixMs: number; uncertaintyMs: number; nowUnixMs: () => number;
+}): Promise<{ operationId: string; delivery: OutboundDelivery; reused: boolean }>;
+
 export const PROTOCOL: 'signal-libsignal-0.105.0';
 
 /** Trusted endpoint adapter: methods must honor AbortSignal and bounded work. */

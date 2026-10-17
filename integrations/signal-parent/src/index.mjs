@@ -5,3 +5,4 @@ export { PROTOCOL } from './validation.mjs';
 export { SignalRelayEndpoint } from './relay-endpoint.mjs';
 
 export { DurableSignalController } from './controller.mjs';
+export { queueSignalClockProbe, respondSignalClockProbe } from './clock-probe.mjs';
