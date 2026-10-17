@@ -25,6 +25,8 @@ const delivery = await controller.issue({
 await exchange.flush(authorizedListenerAddress);
 ```
 
+A bounded `clock-response` request is also supported for the neutral disciplined clock. It includes exactly `nonce` (a 64-character lowercase hex challenge), `receivedUnixMs`, `sentUnixMs`, and `uncertaintyMs`; issuance must occur within five seconds of the remote receive timestamp, have a maximum five-second lifetime, and use the same monotonically allocated control sequence as leases and emergency stops. The receiver separately verifies the nonce against its outstanding local probe. A timestamp signature authenticates its source; it does not prove the source clock is accurate or that speakers are synchronized.
+
 The caller supplies already root-verified membership, endpoint-only keys and the
 existing encrypted vault. Use a stable application operation ID. Do not generate
 another ID just because a result was lost. Repeating `issue` requires identical

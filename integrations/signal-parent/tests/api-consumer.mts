@@ -28,6 +28,10 @@ void channel.queueMessage(sender, 'ack', {}, { expiresAtMs: 1000 });
 
 const durableInbox = new SignalPlaybackInbox({ channel, sender, nowUnixMs: Date.now, durable: true, vault });
 void durableInbox.restoreManifests();
+const clockVerifier = await durableInbox.createClockVerifier(vault);
+void clockVerifier.matchesScope(scope);
+void channel.queueControl(sender, { epoch: 1, sequence: 2, issuedAtMs: 0, expiresAtMs: 1000, action: 'clock-response' },
+  { nonce: 'a'.repeat(64), receivedUnixMs: 0, sentUnixMs: 0, uncertaintyMs: 0.1 }, { messageId: 'clock-response' });
 // @ts-expect-error Durable manifest recovery requires its encrypted application store.
 new SignalPlaybackInbox({ channel, sender, nowUnixMs: Date.now, durable: true });
 import type { CiphertextRelayClient } from '../../../services/ciphertext-relay/src/index.mjs';
@@ -40,6 +44,11 @@ import { DurableSignalController } from '../src/index.mjs';
 const issuer = new DurableSignalController({ vault, channel, nowUnixMs: Date.now });
 void issuer.issue({ operationId: 'durable-emergency', recipient: sender, action: 'emergency-stop',
   payload: null, expiresAtMs: 1000 });
+void issuer.issue({ operationId: 'durable-clock', recipient: sender, action: 'clock-response',
+  expiresAtMs: 1000, payload: { nonce: 'a'.repeat(64), receivedUnixMs: 0, sentUnixMs: 0, uncertaintyMs: 0.1 } });
+void issuer.issue({ operationId: 'wrong-clock', recipient: sender, action: 'clock-response', expiresAtMs: 1000,
+  // @ts-expect-error A clock response must bind to the outstanding nonce.
+  payload: { receivedUnixMs: 0, sentUnixMs: 0, uncertaintyMs: 0.1 } });
 void issuer.resume('durable-emergency'); void issuer.pending();
 void issuer.advanceEpoch(sender, issuer.streamState(sender).epoch); issuer.close();
 // @ts-expect-error An emergency control cannot carry a replacement playback payload.
