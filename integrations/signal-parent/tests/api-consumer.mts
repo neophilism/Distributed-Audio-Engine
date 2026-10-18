@@ -49,6 +49,14 @@ void issuer.issue({ operationId: 'durable-clock', recipient: sender, action: 'cl
 void issuer.issue({ operationId: 'wrong-clock', recipient: sender, action: 'clock-response', expiresAtMs: 1000,
   // @ts-expect-error A clock response must bind to the outstanding nonce.
   payload: { receivedUnixMs: 0, sentUnixMs: 0, uncertaintyMs: 0.1 } });
+import { queueSignalClockProbe, respondSignalClockProbe } from '../src/index.mjs';
+import type { DisciplinedClock } from '../../../dist/src/index.js';
+import type { PendingMessage } from '../src/index.mjs';
+declare const disciplinedClock: DisciplinedClock, authenticatedProbe: PendingMessage;
+void queueSignalClockProbe({ channel, recipient: sender, clock: disciplinedClock,
+  messageId: 'clock-probe', expiresAtMs: 1000 });
+void respondSignalClockProbe({ channel, controller: issuer, receipt: authenticatedProbe,
+  receivedUnixMs: 0, uncertaintyMs: 1, nowUnixMs: Date.now });
 void issuer.resume('durable-emergency'); void issuer.pending();
 void issuer.advanceEpoch(sender, issuer.streamState(sender).epoch); issuer.close();
 // @ts-expect-error An emergency control cannot carry a replacement playback payload.
