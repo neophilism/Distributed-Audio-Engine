@@ -40,6 +40,7 @@ export function assessHeadRuns(runs, sha, expected = REQUIRED) {
 
 export async function fetchHeadRuns(repository, sha, token = '') {
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository) ||
+      repository.split('/').some(part => part === '.' || part === '..' || part.includes('..')) ||
       !/^[0-9a-f]{40}$/.test(sha)) throw Error('INVALID_REPOSITORY_OR_HEAD');
   const all = [];
   for (let page = 1; page <= 10; page++) {
