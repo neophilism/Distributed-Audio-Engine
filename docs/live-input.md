@@ -62,6 +62,15 @@ so later caller mutation cannot change a committed segment. A failed batch
 withholds and wipes its owned previously generated chunk results and closes
 the segmenter rather than silently advancing a damaged stream.
 
+## Receiver continuity
+
+The matching [live-segment continuity contract](live-continuity.md) formats authenticated
+per-segment frame positions as canonical JSON-safe decimals and rejects missing,
+replayed, reordered or format-mismatched segments at the receiving endpoint.
+It is a voluntary consumer-side geometry gate and **does not replace** Signal
+authentication, decryption, rights verification, jitter handling, a durable
+replay checkpoint, physical output qualification or drift correction.
+
 ## Security and deployment boundaries
 
 Media plaintext and private manifests must remain at the authorized
