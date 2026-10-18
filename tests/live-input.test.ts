@@ -45,6 +45,17 @@ test('bounded endpoint segments preserve a contiguous sample timeline with fresh
   await assert.rejects(ingest.push(8n, Float32Array.from([0.2])), /CLOSED/);
 });
 
+test('a restarted segmenter never reuses a parent-message ID with the same stream name', async () => {
+  const first = new EncryptedLivePcmSegmenter(options);
+  const second = new EncryptedLivePcmSegmenter(options);
+  const [a] = await first.push(0n, Float32Array.from([0.2, 0.2, 0.2, 0.2]));
+  const [b] = await second.push(0n, Float32Array.from([0.2, 0.2, 0.2, 0.2]));
+  assert.ok(a && b);
+  assert.notEqual(a.privateManifest.parentMessageId, b.privateManifest.parentMessageId);
+  assert.equal(a.startFrame, b.startFrame);
+  first.close(); second.close();
+});
+
 test('explicit short flush encrypts only actual remaining frames and closes the stream', async () => {
   const ingest = new EncryptedLivePcmSegmenter(options);
   assert.deepEqual(await ingest.push(0n, Float32Array.from([0.5, -0.5, 0.25])), []);
