@@ -42,6 +42,7 @@ export class LiveSegmentPublisher {
   private readonly readers: readonly string[];
   private closed = false;
   private busy = false;
+  private lastNowMs = 0;
   constructor(private readonly options: LivePublisherOptions) {
     invariant(options && typeof options === 'object', 'LIVE_PUBLISH_OPTIONS');
     identifier(options.scope.tenantId); identifier(options.scope.sessionId);
@@ -66,6 +67,13 @@ export class LiveSegmentPublisher {
   }
   snapshot() { return { closed: this.closed, busy: this.busy, ...this.continuity.snapshot() }; }
   close(): void { this.closed = true; this.continuity.close(); }
+  private assertLive(signal?: AbortSignal): void {
+    invariant(!signal?.aborted, 'LIVE_PUBLISH_ABORTED');
+    const now = this.options.nowMs(); integer(now, this.lastNowMs);
+    this.lastNowMs = now;
+    invariant(this.options.expiresAtMs > now && this.options.expiresAtMs <= now + 86400000,
+      'LIVE_PUBLISH_EXPIRED');
+  }
   async publish(segment: Readonly<EncryptedLivePcmSegment>, signal?: AbortSignal): Promise<LiveSegmentNotice> {
     invariant(!this.closed && !this.busy, 'LIVE_PUBLISH_CLOSED_OR_BUSY');
     invariant(signal === undefined || signal instanceof AbortSignal, 'LIVE_PUBLISH_SIGNAL');
@@ -84,12 +92,10 @@ export class LiveSegmentPublisher {
       invariant(Array.isArray(segment.ciphertextChunks) &&
         segment.ciphertextChunks.length === manifest.chunkCount &&
         segment.ciphertextChunks.length <= 64, 'LIVE_PUBLISH_CHUNK_COUNT');
-      const now = this.options.nowMs(); integer(now, 0);
-      invariant(this.options.expiresAtMs > now && this.options.expiresAtMs <= now + 86400000,
-        'LIVE_PUBLISH_EXPIRED');
+      this.assertLive(signal);
       this.continuity.accept(notice);
       for (let index = 0; index < segment.ciphertextChunks.length; index++) {
-        invariant(!signal?.aborted, 'LIVE_PUBLISH_ABORTED');
+        this.assertLive(signal);
         const chunk = segment.ciphertextChunks[index]!;
         const expected = Math.min(manifest.chunkSizeBytes,
           manifest.plaintextSizeBytes - index * manifest.chunkSizeBytes) + 16;
@@ -104,7 +110,7 @@ export class LiveSegmentPublisher {
           }), signal);
         } finally { copy.fill(0); }
       }
-      invariant(!signal?.aborted, 'LIVE_PUBLISH_ABORTED');
+      this.assertLive(signal);
       await this.options.deliverPrivate(Object.freeze({
         notice, privateManifest: structuredClone(manifest),
         privateMetadata: structuredClone(segment.privateMetadata)

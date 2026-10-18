@@ -115,3 +115,18 @@ test('publisher snapshots mutable caller options before asynchronous delivery', 
   await publisher.publish(first);
   assert.deepEqual(observed, ['tenant', 'recipient']);
 });
+
+test('expiry during ciphertext upload withholds private delivery', async () => {
+  const { first } = await segments();
+  let now = 1000;
+  let privateCalls = 0;
+  const publisher = new LiveSegmentPublisher({
+    scope, captureId: describeLiveSegment(first).captureId, sampleRate: 8000, channels: 1,
+    readers: ['recipient'], expiresAtMs: 1100, nowMs: () => now,
+    upload: async () => { now = 1101; },
+    deliverPrivate: async () => { privateCalls++; }
+  });
+  await assert.rejects(publisher.publish(first), /EXPIRED/);
+  assert.equal(privateCalls, 0);
+  assert.equal(publisher.snapshot().closed, true);
+});
