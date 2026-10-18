@@ -24,6 +24,7 @@ void channel.queueControl(sender, { epoch: 1, sequence: 1, issuedAtMs: 0, expire
 import { queueEncryptedLiveSegment, EndpointLivePublisher } from '../src/index.mjs';
 import type { EncryptedLivePcmSegment } from '../../../dist/src/index.js';
 declare const liveSegment: EncryptedLivePcmSegment;
+void [queueEncryptedLiveSegment, EndpointLivePublisher];
 void queueEncryptedLiveSegment({ channel, relay: {
   async uploadChunk() { return { chunkId: 'a'.repeat(64), status: 'stored' as const }; },
 }, recipient: sender, segment: liveSegment, nowUnixMs: Date.now,
