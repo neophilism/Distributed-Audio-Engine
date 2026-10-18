@@ -24,3 +24,32 @@ test('invalid capabilities fail closed', () => {
   const p = new DeviceRouteProfiles(() => {});
   assert.throws(() => p.observe({ origin: 'native-active-output', route, observedAtMs: 0, playbackSupported: true, capabilities: ['pcm-output','pcm-output'] }), /INVALID_ROUTE_CAPABILITIES/);
 });
+
+test('invalidation callback failure cannot leave a stale active profile', () => {
+  for (const transition of ['observe', 'interrupt', 'disconnect'] as const) {
+    let calls = 0;
+    const p = new DeviceRouteProfiles(() => { if (++calls === 2) throw new Error('invalidation failed'); });
+    p.observe({ origin: 'native-active-output', route, observedAtMs: 100,
+      playbackSupported: true, capabilities: ['pcm-output'] });
+    const next = { ...route, routeId: 'next', generation: 2 };
+    assert.throws(() => {
+      if (transition === 'observe') p.observe({ origin: 'native-active-output', route: next,
+        observedAtMs: 101, playbackSupported: true, capabilities: ['pcm-output'] });
+      else p[transition]();
+    }, /invalidation failed/);
+    const state = p.snapshot();
+    assert.equal(state.state, transition === 'interrupt' ? 'interrupted' : 'unavailable');
+    assert.equal(state.generation, 2);
+    assert.deepEqual(state.capabilities, []);
+    assert.equal(state.playbackSupported, false);
+    assert.throws(() => p.requireCurrent(route, 1), /ROUTE_PROFILE_CHANGED/);
+  }
+});
+
+test('unsupported playback route cannot advertise output capabilities', () => {
+  const p = new DeviceRouteProfiles(() => {});
+  assert.throws(() => p.observe({ origin: 'native-active-output', route,
+    observedAtMs: 100, playbackSupported: false, capabilities: ['pcm-output'] }),
+    /UNSUPPORTED_ROUTE_CAPABILITIES/);
+  assert.equal(p.snapshot().state, 'unavailable');
+});

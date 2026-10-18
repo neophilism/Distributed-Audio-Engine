@@ -34,16 +34,37 @@ export class DeviceRouteProfiles {
     invariant(Array.isArray(observation.capabilities) && observation.capabilities.length <= 3 &&
       new Set(observation.capabilities).size === observation.capabilities.length &&
       observation.capabilities.every(c => ['pcm-output','low-latency','multichannel'].includes(c)), 'INVALID_ROUTE_CAPABILITIES');
-    this.lifecycle.active(observation.route, observation.playbackSupported);
-    const state = this.lifecycle.snapshot();
-    invariant(state.state === 'active', 'ROUTE_NOT_ACTIVE');
-    this.profile = { state: 'active', generation: state.generation, route: state.route,
-      observedAtMs: observation.observedAtMs, playbackSupported: state.playbackSupported,
-      capabilities: [...observation.capabilities], speakerProven: false, acousticQualification: 'unknown' };
-    return this.snapshot();
+    invariant(observation.playbackSupported || observation.capabilities.length === 0, 'UNSUPPORTED_ROUTE_CAPABILITIES');
+    try {
+      this.lifecycle.active(observation.route, observation.playbackSupported);
+      const state = this.lifecycle.snapshot();
+      invariant(state.state === 'active', 'ROUTE_NOT_ACTIVE');
+      this.profile = { state: 'active', generation: state.generation, route: state.route,
+        observedAtMs: observation.observedAtMs, playbackSupported: state.playbackSupported,
+        capabilities: [...observation.capabilities], speakerProven: false, acousticQualification: 'unknown' };
+      return this.snapshot();
+    } catch (error) {
+      // The lifecycle invalidates before invoking the callback. If that callback
+      // fails, never leave the previous active profile visible to consumers.
+      const state = this.lifecycle.snapshot();
+      if (state.state !== 'active') this.clear(state.state);
+      throw error;
+    }
   }
-  interrupt(): void { this.lifecycle.interrupt(); this.clear('interrupted'); }
-  disconnect(): void { this.lifecycle.disconnect(); this.clear('unavailable'); }
+  interrupt(): void {
+    try { this.lifecycle.interrupt(); }
+    finally {
+      const state = this.lifecycle.snapshot();
+      if (state.state !== 'active') this.clear(state.state);
+    }
+  }
+  disconnect(): void {
+    try { this.lifecycle.disconnect(); }
+    finally {
+      const state = this.lifecycle.snapshot();
+      if (state.state !== 'active') this.clear(state.state);
+    }
+  }
   private clear(state: 'interrupted' | 'unavailable'): void {
     this.profile = { state, generation: this.lifecycle.snapshot().generation, playbackSupported: false,
       capabilities: [], speakerProven: false, acousticQualification: 'unknown' };
