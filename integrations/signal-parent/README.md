@@ -59,6 +59,36 @@ crash-resumable Node path through `DisciplinedClock`, shared replay checkpoints,
 malformed controls and revoked membership. This is integration software
 evidence, not a phone or speaker test.
 
+## Encrypted live PCM publisher bridge
+
+`queueEncryptedLiveSegment({ channel, relay, recipient, segment,
+authorizationValidUntilMs, expiresAtMs, nowUnixMs, signal? })`
+connects the authorized `EncryptedLivePcmSegmenter` to the existing
+`CiphertextRelayClient.uploadChunk()` endpoint and a durable
+`SignalParentChannel.queueMessage(..., 'manifest', ...)` outbox. It
+authenticates each source ciphertext chunk against the private manifest at
+the *publisher endpoint*, uploads only opaque ciphertext with the authorized
+recipient address and expiry, verifies relay storage receipts, then queues
+the private descriptor within pinned-libsignal E2EE. The receiver uses
+`SignalPlaybackInbox` with `CiphertextRelayClient.chunksFrom` and current
+rights before starting the ordinary playback session.
+
+Never send the private manifest, its attachment key, plaintext media,
+source labels or decoded PCM to the relay. No private descriptor is queued
+until all chunk uploads succeed and membership is rechecked. A partial
+upload remains opaque ciphertext until expiry; a lost response must be
+retried with the **identical** encrypted segment/object, never a regenerated
+key under the same ID. The application separately flushes its durable Signal
+outbox; an upload receipt is not proof of listener receipt or playback.
+The helper does not implement account onboarding, microphone capture,
+producer scheduling, receiver jitter/drift correction, mobile bindings,
+background operation or production deployment.
+
+`tests/live-publish.test.mjs` exercises an actual libsignal manifest and
+endpoint AEAD round trip with a stub `uploadChunk` transport, mutation,
+abort and membership-revocation checks. Existing HTTPS/TLS relay integration
+tests remain separate; these do not establish a deployed service.
+
 ## Build and verification
 
 From the repository root, with the pinned Node runtime:
