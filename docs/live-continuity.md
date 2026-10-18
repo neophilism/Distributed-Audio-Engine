@@ -53,6 +53,9 @@ an earlier authenticated segment then retry; neither missing frames nor
 clock corrections are silently invented. Close this validator on revocation,
 route invalidation, explicit user stop or an unrecoverable gap.
 
+For bounded metadata-only out-of-order delivery, the [notice reorder window](live-reorder.md)
+retains no keys, ciphertext or PCM and releases only contiguous positions.
+
 This is a **volatile metadata sequence gate**, not a persistent anti-replay
 journal. Durable replay resistance remains with the authenticated parent
 channel, signed control checkpoints and application storage. It is not a

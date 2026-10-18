@@ -25,7 +25,7 @@ function parseFrame(value: string): bigint {
   return frame;
 }
 
-function validateNotice(value: LiveSegmentNotice): bigint {
+export function validateLiveSegmentNotice(value: LiveSegmentNotice): bigint {
   invariant(value && typeof value === 'object' && !Array.isArray(value) &&
     [Object.prototype, null].includes(Object.getPrototypeOf(value)) &&
     Reflect.ownKeys(value).every(key => typeof key === 'string') &&
@@ -67,7 +67,7 @@ export function describeLiveSegment(segment: Readonly<EncryptedLivePcmSegment>):
     sampleRate: segment.privateMetadata.sampleRate,
     channels: segment.privateMetadata.channels,
   };
-  validateNotice(notice);
+  validateLiveSegmentNotice(notice);
   return Object.freeze(notice);
 }
 
@@ -108,7 +108,7 @@ export class LiveSegmentContinuity {
   }
   accept(notice: LiveSegmentNotice): { segmentIndex: number; startFrame: bigint; nextFrame: bigint } {
     invariant(!this.closed, 'LIVE_CONTINUITY_CLOSED');
-    const start = validateNotice(notice);
+    const start = validateLiveSegmentNotice(notice);
     invariant(notice.captureId === this.captureId, 'LIVE_CONTINUITY_CAPTURE_MISMATCH');
     invariant(notice.sampleRate === this.rate && notice.channels === this.channels,
       'LIVE_CONTINUITY_FORMAT_MISMATCH');

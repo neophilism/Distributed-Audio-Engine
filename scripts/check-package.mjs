@@ -10,12 +10,12 @@ try {
   const [packed] = JSON.parse(stdout);
   const paths = new Set(packed.files.map(file => file.path));
   for (const path of paths) if (/(^|\/)(?:node_modules|tests|\.env(?:\..*)?|\.git)(\/|$)|\.(?:sqlite|tgz)$/.test(path)) throw new Error(`Unexpected package file: ${path}`);
-  for (const path of ['dist/src/index.js', 'dist/src/index.d.ts', 'dist/src/browser/index.js', 'dist/src/browser/index.d.ts', 'dist/src/android/index.js', 'dist/src/android/index.d.ts', 'dist/src/ios/index.js', 'dist/src/ios/index.d.ts', 'dist/src/node/index.js', 'dist/src/node/index.d.ts', 'src/index.ts', 'dist/src/live-input.js', 'dist/src/live-input.d.ts', 'dist/src/live-continuity.js', 'dist/src/live-continuity.d.ts', 'docs/live-input.md', 'docs/security-baseline.json']) if (!paths.has(path)) throw new Error(`Missing package file: ${path}`);
+  for (const path of ['dist/src/index.js', 'dist/src/index.d.ts', 'dist/src/browser/index.js', 'dist/src/browser/index.d.ts', 'dist/src/android/index.js', 'dist/src/android/index.d.ts', 'dist/src/ios/index.js', 'dist/src/ios/index.d.ts', 'dist/src/node/index.js', 'dist/src/node/index.d.ts', 'src/index.ts', 'dist/src/live-input.js', 'dist/src/live-input.d.ts', 'dist/src/live-continuity.js', 'dist/src/live-continuity.d.ts', 'dist/src/live-reorder.js', 'dist/src/live-reorder.d.ts', 'docs/live-input.md', 'docs/security-baseline.json']) if (!paths.has(path)) throw new Error(`Missing package file: ${path}`);
   const consumer = join(dir, 'consumer'); await mkdir(consumer); await writeFile(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
   await run('npm', ['install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', join(dir, packed.filename)], { cwd: consumer, maxBuffer: 1024 * 1024 });
   await writeFile(join(consumer, 'smoke.mjs'), `
     import assert from 'node:assert/strict';
-    import { EndpointPlaybackSession, compileProgram, ProgramTimeline, encryptAttachment, EndpointAttachmentReader, readAttachmentRange, canonicalJson, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, convertPcmFormat, packageNormalizedRendition, EncryptedLivePcmSegmenter, LiveSegmentContinuity, describeLiveSegment } from '@neophilism/distributed-audio-engine';
+    import { EndpointPlaybackSession, compileProgram, ProgramTimeline, encryptAttachment, EndpointAttachmentReader, readAttachmentRange, canonicalJson, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, convertPcmFormat, packageNormalizedRendition, EncryptedLivePcmSegmenter, LiveSegmentContinuity, describeLiveSegment, BoundedLiveNoticeReorder } from '@neophilism/distributed-audio-engine';
     import { BrowserAudioSink } from '@neophilism/distributed-audio-engine/browser';
     import { AndroidAudioSink } from '@neophilism/distributed-audio-engine/android';
     import { IOSAudioSink } from '@neophilism/distributed-audio-engine/ios';
@@ -29,6 +29,7 @@ try {
     assert.equal(first.frames, 2); assert.equal(first.startFrame, 0n);
     const notice = describeLiveSegment(first);
     assert.equal(new LiveSegmentContinuity({ captureId: notice.captureId, sampleRate: 8000, channels: 1 }).accept(notice).nextFrame, 2n);
+    assert.equal(new BoundedLiveNoticeReorder({ captureId: notice.captureId, sampleRate: 8000, channels: 1 }).offer(notice).length, 1);
     live.close();
     const context = { tenantId: 'tenant', application: 'distributed-radio', parentMessageId: 'parent' };
     const encrypted = await encryptAttachment(new Uint8Array([1, 2, 3]), { ...context, filename: 'fixture.wav', mediaType: 'audio/wav' });

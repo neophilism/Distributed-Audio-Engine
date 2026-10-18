@@ -9,7 +9,7 @@ const timeline = new ProgramTimeline(0, compileProgram('program', 8000, [{ id: '
 declare const transport: CiphertextChunkTransport;
 void [EndpointPlaybackSession, timeline, transport, EndpointProgramPlayer, SqliteCheckpointStore, SqliteEntitlementStore, CheckoutEngine, ReconciliationEngine, EntitlementLedger, OperationsEvidenceAcceptor, assessOperationsAssurance, OutputEvidenceEndpoint, OutputLifecycle, AndroidAudioSink, IOSAudioSink];
 
-import { convertPcmFormat, packageNormalizedRendition, EncryptedLivePcmSegmenter, LiveSegmentContinuity, describeLiveSegment } from '@neophilism/distributed-audio-engine';
+import { convertPcmFormat, packageNormalizedRendition, EncryptedLivePcmSegmenter, LiveSegmentContinuity, describeLiveSegment, BoundedLiveNoticeReorder } from '@neophilism/distributed-audio-engine';
 import type { PcmAudio, PcmFormatTarget, PcmConversionOptions } from '@neophilism/distributed-audio-engine';
 declare const sourcePcm: PcmAudio, formatTarget: PcmFormatTarget, conversionOptions: PcmConversionOptions;
 void convertPcmFormat(sourcePcm, formatTarget, conversionOptions);
@@ -20,7 +20,7 @@ const live = new EncryptedLivePcmSegmenter({
   streamId: 'publisher', sampleRate: 8000, channels: 1, segmentFrames: 800, gain: 0.5,
 });
 void live.push(0n, new Float32Array(800)); void live.flush();
-void [LiveSegmentContinuity, describeLiveSegment];
+void [LiveSegmentContinuity, describeLiveSegment, BoundedLiveNoticeReorder];
 // @ts-expect-error The source frame cursor must be a bigint, not a guessed number.
 void live.push(0, new Float32Array(800));
 // @ts-expect-error Implicit string formats are not accepted by the converter.
