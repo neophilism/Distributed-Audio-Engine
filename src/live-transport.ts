@@ -55,6 +55,10 @@ export class LiveSegmentPublisher {
     invariant(typeof options.nowMs === 'function' && typeof options.upload === 'function' &&
       typeof options.deliverPrivate === 'function', 'LIVE_PUBLISH_ADAPTERS');
     this.readers = Object.freeze([...options.readers]);
+    // Pin caller-controlled scope, expiry and adapters for this entire capture.
+    this.options = Object.freeze({
+      ...options, scope: Object.freeze({ ...options.scope }), readers: this.readers
+    });
     this.continuity = new LiveSegmentContinuity({
       captureId: options.captureId, sampleRate: options.sampleRate,
       channels: options.channels, initialFrame: options.initialFrame

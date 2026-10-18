@@ -94,3 +94,24 @@ test('private delivery failure stops an uncertain publication without retrying',
   await assert.rejects(publisher.publish(first), /CLOSED_OR_BUSY/);
   assert.equal(uploads, 1);
 });
+
+test('publisher snapshots mutable caller options before asynchronous delivery', async () => {
+  const { first } = await segments();
+  const mutableScope = { ...scope };
+  const readers = ['recipient'];
+  const observed: string[] = [];
+  const options = {
+    scope: mutableScope, captureId: describeLiveSegment(first).captureId,
+    sampleRate: 8000, channels: 1, readers, expiresAtMs: 5000, nowMs: () => 1000,
+    upload: async (request: { tenantId: string; readers: readonly string[] }) => {
+      observed.push(request.tenantId, ...request.readers);
+    },
+    deliverPrivate: async () => {}
+  };
+  const publisher = new LiveSegmentPublisher(options);
+  mutableScope.tenantId = 'other';
+  readers.push('intruder');
+  options.expiresAtMs = 99999999;
+  await publisher.publish(first);
+  assert.deepEqual(observed, ['tenant', 'recipient']);
+});
