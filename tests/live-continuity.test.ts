@@ -74,6 +74,17 @@ test('non-canonical wire frame encodings, exaggerated lengths and injected field
   p.producer.close();
 });
 
+test('publisher notices reject tampered source geometry and mismatched manifest identities', async () => {
+  const publisher = new EncryptedLivePcmSegmenter(options);
+  const segment = (await publisher.push(0n, fill(.1, .2, .3, .4)))[0]!;
+  assert.throws(() => describeLiveSegment({ ...segment, frames: 3 }), /SOURCE_GEOMETRY/);
+  assert.throws(() => describeLiveSegment({
+    ...segment, privateManifest: { ...segment.privateManifest, parentMessageId: 'other-capture' },
+  }), /PARENT_ID/);
+  assert.match(describeLiveSegment(segment).parentMessageId, /^live-feed-/);
+  publisher.close();
+});
+
 test('the receiver honors explicit nonzero capture positions without synthetic catch-up', async () => {
   const producer = new EncryptedLivePcmSegmenter({ ...options, startFrame: 4096n });
   const notice = describeLiveSegment((await producer.push(4096n, fill(.1, .2, .3, .4)))[0]!);
