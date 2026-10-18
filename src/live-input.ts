@@ -86,7 +86,7 @@ export class EncryptedLivePcmSegmenter {
     invariant(this.nextSegment < MAX_SEGMENTS, 'LIVE_INPUT_SEGMENT_COUNT_LIMIT');
     const segmentIndex = this.nextSegment++;
     const context = { tenantId: this.scope.tenantId, application: this.scope.application,
-      parentMessageId: `${this.streamId}-${segmentIndex}` };
+      parentMessageId: `${this.streamId}-${this.incarnationId}-${segmentIndex}` };
     const audio: PcmAudio = { sampleRate: this.sampleRate, channels: this.channels, samples };
     notAborted(signal);
     const packaged = await packageRendition(audio, this.gain, context, `segment-${segmentIndex}.wav`);
