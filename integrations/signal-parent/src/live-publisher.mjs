@@ -7,6 +7,8 @@ function wipe(segment) {
 }
 function authorized(value, atMs) {
   invariant(value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype &&
+    Reflect.ownKeys(value).every(key => typeof key === 'string') &&
+    Object.values(Object.getOwnPropertyDescriptors(value)).every(d => 'value' in d && d.enumerable) &&
     Object.keys(value).sort().join(',') ===
     'allowed,authorizationValidUntilMs,expiresAtMs', 'LIVE_PUBLISH_RIGHTS_RESPONSE');
   invariant(value.allowed === true, 'LIVE_PUBLISH_RIGHTS_DENIED');
