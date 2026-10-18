@@ -98,3 +98,9 @@ round trips, fresh per-segment manifests, partial flush, mutation resistance,
 invalid/gapped/replayed inputs, bounded producer calls, concurrency and
 closure/cancellation. Hosted `npm run check` and the integration rehearsal
 remain separate release gates.
+
+## Optional endpoint publication adapter
+
+`LiveSegmentPublisher` accepts a segment already encrypted by the endpoint. It uploads only scoped ciphertext and opaque storage identifiers through a caller-supplied relay adapter, then delivers the notice and private manifest through a separate authenticated E2EE parent adapter. It enforces one publisher operation at a time, contiguous segment indices and frames, bounded readers and expiry, and a durable upload acknowledgment before private delivery. Private keys, media metadata and the manifest are never passed to the ciphertext adapter.
+
+Both adapters must acknowledge durable effects. On an upload or private-delivery error, the publisher closes and does not retry or re-encrypt automatically; the application must reconcile an uncertain effect using its own durable journal. The adapter is not a microphone capture service, a relay client, a Signal implementation, a low-latency guarantee or hardware/acoustic qualification. Real-device latency and field claims still require measured evidence.
