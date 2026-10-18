@@ -1,5 +1,5 @@
 import type { Scope, DeviceRegistry, DeviceRecord, ControlBody, SignedControl, ControlVerifier,
-  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey, ClockResponse, ClockProbe, DisciplinedClock, EncryptedLivePcmSegment } from '../../../dist/src/index.js';
+  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey, ClockResponse, ClockProbe, DisciplinedClock, EncryptedLivePcmSegment, EncryptedLivePcmSegmenter } from '../../../dist/src/index.js';
 export type ParentKind = 'manifest' | 'control' | 'ack';
 export interface VaultRow<T = unknown> { revision: number; value: T }
 export interface EndpointVault {
