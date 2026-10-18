@@ -13,6 +13,27 @@ relay. Its Node library is not an Android or iOS executable. Mobile bindings to
 the same upstream protocol, hardware-backed state, independent profile review,
 physical outputs and production operations remain separate gates.
 
+## Explicit encrypted clock-probe round trip
+
+`queueSignalClockProbe({ channel, recipient, clock, messageId, expiresAtMs })`
+starts `DisciplinedClock.beginProbe()` at the caller's monotonic time and queues
+the fresh nonce as a durable encrypted `ack` message to an authorized peer. The
+caller must flush and pull the existing Signal relay endpoint explicitly.
+On the reference endpoint, pass **only** a retained, authenticated
+`SignalParentChannel.receivePacket` inbox receipt to
+`respondSignalClockProbe({ channel, controller, receipt, receivedUnixMs,
+uncertaintyMs, nowUnixMs })`. The responder rechecks the durable inbox before
+issuing the signed encrypted clock response, uses the caller-supplied trusted
+reference timestamp and uncertainty, and resumes identical ciphertext on
+duplicate receipt. It does not automatically mark the probe consumed or send
+the response; the application owns relay flush/ack/completion and expiration.
+Never invoke the responder with unsigned relay JSON.
+
+These explicit helpers do **not** establish an accurate trusted reference clock,
+a physically measured output delay, hardware support, or a background scheduler.
+Restarting a failed probe may supersede the receiver's old nonce; an unbounded
+or stale response must not be treated as a time source.
+
 ## Authenticated clock responses (Node endpoints)
 
 The existing endpoint Signal channel now accepts `clock-response` as an
