@@ -1,5 +1,5 @@
 import type { Scope, DeviceRegistry, DeviceRecord, ControlBody, SignedControl, ControlVerifier,
-  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey, ClockResponse, ClockProbe, DisciplinedClock, EncryptedLivePcmSegment } from '../../../dist/src/index.js';
+  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey, ClockResponse, ClockProbe, DisciplinedClock, EncryptedLivePcmSegment, EncryptedLivePcmSegmenter } from '../../../dist/src/index.js';
 export type ParentKind = 'manifest' | 'control' | 'ack';
 export interface VaultRow<T = unknown> { revision: number; value: T }
 export interface EndpointVault {
@@ -106,6 +106,20 @@ export function queueEncryptedLiveSegment(options: {
 }): Promise<{ assetId: string; segmentIndex: number; uploadedChunks: number;
   delivery: OutboundDelivery }>;
 
+export interface LivePublicationPolicy { allowed: true; authorizationValidUntilMs: number; expiresAtMs: number }
+export class EndpointLivePublisher {
+  constructor(options: {
+    segmenter: EncryptedLivePcmSegmenter; channel: SignalParentChannel;
+    relay: EndpointLiveChunkRelay; recipient: string; nowUnixMs: () => number;
+    authorizePublication: (segmentIndex: number, atMs: number, signal: AbortSignal) => Promise<LivePublicationPolicy | { allowed: false }>;
+  });
+  snapshot(): { closed: boolean; busy: boolean; published: number };
+  push(frameStart: bigint, samples: Float32Array, signal?: AbortSignal):
+    Promise<Array<{ assetId: string; segmentIndex: number; uploadedChunks: number; deliveryId: string }>>;
+  flush(signal?: AbortSignal):
+    Promise<Array<{ assetId: string; segmentIndex: number; uploadedChunks: number; deliveryId: string }>>;
+  close(): void;
+}
 export const PROTOCOL: 'signal-libsignal-0.105.0';
 
 /** Trusted endpoint adapter: methods must honor AbortSignal and bounded work. */

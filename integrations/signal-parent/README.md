@@ -89,6 +89,33 @@ endpoint AEAD round trip with a stub `uploadChunk` transport, mutation,
 abort and membership-revocation checks. Existing HTTPS/TLS relay integration
 tests remain separate; these do not establish a deployed service.
 
+## Explicit live publisher lifecycle (Node endpoint)
+
+`EndpointLivePublisher` owns one `EncryptedLivePcmSegmenter` and composes
+its bounded `push(frameStart, samples, signal?)` and `flush(signal?)`
+with the real `queueEncryptedLiveSegment` publisher. The application
+must supply `authorizePublication(segmentIndex, atMs, signal)`; it
+returns `{allowed:true,authorizationValidUntilMs,expiresAtMs}` after
+independently checking source ownership, current publishing rights and
+expiration. A denial, clock/format error, upload failure or cancellation
+closes the stream and prevents silent resume or gap-filling. Every
+completed segment is uploaded/queued **in exact source order**, with
+bounded backpressure and synchronous output scrubbing. The public
+results include only asset IDs, indices, chunk counts and durable
+delivery IDs, never private keys/manifests or PCM.
+
+A race can leave already committed ciphertext or an encrypted outbox
+record on storage after an uncertain failure or explicit close.
+The endpoint must reconcile that durable state instead of issuing a
+different object under the same ID. Revoking playback/rights/peer
+membership is a separate authorized action. Calling `close()`
+does not withdraw a committed remote packet or physically stop
+sound on another device. No timers, microphone or background service
+are added, and there is no ready-to-deploy radio application.
+Portable publisher tests are in
+`tests/live-publisher.test.mjs`; the real TLS publisher flow also
+has its own integration test under the relay suite.
+
 ## Build and verification
 
 From the repository root, with the pinned Node runtime:

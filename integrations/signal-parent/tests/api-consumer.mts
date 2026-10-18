@@ -21,9 +21,10 @@ if (delivery.packet.recordType === 'signal') {
   }
 }
 void channel.queueControl(sender, { epoch: 1, sequence: 1, issuedAtMs: 0, expiresAtMs: 1000, action: 'lease' }, {}, { messageId: 'stable-control-id' });
-import { queueEncryptedLiveSegment } from '../src/index.mjs';
+import { queueEncryptedLiveSegment, EndpointLivePublisher } from '../src/index.mjs';
 import type { EncryptedLivePcmSegment } from '../../../dist/src/index.js';
 declare const liveSegment: EncryptedLivePcmSegment;
+void [queueEncryptedLiveSegment, EndpointLivePublisher];
 void queueEncryptedLiveSegment({ channel, relay: {
   async uploadChunk() { return { chunkId: 'a'.repeat(64), status: 'stored' as const }; },
 }, recipient: sender, segment: liveSegment, nowUnixMs: Date.now,
