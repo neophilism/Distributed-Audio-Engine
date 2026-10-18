@@ -20,6 +20,8 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run check
+      # Separate TAP command: the integrated rehearsal expects one portable test summary.
+      - run: npm run head:check
       - run: npm audit --audit-level=moderate
       - name: Signed endpoint-to-native integration
         run: sh native/integration/test.sh
