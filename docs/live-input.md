@@ -46,9 +46,12 @@ of Float32 samples, contains at most one second of audio, and uses up to eight
 channels at rates between 8 and 192 kHz. Segment sequence numbers are bounded
 to one million per stream. Each output includes its frame start and exact frame
 count, new attachment key, unique storage identifier and a distinct
-`parentMessageId` derived from the capture's unique `streamId`.
-The caller MUST select a fresh `streamId` for each independently created capture
-and preserve order for its downstream timeline; no global ID registry is provided.
+`parentMessageId` derived from `streamId`, a fresh cryptographically random
+per-construction incarnation UUID and the bounded segment index. Thus recreating a
+capture after a crash cannot silently reuse the same private manifest message ID
+when the caller reuses its `streamId`. The caller MUST still track authorized
+capture identity and preserve ordering for its downstream timeline; no global
+ID registry or durable resume protocol is provided.
 
 Segments are PCM16 WAVE renditions via the existing `packageRendition`
 encoder. Quantization is expected. `flush()` encrypts an unpadded short
