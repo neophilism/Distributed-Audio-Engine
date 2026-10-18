@@ -40,6 +40,8 @@ export class EncryptedLivePcmSegmenter {
   readonly segmentFrames: number;
   private readonly scope: Scope;
   private readonly streamId: string;
+  /** Random per-construction incarnation prevents reusing manifest IDs after app restarts. */
+  private readonly incarnationId = crypto.randomUUID();
   private readonly gain: number;
   private readonly buffer: Float32Array;
   private bufferedFrames = 0;
