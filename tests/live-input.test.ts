@@ -11,7 +11,7 @@ async function readSegment(segment: EncryptedLivePcmSegment) {
   const reader = await EndpointAttachmentReader.open(segment.privateManifest, context);
   try {
     const { plaintext } = await readAttachmentRange(reader, {
-      async read(request) { return segment.ciphertextChunks[request.chunkIndex]; },
+      async read(request) { return segment.ciphertextChunks[request.chunkIndex]!; },
     }, 0, reader.sizeBytes);
     try { return decodeWave(plaintext); }
     finally { plaintext.fill(0); }
