@@ -8,7 +8,7 @@ Neutral TypeScript audio foundation for SceneSignal and Distributed Radio Engine
 
 `npm ci --ignore-scripts` then `npm run check` runs strict typecheck, source/boundary checks, dependency validation, build and tests. Node 24.19.0 and exact development dependencies are pinned; the runtime library has no third-party dependencies.
 
-An optional [bounded encrypted live PCM segmenter](docs/live-input.md) with [receiver continuity checking](docs/live-continuity.md) now prepares foreground endpoint-supplied capture blocks as fresh encrypted, sequenced media assets. It does not operate a microphone, add network transport, or qualify seamless live playback.
+An optional [bounded encrypted live PCM segmenter](docs/live-input.md) with [receiver continuity checking](docs/live-continuity.md) and [bounded notice reordering](docs/live-reorder.md) now prepares foreground endpoint-supplied capture blocks as fresh encrypted, sequenced media assets. It does not operate a microphone, add network transport, or qualify seamless live playback.
 
 The portable implementation includes encrypted range delivery, a current-position program player, bounded browser audio plus Android and iOS host-binding sinks, shared-clock estimation, signed local coordinator failover, ciphertext cache and durable SQLite replay/cache adapters. It also includes challenged output-evidence primitives, complete-product checkout, payment reconciliation and generic entitlements with private SQLite business stores. [Implementation/evidence status](docs/implementation-status.md) · [Developer guide](docs/developer-guide.md) · [Portable pipeline evidence](docs/portable-integration.md)
 
