@@ -28,7 +28,7 @@ test('bounded endpoint segments preserve a contiguous sample timeline with fresh
   assert.equal(first.length, 1);
   assert.equal(first[0]!.startFrame, 0n); assert.equal(first[0]!.frames, 4);
   assert.equal(first[0]!.privateMetadata.frames, 4);
-  assert.equal(first[0]!.privateManifest.parentMessageId, 'local-live-0');
+  assert.match(first[0]!.privateManifest.parentMessageId, /^local-live-[0-9a-f-]{36}-0$/);
   const second = await ingest.push(6n, Float32Array.from([0.8, -0.8]));
   assert.equal(second.length, 1);
   assert.equal(second[0]!.startFrame, 4n);
