@@ -64,7 +64,8 @@
     "rehearsal": "node scripts/rehearsal.mjs",
     "rehearsal:runner-test": "node --test --test-reporter=tap scripts/rehearsal/runner.test.mjs",
     "relay:start": "node services/ciphertext-relay/src/main.mjs",
-    "relay:staging": "node services/ciphertext-relay/src/render-main.mjs"
+    "relay:staging": "node services/ciphertext-relay/src/render-main.mjs",
+    "head:check": "node --test --test-reporter=tap scripts/verify-exact-head.test.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
