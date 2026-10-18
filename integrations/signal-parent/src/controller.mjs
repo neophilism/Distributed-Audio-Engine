@@ -1,4 +1,4 @@
-import { canonicalJson, digest, exact, integer, invariant, jsonBytes, scopeCheck, snapshot, identifier } from './validation.mjs';
+import { canonicalJson, digest, exact, integer, invariant, jsonBytes, scopeCheck, snapshot, identifier, validateClockResponse } from './validation.mjs';
 
 const ROW = 'controller-state';
 const HASH = /^[0-9a-f]{64}$/;
@@ -10,7 +10,11 @@ function requestOf(value) {
 function validateRequest(value, now) {
   address(value.recipient);
   integer(value.expiresAtMs, now + 1, now + 60000);
-  invariant(['lease', 'emergency-stop'].includes(value.action), 'CONTROLLER_INVALID_ACTION');
+  invariant(['lease', 'emergency-stop', 'clock-response'].includes(value.action), 'CONTROLLER_INVALID_ACTION');
+  if (value.action === 'clock-response') {
+    validateClockResponse(value.payload, now, value.expiresAtMs);
+    return;
+  }
   if (value.action === 'emergency-stop') {
     invariant(value.payload === null, 'CONTROLLER_INVALID_EMERGENCY_PAYLOAD'); return;
   }

@@ -1,5 +1,5 @@
 import type { Scope, DeviceRegistry, DeviceRecord, ControlBody, SignedControl, ControlVerifier,
-  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey } from '../../../dist/src/index.js';
+  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey, ClockResponse } from '../../../dist/src/index.js';
 export type ParentKind = 'manifest' | 'control' | 'ack';
 export interface VaultRow<T = unknown> { revision: number; value: T }
 export interface EndpointVault {
@@ -52,7 +52,7 @@ export class SignalParentChannel {
   queueMessage(address: string, kind: ParentKind, payload: unknown,
     options: { messageId: string; expiresAtMs: number }): Promise<OutboundDelivery>;
   queueControl(address: string,
-    fields: { epoch: number; sequence: number; issuedAtMs: number; expiresAtMs: number; action: 'lease' | 'emergency-stop' },
+    fields: { epoch: number; sequence: number; issuedAtMs: number; expiresAtMs: number; action: 'lease' | 'emergency-stop' | 'clock-response' },
     payload: unknown, options: { messageId: string }): Promise<OutboundDelivery>;
   receiveQueued(wire: SignalWire, expectedKind?: ParentKind): Promise<InboxMessage>;
   receivePacket(packet: DeliveryPacket, expectedSender: string): Promise<InboxMessage>;
@@ -70,6 +70,7 @@ export class SignalPlaybackInbox {
   constructor(options: { channel: SignalParentChannel; sender: string; nowUnixMs: () => number } &
     ({ durable: true; vault: EndpointVault } | { durable?: false; vault?: EndpointVault }));
   createVerifier(vault: EndpointVault): Promise<ControlVerifier>;
+  createClockVerifier(vault: EndpointVault): Promise<ControlVerifier>;
   sessionOptions(options: { vault: EndpointVault; timeline: ProgramTimeline; transport: CiphertextChunkTransport;
     authorizePlayback: ProgramPlayerOptions['authorizePlayback']; consentedGainCeiling: number }): Promise<PlaybackSessionOptions>;
   acceptManifest(wire: SignalWire): Promise<{ assetId: string; expiresAtMs: number }>;
@@ -96,7 +97,8 @@ export class SignalRelayEndpoint {
 export type ControllerRequest = {
   operationId: string; recipient: string; expiresAtMs: number;
 } & ({ action: 'lease'; payload: { expiresAtMs: number; stopAtMs: number; fadeMs: number; maxLinearGain: number } } |
-  { action: 'emergency-stop'; payload: null });
+  { action: 'emergency-stop'; payload: null } |
+  { action: 'clock-response'; payload: ClockResponse });
 export class DurableSignalController {
   constructor(options: { vault: EndpointVault; channel: SignalParentChannel; nowUnixMs: () => number });
   issue(request: ControllerRequest): Promise<OutboundDelivery>;
@@ -104,6 +106,6 @@ export class DurableSignalController {
   advanceEpoch(recipient: string, expectedEpoch: number): { epoch: number; sequence: number };
   streamState(recipient: string): { recipient: string; epoch: number; sequence: number; reservationId: string | null };
   pending(): Array<{ operationId: string; recipient: string; epoch: number; sequence: number;
-    action: 'lease' | 'emergency-stop'; expiresAtMs: number; expired: boolean }>;
+    action: 'lease' | 'emergency-stop' | 'clock-response'; expiresAtMs: number; expired: boolean }>;
   close(): void;
 }

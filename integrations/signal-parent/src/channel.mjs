@@ -5,7 +5,7 @@ import { journalFor, checkJournal, findOutgoing, saveOutgoing, deliveryView, fin
   saveIncoming, incomingView, markSent, completeIncoming } from './journal.mjs';
 import { PROTOCOL, MAX_MESSAGE_BYTES, MAX_WIRE_BYTES, MAX_LIFETIME_MS, jsonBytes,
   digest, snapshot, exact, bytes64, scopeCheck, addressFor, publicDescriptor,
-  assertLifetime, canonicalJson, parseCanonicalJson, identifier, integer, invariant } from './validation.mjs';
+  assertLifetime, canonicalJson, parseCanonicalJson, identifier, integer, invariant, validateClockResponse } from './validation.mjs';
 
 const b64 = bytes => Buffer.from(bytes).toString('base64');
 const hex = bytes => Buffer.from(bytes).toString('hex');
@@ -262,9 +262,10 @@ export class SignalParentChannel {
   async queueControl(address, fields, payload, options) {
     const copy = snapshot(fields), ids = snapshot(options);
     exact(ids, ['messageId']); exact(copy, ['epoch', 'sequence', 'issuedAtMs', 'expiresAtMs', 'action']);
-    invariant(['lease', 'emergency-stop'].includes(copy.action), 'PARENT_UNSUPPORTED_CONTROL');
+    invariant(['lease', 'emergency-stop', 'clock-response'].includes(copy.action), 'PARENT_UNSUPPORTED_CONTROL');
     integer(copy.epoch, 1); integer(copy.sequence, 1); integer(copy.issuedAtMs);
     integer(copy.expiresAtMs, copy.issuedAtMs + 1, copy.issuedAtMs + 60_000);
+    if (copy.action === 'clock-response') validateClockResponse(payload, copy.issuedAtMs, copy.expiresAtMs);
     const body = { version: '1.0.0', scope: this.#scope, keyId: this.#own.device.signing.id,
       algorithm: 'ALG-ED25519', ...copy };
     return this.#seal(address, 'control', { header: body, value: snapshot(payload) },
@@ -344,7 +345,7 @@ export class SignalParentChannel {
           const key = await crypto.subtle.importKey('raw', Buffer.from(peer.record.device.signing.publicKeyHex, 'hex'),
             'Ed25519', false, ['verify']);
           await authenticateControl(packet.record, { scope: this.#scope,
-            signers: new Map([[peer.record.device.signing.id, key]]), actions: new Set(['lease', 'emergency-stop']) }, now);
+            signers: new Map([[peer.record.device.signing.id, key]]), actions: new Set(['lease', 'emergency-stop', 'clock-response']) }, now);
         }
       }
       const bind = message => {

@@ -6,6 +6,18 @@ export const PROTOCOL = 'signal-libsignal-0.105.0';
 export const MAX_WIRE_BYTES = 49_152;
 export const MAX_MESSAGE_BYTES = 24_576;
 export const MAX_LIFETIME_MS = 300_000;
+/** Bound a signed clock response before it enters endpoint delivery. Its time
+ * estimate is still only network-clock evidence, never acoustic calibration. */
+export function validateClockResponse(value, issuedAtMs, expiresAtMs) {
+  exact(value, ['nonce', 'receivedUnixMs', 'sentUnixMs', 'uncertaintyMs']);
+  integer(issuedAtMs); integer(expiresAtMs, issuedAtMs + 1, issuedAtMs + 5000);
+  invariant(typeof value.nonce === 'string' && /^[0-9a-f]{64}$/.test(value.nonce), 'PARENT_CLOCK_NONCE');
+  invariant(Number.isFinite(value.receivedUnixMs) && Number.isFinite(value.sentUnixMs) &&
+    value.receivedUnixMs >= 0 && value.sentUnixMs >= value.receivedUnixMs &&
+    value.sentUnixMs <= issuedAtMs && issuedAtMs - value.receivedUnixMs <= 5000, 'PARENT_CLOCK_TIMESTAMPS');
+  invariant(Number.isFinite(value.uncertaintyMs) &&
+    value.uncertaintyMs >= 0 && value.uncertaintyMs <= 1000, 'PARENT_CLOCK_UNCERTAINTY');
+}
 export const jsonBytes = value => Buffer.from(canonicalJson(value), 'utf8');
 export const digest = value => createHash('sha256').update(jsonBytes(value)).digest('hex');
 export const snapshot = value => parseCanonicalJson(canonicalJson(value));

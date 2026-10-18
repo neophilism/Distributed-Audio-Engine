@@ -9,8 +9,8 @@ import { snapshot, exact, bytes64, jsonBytes, canonicalJson, parseCanonicalJson,
  * must not retain command authority after root-verified rotation/revocation.
  */
 class MembershipControlVerifier extends ControlVerifier {
-  constructor(scope, signers, checkpoints, channel, sender) {
-    super(scope, signers, new Set(['lease', 'emergency-stop']), checkpoints);
+  constructor(scope, signers, checkpoints, channel, sender, actions = new Set(['lease', 'emergency-stop'])) {
+    super(scope, signers, actions, checkpoints);
     this.channel = channel; this.sender = sender;
   }
   async accept(control, nowMs) {
@@ -59,6 +59,16 @@ export class SignalPlaybackInbox {
     this.#channel.requirePeer(this.#sender, 'control');
     return new MembershipControlVerifier(this.#scope, new Map([[record.device.signing.id, key]]),
       new EncryptedCheckpointStore(vault), this.#channel, this.#sender);
+  }
+  /** Shares the same durable strict-sequence checkpoint as playback controls.
+   * Deliver clock and playback controls in order; a gap requires a fresh epoch. */
+  async createClockVerifier(vault) {
+    this.#open();
+    const record = this.#channel.requirePeer(this.#sender, 'control');
+    const key = await this.#channel.controlPublicKey(this.#sender);
+    this.#open(); this.#channel.requirePeer(this.#sender, 'control');
+    return new MembershipControlVerifier(this.#scope, new Map([[record.device.signing.id, key]]),
+      new EncryptedCheckpointStore(vault), this.#channel, this.#sender, new Set(['clock-response']));
   }
   async sessionOptions({ vault, timeline, transport, authorizePlayback, consentedGainCeiling }) {
     this.#open(); invariant(typeof authorizePlayback === 'function', 'PARENT_RIGHTS_ADAPTER_REQUIRED');
