@@ -65,4 +65,6 @@ test('GitHub fetch is read only, pinned to the full SHA and rejects failures', a
   globalThis.fetch = async () => ({ ok: false, status: 503 });
   await assert.rejects(fetchHeadRuns('neophilism/Distributed-Audio-Engine', SHA), /FETCH_FAILED_503/);
   await assert.rejects(fetchHeadRuns('../invalid', SHA), /INVALID_REPOSITORY/);
+  await assert.rejects(fetchHeadRuns('owner/..', SHA), /INVALID_REPOSITORY/);
+  await assert.rejects(fetchHeadRuns('owner/repo..other', SHA), /INVALID_REPOSITORY/);
 });
