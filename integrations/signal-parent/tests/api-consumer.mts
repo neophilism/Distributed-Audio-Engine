@@ -21,6 +21,13 @@ if (delivery.packet.recordType === 'signal') {
   }
 }
 void channel.queueControl(sender, { epoch: 1, sequence: 1, issuedAtMs: 0, expiresAtMs: 1000, action: 'lease' }, {}, { messageId: 'stable-control-id' });
+import { queueEncryptedLiveSegment } from '../src/index.mjs';
+import type { EncryptedLivePcmSegment } from '../../../dist/src/index.js';
+declare const liveSegment: EncryptedLivePcmSegment;
+void queueEncryptedLiveSegment({ channel, relay: {
+  async uploadChunk() { return { chunkId: 'a'.repeat(64), status: 'stored' as const }; },
+}, recipient: sender, segment: liveSegment, nowUnixMs: Date.now,
+  authorizationValidUntilMs: 1000, expiresAtMs: 2000 });
 void channel.pendingDeliveries(sender); void channel.pendingMessages(sender);
 void channel.markDeliverySent('stable-id'); void channel.sweepJournal();
 // @ts-expect-error Durable queue requires an explicit stable ID.

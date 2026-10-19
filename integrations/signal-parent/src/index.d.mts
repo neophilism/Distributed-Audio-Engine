@@ -1,5 +1,5 @@
 import type { Scope, DeviceRegistry, DeviceRecord, ControlBody, SignedControl, ControlVerifier,
-  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey, ClockResponse, ClockProbe, DisciplinedClock } from '../../../dist/src/index.js';
+  ProgramTimeline, CiphertextChunkTransport, ProgramPlayerOptions, PlaybackSessionOptions, EndpointCryptoKey, ClockResponse, ClockProbe, DisciplinedClock, EncryptedLivePcmSegment } from '../../../dist/src/index.js';
 export type ParentKind = 'manifest' | 'control' | 'ack';
 export interface VaultRow<T = unknown> { revision: number; value: T }
 export interface EndpointVault {
@@ -89,6 +89,22 @@ export function respondSignalClockProbe(options: {
   channel: SignalParentChannel; controller: DurableSignalController; receipt: PendingMessage;
   receivedUnixMs: number; uncertaintyMs: number; nowUnixMs: () => number;
 }): Promise<{ operationId: string; delivery: OutboundDelivery; reused: boolean }>;
+
+/** Upload only ciphertext and opaque routing information to the existing relay. */
+export interface EndpointLiveChunkRelay {
+  uploadChunk(input: { application: Scope['application']; tenantId: string;
+    storageObjectId: string; chunkIndex: number; ciphertextBase64: string;
+    readers: string[]; expiresAtMs: number }, signal?: AbortSignal):
+    Promise<{ chunkId: string; status: 'stored' }>;
+}
+/** Upload authenticated endpoint ciphertext before queueing its PRIVATE descriptor on Signal. */
+export function queueEncryptedLiveSegment(options: {
+  channel: SignalParentChannel; relay: EndpointLiveChunkRelay;
+  recipient: string; segment: EncryptedLivePcmSegment;
+  authorizationValidUntilMs: number; expiresAtMs: number;
+  nowUnixMs: () => number; signal?: AbortSignal;
+}): Promise<{ assetId: string; segmentIndex: number; uploadedChunks: number;
+  delivery: OutboundDelivery }>;
 
 export const PROTOCOL: 'signal-libsignal-0.105.0';
 
