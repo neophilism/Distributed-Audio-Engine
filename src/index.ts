@@ -35,3 +35,5 @@ export * from './pcm-format.js';
 export * from './live-input.js';
 export * from './live-continuity.js';
 export * from './device-profiles.js';
+
+export * from './release-candidate.js';
