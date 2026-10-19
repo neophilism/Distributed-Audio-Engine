@@ -1,0 +1,25 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { ControlVerifier, MemoryCheckpointStore, createControlSigningKey, signControl } from '../src/controls.js';
+import { OptInAcousticAdapter } from '../src/acoustic-adapter.js';
+import type { AcousticEvidence } from '../src/evidence.js';
+import type { ControlBody } from '../src/controls.js';
+const scope = { tenantId: 'tenant', application: 'distributed-radio' as const, sessionId: 'session' };
+const route = { endpointId: 'endpoint', routeId: 'route', outputId: 'speaker', kind: 'bluetooth-speaker' as const, generation: 1 };
+test('opt-in capture cannot start from paired names or without consent, and route transitions revoke', async () => {
+  const keys = await createControlSigningKey();
+  let now = 100;
+  const verifier = new ControlVerifier(scope, new Map([['key', keys.publicKey]]), new Set(['output-evidence']), new MemoryCheckpointStore());
+  const adapter = new OptInAcousticAdapter(scope, verifier, async () => ({}), () => now);
+  assert.throws(() => adapter.challenge(), /CONSENT_REQUIRED/);
+  assert.throws(() => adapter.observeNativeRoute({ origin: 'paired-device', route, observedAtMs: now, playbackSupported: true, capabilities: [] }), /ACTIVE_NATIVE_ROUTE_REQUIRED/);
+  adapter.grantConsent(3000);
+  adapter.observeNativeRoute({ origin: 'native-active-output', route, observedAtMs: now, playbackSupported: true, capabilities: ['pcm-output'] });
+  assert.throws(() => adapter.challenge(), /CONSENT_REQUIRED/);
+  adapter.grantConsent(3000);
+  assert.equal(adapter.challenge().route.routeId, route.routeId);
+  adapter.interrupt();
+  assert.throws(() => adapter.challenge(), /CONSENT_REQUIRED/);
+  now = 4000;
+  assert.throws(() => adapter.grantConsent(4000));
+});
