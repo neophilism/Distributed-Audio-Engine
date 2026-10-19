@@ -1,0 +1,7 @@
+# Opt-in acoustic evidence adapter (DAE-13)
+
+The `OptInAcousticAdapter` binds explicit capture consent, the trusted native active-output route and the already-authenticated `OutputEvidenceEndpoint`. Applications must obtain informed opt-in before calling `grantConsent`. The adapter does not request microphone access, retain raw samples, independently authenticate a native bridge, or establish signing keys. Native route callbacks must be authenticated by the platform integration; paired-device lists and output labels are not acceptable route evidence.
+
+On each active-route change, interruption or disconnect, the native profile callback immediately revokes consent and the pending challenge. Callers must obtain fresh consent after changing routes and must submit a signed `output-evidence` response through the existing pinned-key verifier and authenticated E2EE decoder. The adapter checks the bound route/generation before and after asynchronous verification and rejects expired or withdrawn consent. Replay and stale challenge protection remain enforced by `OutputEvidenceEndpoint`.
+
+A route profile never proves actual speaker emission. Even authenticated calibration receipts have `fieldValidated: false` in the neutral core; hardware field qualification and any output safety claims require separate actual-device experiments and independently attributable capture evidence. Unit tests exercise software boundaries only.
