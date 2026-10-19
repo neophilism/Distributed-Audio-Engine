@@ -1,0 +1,5 @@
+# Signed evidence anti-abuse and replay guard (DAE-20)
+
+`SignedEvidenceReplayGate` admits only a branded result from `evaluateContribution`. It rejects copied and forged decisions, skips failed qualification and calls an injected **durable, atomic** claim-if-absent store keyed to scope, receipt and policy version. Repeated claims for an already recorded receipt return false. The store implementation must enforce uniqueness transactionally across processes and retain claims for the chosen entitlement/reconciliation retention period; an in-memory demonstration is test-only and is not suitable for financial production use.
+
+Authorization, signed Ed25519 command verification and monotonic control replay prevention occur upstream in `OutputEvidenceEndpoint` and `ControlVerifier`. This guard supplies an additional duplicate-receipt barrier; it does not itself authenticate arbitrary payloads, establish keys, disburse value, or prove physical sound emission. Production systems must provide durable database uniqueness and ledger idempotency, without relying on expiry alone to prevent repeat grants.

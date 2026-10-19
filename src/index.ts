@@ -35,3 +35,7 @@ export * from './pcm-format.js';
 export * from './live-input.js';
 export * from './live-continuity.js';
 export * from './device-profiles.js';
+
+export * from './evidence-replay.js';
+
+export * from './evidence-replay-postgres.js';
