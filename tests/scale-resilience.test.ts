@@ -1,3 +1,5 @@
+import { CoordinatorChunkTransport, CoordinatorMonitor } from '../src/coordinator.js';
+import { ControlVerifier, MemoryCheckpointStore, createControlSigningKey } from '../src/controls.js';
 import { EndpointCiphertextCache, MemoryCiphertextCacheStore } from '../src/cache.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -70,4 +72,25 @@ test('1,000 ciphertext cache insertions stay within policy and reject time rollb
   assert.equal(cache.get(request(999), 1999)?.byteLength, 20);
   assert.throws(() => cache.stats(1998));
   assert.throws(() => cache.put({ ...request(999), tenantId: 'other' }, new Uint8Array(20), 2000, 3000), /CACHE_SCOPE_MISMATCH/);
+});
+
+test('concurrent ciphertext requests have a bounded coordinator limit and close aborts all', async () => {
+  const scope = { tenantId: 'tenant', application: 'distributed-radio' as const, sessionId: 'session' };
+  const keys = await createControlSigningKey();
+  const verifier = new ControlVerifier(scope, new Map([['key', keys.publicKey]]),
+    new Set(['coordinator-lease']), new MemoryCheckpointStore());
+  const monitor = new CoordinatorMonitor(scope, 'program', verifier, async () => ({}));
+  const transport = new CoordinatorChunkTransport(
+    monitor, new Map(), { async read() { return new Promise<Uint8Array>(() => undefined); } },
+    { nowUnixMs: () => 1000, fallbackTimeoutMs: 5000 }
+  );
+  const request = { tenantId: scope.tenantId, application: scope.application,
+    storageObjectId: 'ciphertext', chunkIndex: 0, expectedBytes: 20 };
+  const operations = Array.from({ length: 64 }, () => transport.read(request));
+  await assert.rejects(transport.read(request), /COORDINATOR_CLOSED_ABORTED_OR_BUSY/);
+  transport.close();
+  const outcomes = await Promise.allSettled(operations);
+  assert.equal(outcomes.length, 64);
+  assert.ok(outcomes.every(result => result.status === 'rejected'));
+  await assert.rejects(transport.read(request), /COORDINATOR_CLOSED_ABORTED_OR_BUSY/);
 });
