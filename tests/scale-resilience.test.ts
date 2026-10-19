@@ -1,3 +1,4 @@
+import { EndpointCiphertextCache, MemoryCiphertextCacheStore } from '../src/cache.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { OutputLifecycle } from '../src/output-lifecycle.js';
@@ -48,4 +49,25 @@ test('1,000 independently tracked objects preserve identity, replay and stalenes
   assert.deepEqual(registry.positionAt('fixed-speaker', 1200), {
     position: { x: 1, y: 2, z: 3 }, state: 'fixed'
   });
+});
+
+test('1,000 ciphertext cache insertions stay within policy and reject time rollback', () => {
+  const cache = new EndpointCiphertextCache(new MemoryCiphertextCacheStore(),
+    { tenantId: 'tenant', application: 'distributed-radio' },
+    { maxBytes: 640, maxEntries: 32, maxRetentionMs: 5000 });
+  const request = (i: number) => ({
+    tenantId: 'tenant', application: 'distributed-radio' as const,
+    storageObjectId: 'cipher-' + i, chunkIndex: 0, expectedBytes: 20
+  });
+  for (let i = 0; i < 1000; i++) {
+    cache.put(request(i), new Uint8Array(20).fill(i % 255), 1000 + i, 2000 + i);
+    const stats = cache.stats(1000 + i);
+    assert.ok(stats.entries <= 32);
+    assert.ok(stats.bytes <= 640);
+  }
+  assert.deepEqual(cache.stats(1999), { entries: 32, bytes: 640 });
+  assert.equal(cache.get(request(0), 1999), undefined);
+  assert.equal(cache.get(request(999), 1999)?.byteLength, 20);
+  assert.throws(() => cache.stats(1998));
+  assert.throws(() => cache.put({ ...request(999), tenantId: 'other' }, new Uint8Array(20), 2000, 3000), /CACHE_SCOPE_MISMATCH/);
 });
