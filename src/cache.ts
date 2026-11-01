@@ -94,11 +94,15 @@ interface PendingRead { controller: AbortController; promise: Promise<Uint8Array
 export class CachingChunkTransport implements CiphertextChunkTransport {
   private readonly pending = new Map<string, PendingRead>();
   private closed = false;
+  private readonly invalidations = new Map<string, number>();
   constructor(private readonly cache: EndpointCiphertextCache, private readonly upstream: CiphertextChunkTransport, private readonly nowUnixMs: () => number, private readonly retentionMs: number) { integer(retentionMs, 1, cache.maxRetentionMs); }
   async read(request: ChunkRequest, signal?: AbortSignal): Promise<Uint8Array> {
     invariant(!this.closed && !signal?.aborted, 'CACHE_TRANSPORT_CLOSED_OR_ABORTED');
-    const local = { ...request }; const cached = this.cache.get(local, this.nowUnixMs()); if (cached) return cached;
-    const key = canonicalJson(local); let entry = this.pending.get(key);
+    const local = { ...request }; validateChunkRequest(local);
+    const key = canonicalJson(local);
+    invariant(!this.invalidations.has(key), 'CACHE_INVALIDATION_IN_PROGRESS');
+    const cached = this.cache.get(local, this.nowUnixMs()); if (cached) return cached;
+    let entry = this.pending.get(key);
     if (!entry) {
       const controller = new AbortController();
       const promise = (async () => {
@@ -127,6 +131,19 @@ export class CachingChunkTransport implements CiphertextChunkTransport {
       if (--entry.waiters === 0) { entry.controller.abort(); if (this.pending.get(key) === entry) this.pending.delete(key); }
     }
   }
-  async invalidate(request: ChunkRequest): Promise<void> { this.cache.invalidate(request); await this.upstream.invalidate?.(request); }
+  async invalidate(request: ChunkRequest): Promise<void> {
+    const local = { ...request }; this.cache.invalidate(local);
+    const key = canonicalJson(local);
+    this.invalidations.set(key, (this.invalidations.get(key) ?? 0) + 1);
+    const entry = this.pending.get(key);
+    if (entry) { entry.controller.abort(); this.pending.delete(key); }
+    try { await this.upstream.invalidate?.({ ...local }); }
+    finally {
+      const remaining = this.invalidations.get(key)! - 1;
+      if (remaining === 0) this.invalidations.delete(key);
+      else this.invalidations.set(key, remaining);
+    }
+  }
   close(): void { this.closed = true; for (const entry of this.pending.values()) entry.controller.abort(); this.pending.clear(); }
 }
+
